@@ -7,10 +7,6 @@ import java.util.Date;
  */
 public class ObservationReading
 {
-    /* The name of the observation station
-     */
-    String WeatherStationName;
-
     /* The time of the observation, in local time
      */
     Date LocalTime;
