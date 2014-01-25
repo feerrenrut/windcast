@@ -8,17 +8,27 @@ import org.robolectric.RobolectricTestRunner;
 import android.app.Activity;
 import android.widget.TextView;
 
+import com.feer.windcast.ObservationReader;
+import com.feer.windcast.WeatherData;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
 @RunWith(RobolectricTestRunner.class)
 public class TestObservationReader {
 
     @Test
-    public void testInstantiation() {
+    public void testInstantiation() throws FileNotFoundException, IOException{
 
-        Activity activity = new Activity();
+        String current = new java.io.File(".").getCanonicalPath();
+        ass
+        final String testDataFileName = "data\\observationData.txt";
+        InputStream testStream = new FileInputStream(testDataFileName);
 
-        TextView tv = new TextView(activity);
-        tv.setText("e85");
+        WeatherData wd = ObservationReader.ReadJsonStream(testStream);
 
-        assertEquals("e85", tv.getText());
+        assertEquals("Badgingarra", wd.WeatherStationName);
     }
 }

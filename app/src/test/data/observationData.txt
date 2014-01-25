@@ -1,0 +1,100 @@
+{
+	"observations": {
+		"notice": [
+			{
+				"copyright": "Copyright Commonwealth of Australia 2014, Bureau of Meteorology. For more information see: http://www.bom.gov.au/other/copyright.shtml http://www.bom.gov.au/other/disclaimer.shtml",
+				"copyright_url": "http://www.bom.gov.au/other/copyright.shtml",
+				"disclaimer_url": "http://www.bom.gov.au/other/disclaimer.shtml",
+				"feedback_url": "http://www.bom.gov.au/other/feedback"
+			}
+		],
+		"header": [
+			{
+				"refresh_message": "Issued at  9:35 pm WST Wednesday 22 January 2014",
+				"ID": "IDW60801",
+				"main_ID": "IDW60800",
+				"name": "Badgingarra",
+				"state_time_zone": "WA",
+				"time_zone": "WST",
+				"product_name": "Weather Observations",
+				"state": "Western Australia"
+			}
+		],
+		"data": [
+			{
+				"sort_order": 0,
+				"wmo": 94603,
+				"name": "Badgingarra",
+				"history_product": "IDW60801",
+				"local_date_time": "22/09:30pm",
+				"local_date_time_full": "20140122213000",
+				"aifstime_utc": "20140122133000",
+				"air_temp": 24.0,
+				"apparent_t": 23.8,
+				"cloud": "-",
+				"cloud_base_m": null,
+				"cloud_oktas": null,
+				"cloud_type": "-",
+				"cloud_type_id": null,
+				"delta_t": 4.5,
+				"dewpt": 16.8,
+				"gust_kmh": 20,
+				"gust_kt": 11,
+				"lat": -30.3,
+				"lon": 115.5,
+				"press": null,
+				"press_msl": null,
+				"press_qnh": null,
+				"press_tend": "-",
+				"rain_trace": "0.0",
+				"rel_hum": 64,
+				"sea_state": "-",
+				"swell_dir_worded": "-",
+				"swell_height": null,
+				"swell_period": null,
+				"vis_km": "-",
+				"weather": "-",
+				"wind_dir": "SE",
+				"wind_spd_kmh": 13,
+				"wind_spd_kt": 7
+			},
+			{
+				"sort_order": 1,
+				"wmo": 94603,
+				"name": "Badgingarra",
+				"history_product": "IDW60801",
+				"local_date_time": "22/09:00pm",
+				"local_date_time_full": "20140122210000",
+				"aifstime_utc": "20140122130000",
+				"air_temp": 24.5,
+				"apparent_t": 23.5,
+				"cloud": "-",
+				"cloud_base_m": null,
+				"cloud_oktas": null,
+				"cloud_type": "-",
+				"cloud_type_id": null,
+				"delta_t": 4.9,
+				"dewpt": 16.7,
+				"gust_kmh": 26,
+				"gust_kt": 14,
+				"lat": -30.3,
+				"lon": 115.5,
+				"press": null,
+				"press_msl": null,
+				"press_qnh": null,
+				"press_tend": "-",
+				"rain_trace": "0.0",
+				"rel_hum": 61,
+				"sea_state": "-",
+				"swell_dir_worded": "-",
+				"swell_height": null,
+				"swell_period": null,
+				"vis_km": "-",
+				"weather": "-",
+				"wind_dir": "SE",
+				"wind_spd_kmh": 17,
+				"wind_spd_kt": 9
+			}
+ 		]
+ 	}
+ }
