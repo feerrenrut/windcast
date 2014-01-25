@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import android.os.Build;
 import android.widget.TextView;
 
+import org.apache.http.util.ExceptionUtils;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,9 +77,10 @@ public class MainActivity extends ActionBarActivity {
         public void onResume()
         {
             super.onResume();
-            final TextView label = (TextView) getActivity().findViewById(R.id.label);
             new AsyncTask<Void, Void, Boolean>()
             {
+                WeatherData wd;
+
                 @Override
                 protected Boolean doInBackground(Void... params)
                 {
@@ -88,10 +91,7 @@ public class MainActivity extends ActionBarActivity {
                         InputStream is = ucon.getInputStream();
                         BufferedInputStream bis = new BufferedInputStream(is);
 
-                        while(bis.read() != -1)
-                        {
-
-                        }
+                        wd = ObservationReader.ReadJsonStream(is);
 
                     } catch (MalformedURLException e)
                     {
@@ -106,7 +106,19 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 protected void onPostExecute(Boolean result)
                 {
-                    label.setText("done");
+                    final TextView label = (TextView) getActivity().findViewById(R.id.label);
+                    if (label == null)
+                    {
+                        throw new NullPointerException("unable to find the label");
+                    }
+
+                    if(wd == null)
+                    {
+                        label.setText("Weather data is null!");
+                    }else
+                    {
+                        label.setText(wd.WeatherStationName);
+                    }
                 }
             }.execute();
         }
