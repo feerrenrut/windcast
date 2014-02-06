@@ -17,43 +17,43 @@ public class ObservationReading
 
     /* The temperature of the air, in degrees celsius
      */
-    float AirTemp_DegCel;
+    Float AirTemp_DegCel;
 
     /* The apparent temperature, in degrees celsius
      */
-    float ApparentTemp_DegCel;
+    Float ApparentTemp_DegCel;
 
-    /* The set of possible wind directions.
+    /* The cardinal direction (n,s,e,w) the wind is coming from eg nnw
      */
-    enum CardinalDirections
-    {
-        NORTH,
-        SOUTH,
-        EAST,
-        WEST,
-    }
+    String CardinalWindDirection;
 
-    /* The direction the wind is coming from
-     */
-    CardinalDirections[] WindDirection;
+    /* The compass bearing the wind is coming from
+    *  0 = North, 90 = East, 180 = South, 270 = West
+    */
+    Float WindBearing;
 
     /* The speed of the wind in KiloMeters per Hour
      */
-    float WindSpeed_KMH;
+    Integer WindSpeed_KMH;
 
     /* The wind gust speed in KiloMeters per Hour
      */
-    float WindGustSpeed_KMH;
+    Integer WindGustSpeed_KMH;
 
-    /* The direction of the ocean swell
+    /* The cardinal direction (n,s,e,w) of the ocean swell eg nnw
      */
-    CardinalDirections[] SwellDirection;
+    String CardinalSwellDirection;
+
+    /* The compass bearing for the swell direction
+    *  0 = North, 90 = East, 180 = South, 270 = West
+    */
+    Float SwellBearing;
 
     /* The height in meters of the ocean swell
      */
-    float SwellHeight_meters;
+    Integer SwellHeight_meters;
 
     /* The swell period in seconds
      */
-    float SwellPeriod_seconds;
+    Integer SwellPeriod_seconds;
 }

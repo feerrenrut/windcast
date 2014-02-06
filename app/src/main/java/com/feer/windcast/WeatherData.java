@@ -18,7 +18,7 @@ public class WeatherData
     String WeatherStationName;
 
     /* The observation data for this location */
-    List ObservationData;
+    List<ObservationReading> ObservationData;
 
     String State;
 

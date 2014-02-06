@@ -117,7 +117,25 @@ public class MainActivity extends ActionBarActivity {
                         label.setText("Weather data is null!");
                     }else
                     {
-                        label.setText(wd.WeatherStationName);
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(wd.WeatherStationName); sb.append('\n');
+                        sb.append(wd.State); sb.append('\n');
+
+                        if(wd.ObservationData != null && !wd.ObservationData.isEmpty())
+                        {
+                            ObservationReading reading = wd.ObservationData.get(0);
+                            sb.append(reading.LocalTime); sb.append("\n\n");
+                            sb.append("Latest Wind Reading:");
+
+                            if(reading.WindBearing != null && reading.CardinalWindDirection != null && reading.WindSpeed_KMH != null)
+                            {
+                                sb.append(reading.WindBearing);
+                                sb.append(" (" +reading.CardinalWindDirection + " ) ");
+                                sb.append(" " + reading.WindSpeed_KMH);
+                            }
+                        }
+
+                        label.setText(sb.toString());
                     }
                 }
             }.execute();
