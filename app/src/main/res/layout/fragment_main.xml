@@ -20,7 +20,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
 
-        androidPlot.title="A Simple XY Plot"
+        androidPlot.title="Wind Speed"
         androidPlot.domainLabel="Domain"
         androidPlot.rangeLabel="Range"
         androidPlot.titleWidget.labelPaint.textSize="@dimen/title_font_size"
