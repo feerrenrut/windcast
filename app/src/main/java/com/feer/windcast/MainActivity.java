@@ -30,7 +30,6 @@ import java.text.Format;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.ListIterator;
@@ -171,14 +170,10 @@ public class MainActivity extends ActionBarActivity {
                             plot = (XYPlot) getActivity().findViewById(R.id.mySimpleXYPlot);
                             plot.setTitle("Wind Speed at "+wd.WeatherStationName);
 
-                            // Create a couple arrays of y-values to plot:
-                            Number[] series1Numbers = windSpeeds.toArray(new Number[windSpeeds.size()]);
-                            Number[] series1XLabels = readingTimes.toArray(new Number[readingTimes.size()]);
-
                             // Turn the above arrays into XYSeries':
                             XYSeries series1 = new SimpleXYSeries(
-                                    Arrays.asList(series1XLabels),
-                                    Arrays.asList(series1Numbers),          // SimpleXYSeries takes a List so turn our array into a List
+                                    readingTimes,
+                                    windSpeeds,          // SimpleXYSeries takes a List so turn our array into a List
                                     "");                             // Set the display title of the series
 
                             plot.setDomainLabel("Time");
