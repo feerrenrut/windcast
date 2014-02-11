@@ -12,11 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.PointLabelFormatter;
 import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYSeries;
+import com.androidplot.xy.XYStepMode;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -24,7 +26,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.ParsePosition;
@@ -149,9 +150,10 @@ public class MainActivity extends ActionBarActivity {
 
                             label.setText(sb.toString());
 
+                            int numObs = wd.ObservationData.size();
+                            ArrayList<Number> windSpeeds = new ArrayList<Number>(numObs);
+                            final ArrayList<Date> readingTimes = new ArrayList<Date>(numObs);
 
-                            ArrayList<Number> windSpeeds = new ArrayList<Number>(wd.ObservationData.size());
-                            ArrayList<Number> readingTimes = new ArrayList<Number>(wd.ObservationData.size());
                             ListIterator windSpeedItr = windSpeeds.listIterator();
                             ListIterator readingTimesItr = readingTimes.listIterator();
                             for(ObservationReading reading1 : wd.ObservationData)
@@ -160,9 +162,9 @@ public class MainActivity extends ActionBarActivity {
                                         reading1.WindSpeed_KMH : 0;
 
                                 windSpeedItr.add(val);
+                                readingTimesItr.add(reading1.LocalTime);
+                            };
 
-                                readingTimesItr.add(reading1.LocalTime.getTime());
-                            }
                             Collections.reverse(windSpeeds);
                             Collections.reverse(readingTimes);
 
@@ -172,34 +174,29 @@ public class MainActivity extends ActionBarActivity {
 
                             // Turn the above arrays into XYSeries':
                             XYSeries series1 = new SimpleXYSeries(
-                                    readingTimes,
                                     windSpeeds,          // SimpleXYSeries takes a List so turn our array into a List
+                                    SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,
                                     "");                             // Set the display title of the series
 
                             plot.setDomainLabel("Time");
-                            plot.setDomainValueFormat(new DecimalFormat("0"));
+                            plot.setDomainBoundaries(numObs-11, numObs-1, BoundaryMode.FIXED);
+                            plot.setDomainStepValue(1.0);
+                            plot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
 
                             plot.setDomainValueFormat(new Format() {
-
-                                // create a simple date format that draws on the year portion of our timestamp.
-                                // see http://download.oracle.com/javase/1.4.2/docs/api/java/text/SimpleDateFormat.html
-                                // for a full description of SimpleDateFormat.
                                 private SimpleDateFormat dateFormat = new SimpleDateFormat("kk:mm");
 
                                 @Override
                                 public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
 
-                                    // because our timestamps are in seconds and SimpleDateFormat expects milliseconds
-                                    // we multiply our timestamp by 1000:
-                                    long timestamp = ((Number) obj).longValue() * 1000;
-                                    Date date = new Date(timestamp);
+                                    long index = Math.round( ((Number)obj).doubleValue() ) ;
+                                    Date date = readingTimes.get((int)index);
                                     return dateFormat.format(date, toAppendTo, pos);
                                 }
 
                                 @Override
                                 public Object parseObject(String source, ParsePosition pos) {
                                     return null;
-
                                 }
                             });
 
@@ -209,8 +206,6 @@ public class MainActivity extends ActionBarActivity {
                             series1Format.setPointLabelFormatter(new PointLabelFormatter());
                             series1Format.configure(getActivity().getApplicationContext(),
                                     R.xml.line_point_formatter_with_plf1);
-
-
 
                             // add a new series' to the xyplot:
                             plot.addSeries(series1, series1Format);
