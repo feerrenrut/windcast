@@ -100,12 +100,21 @@ public class MainActivity extends ActionBarActivity {
                 {
                     try
                     {
-                        URL url = new URL("http://www.bom.gov.au/fwo/IDW60801/IDW60801.94603.json");
-                        URLConnection ucon = url.openConnection();
-                        InputStream is = ucon.getInputStream();
-                        BufferedInputStream bis = new BufferedInputStream(is);
-
-                        wd = ObservationReader.ReadJsonStream(is);
+                        boolean getFromNet = false;
+                        BufferedInputStream bis = null;
+                        if(getFromNet)
+                        {
+                            URL url = new URL("http://www.bom.gov.au/fwo/IDW60801/IDW60801.94603.json");
+                            URLConnection ucon = url.openConnection();
+                            InputStream is = ucon.getInputStream();
+                            bis = new BufferedInputStream(is);
+                        }
+                        else
+                        {
+                            InputStream is = getActivity().getResources().openRawResource(R.raw.test_data);
+                            bis = new BufferedInputStream(is);
+                        }
+                        wd = ObservationReader.ReadJsonStream(bis);
 
                     } catch (MalformedURLException e)
                     {
@@ -178,7 +187,7 @@ public class MainActivity extends ActionBarActivity {
                                     SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,
                                     "");                             // Set the display title of the series
 
-                            plot.setDomainLabel("Time");
+
                             plot.setDomainBoundaries(numObs-11, numObs-1, BoundaryMode.FIXED);
                             plot.setDomainStepValue(1.0);
                             plot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
