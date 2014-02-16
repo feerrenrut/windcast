@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,28 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.androidplot.xy.BoundaryMode;
-import com.androidplot.xy.LineAndPointFormatter;
-import com.androidplot.xy.PointLabelFormatter;
-import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYPlot;
-import com.androidplot.xy.XYSeries;
-import com.androidplot.xy.XYStepMode;
-
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.FieldPosition;
-import java.text.Format;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.ListIterator;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -98,31 +76,7 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 protected Boolean doInBackground(Void... params)
                 {
-                    try
-                    {
-                        boolean getFromNet = false;
-                        BufferedInputStream bis = null;
-                        if(getFromNet)
-                        {
-                            URL url = new URL("http://www.bom.gov.au/fwo/IDW60801/IDW60801.94603.json");
-                            URLConnection ucon = url.openConnection();
-                            InputStream is = ucon.getInputStream();
-                            bis = new BufferedInputStream(is);
-                        }
-                        else
-                        {
-                            InputStream is = getActivity().getResources().openRawResource(R.raw.test_data);
-                            bis = new BufferedInputStream(is);
-                        }
-                        wd = ObservationReader.ReadJsonStream(bis);
-
-                    } catch (MalformedURLException e)
-                    {
-                        Log.e("DATA", e.getMessage());
-                    } catch (IOException e)
-                    {
-                        Log.e("DATA", e.getMessage());
-                    }
+                    wd = new WeatherDataCache(getActivity().getResources()).GetWeatherData();
                     return true;
                 }
 
@@ -158,73 +112,11 @@ public class MainActivity extends ActionBarActivity {
                             }
 
                             label.setText(sb.toString());
-
-                            int numObs = wd.ObservationData.size();
-                            ArrayList<Number> windSpeeds = new ArrayList<Number>(numObs);
-                            final ArrayList<Date> readingTimes = new ArrayList<Date>(numObs);
-
-                            ListIterator windSpeedItr = windSpeeds.listIterator();
-                            ListIterator readingTimesItr = readingTimes.listIterator();
-                            for(ObservationReading reading1 : wd.ObservationData)
-                            {
-                                Number val = reading1.WindSpeed_KMH != null ?
-                                        reading1.WindSpeed_KMH : 0;
-
-                                windSpeedItr.add(val);
-                                readingTimesItr.add(reading1.LocalTime);
-                            };
-
-                            Collections.reverse(windSpeeds);
-                            Collections.reverse(readingTimes);
-
-                            // initialize our XYPlot reference:
-                            plot = (XYPlot) getActivity().findViewById(R.id.mySimpleXYPlot);
-                            plot.setTitle("Wind Speed at "+wd.WeatherStationName);
-
-                            // Turn the above arrays into XYSeries':
-                            XYSeries series1 = new SimpleXYSeries(
-                                    windSpeeds,          // SimpleXYSeries takes a List so turn our array into a List
-                                    SimpleXYSeries.ArrayFormat.Y_VALS_ONLY,
-                                    "");                             // Set the display title of the series
-
-
-                            plot.setDomainBoundaries(numObs-11, numObs-1, BoundaryMode.FIXED);
-                            plot.setDomainStepValue(1.0);
-                            plot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
-
-                            plot.setDomainValueFormat(new Format() {
-                                private SimpleDateFormat dateFormat = new SimpleDateFormat("kk:mm");
-
-                                @Override
-                                public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-
-                                    long index = Math.round( ((Number)obj).doubleValue() ) ;
-                                    Date date = readingTimes.get((int)index);
-                                    return dateFormat.format(date, toAppendTo, pos);
-                                }
-
-                                @Override
-                                public Object parseObject(String source, ParsePosition pos) {
-                                    return null;
-                                }
-                            });
-
-                            // Create a formatter to use for drawing a series using LineAndPointRenderer
-                            // and configure it from xml:
-                            LineAndPointFormatter series1Format = new LineAndPointFormatter();
-                            series1Format.setPointLabelFormatter(new PointLabelFormatter());
-                            series1Format.configure(getActivity().getApplicationContext(),
-                                    R.xml.line_point_formatter_with_plf1);
-
-                            // add a new series' to the xyplot:
-                            plot.addSeries(series1, series1Format);
-                            plot.getLegendWidget().setVisible(false);
-
-                            // reduce the number of range labels
-                            plot.setTicksPerRangeLabel(3);
-                            plot.getGraphWidget().setDomainLabelOrientation(-45);
                         }
                     }
+                    // initialize our XYPlot reference:
+                    XYPlot  plot = (XYPlot) getActivity().findViewById(R.id.mySimpleXYPlot);
+                    WindGraph.SetupGraph(wd, plot, getActivity());
                 }
             }.execute();
 
