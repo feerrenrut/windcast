@@ -1,7 +1,7 @@
 package com.feer.windcast;
 
 import java.util.Date;
-
+//TODO This should probably be split up into wind reading, swell reading, etc
 /**
  * Holds data for a weather observation at a particular time
  */

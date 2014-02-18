@@ -44,7 +44,7 @@ public class WindGraph
         Collections.reverse(windSpeeds);
         Collections.reverse(readingTimes);
 
-        plot.setTitle("Wind Speed at "+wd.WeatherStationName);
+        plot.setTitle("Wind Speed at " + wd.Station.Name);
 
         // Turn the above arrays into XYSeries':
         XYSeries series1 = new SimpleXYSeries(

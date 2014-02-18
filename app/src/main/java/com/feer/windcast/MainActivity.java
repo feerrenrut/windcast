@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.androidplot.xy.XYPlot;
+
+import java.net.URL;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -72,11 +75,16 @@ public class MainActivity extends ActionBarActivity {
             new AsyncTask<Void, Void, Boolean>()
             {
                 WeatherData wd;
+                String urls;
 
                 @Override
                 protected Boolean doInBackground(Void... params)
                 {
-                    wd = new WeatherDataCache(getActivity().getResources()).GetWeatherData();
+                    WeatherDataCache cache = new WeatherDataCache(getActivity().getResources());
+
+                    URL url = cache.GetWeatherStations().get(0).url;
+                    Log.i("WindCast", "Getting data from: "+ url.toString());
+                    wd = cache.GetWeatherDataFor(url);
                     return true;
                 }
 
@@ -95,8 +103,8 @@ public class MainActivity extends ActionBarActivity {
                     }else
                     {
                         StringBuilder sb = new StringBuilder();
-                        sb.append(wd.WeatherStationName); sb.append('\n');
-                        sb.append(wd.State); sb.append('\n');
+                        sb.append(wd.Station.Name); sb.append('\n');
+                        sb.append(wd.Station.State); sb.append('\n');
 
                         if(wd.ObservationData != null && !wd.ObservationData.isEmpty())
                         {
@@ -110,9 +118,12 @@ public class MainActivity extends ActionBarActivity {
                                 sb.append(" (" +reading.CardinalWindDirection + " ) ");
                                 sb.append(" " + reading.WindSpeed_KMH);
                             }
-
-                            label.setText(sb.toString());
                         }
+
+                        sb.append(urls);
+
+                        label.setText(sb.toString());
+
                     }
                     // initialize our XYPlot reference:
                     XYPlot  plot = (XYPlot) getActivity().findViewById(R.id.mySimpleXYPlot);

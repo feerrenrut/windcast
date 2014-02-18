@@ -1,14 +1,19 @@
 package com.feer.windcast;
 
+import android.annotation.TargetApi;
 import android.content.res.Resources;
+import android.os.Build;
+import android.util.JsonReader;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 
 /**
  *
@@ -21,18 +26,18 @@ public class WeatherDataCache
         m_res = res;
     }
 
-    public WeatherData GetWeatherData()
+    public boolean ShouldUseStaticData = false;
+
+    public WeatherData GetWeatherDataFor(URL url)
     {
         WeatherData wd = null;
         try
         {
-            boolean getFromNet = false;
             BufferedInputStream bis;
-            if(getFromNet)
+            if(!ShouldUseStaticData)
             {
-                URL url = new URL("http://www.bom.gov.au/fwo/IDW60801/IDW60801.94603.json");
-                URLConnection ucon = url.openConnection();
-                InputStream is = ucon.getInputStream();
+                URLConnection urlConnection = url.openConnection();
+                InputStream is = urlConnection.getInputStream();
                 bis = new BufferedInputStream(is);
             }
             else
@@ -50,5 +55,71 @@ public class WeatherDataCache
             Log.e("DATA", e.getMessage());
         }
         return wd;
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public ArrayList<WeatherStation> GetWeatherStations()
+    {
+        InputStream is = m_res.openRawResource(R.raw.all_wa_stations);
+        BufferedInputStream bis = new BufferedInputStream(is);
+
+        ArrayList<WeatherStation> stations = new ArrayList<WeatherStation>();
+
+        try
+        {
+            JsonReader reader = new JsonReader(new InputStreamReader(bis, "UTF-8"));
+            reader.beginObject();
+
+            String name = reader.nextName();
+            if(name.equals("weatherStations"))
+            {
+                reader.beginArray();
+                while(reader.hasNext())
+                {
+                    WeatherStation station = new WeatherStation();
+                    reader.beginObject();
+                    while(reader.hasNext())
+                    {
+                        name = reader.nextName();
+                        if(name.equals("name"))
+                        {
+                            station.Name = reader.nextString();
+                        }
+                        else if(name.equals("url"))
+                        {
+                            String urlString = reader.nextString();
+                            if (urlString != null)
+                            {
+                                urlString = urlString.replaceAll("shtml", "json");
+                                urlString = urlString.replaceAll("products", "fwo");
+                                station.url = new URL(urlString);
+                            }
+                        }
+                        else
+                        {
+                            reader.skipValue();
+                        }
+                    }
+                    reader.endObject();
+                    if(station.Name != null && station.url != null)
+                    {
+                        stations.add(station);
+                    }
+                }
+                reader.endArray();
+            }
+            else
+            {
+                reader.skipValue();
+            }
+            reader.endObject();
+
+
+        } catch (IOException e)
+        {
+            Log.e("DATA", e.getMessage());
+        }
+
+        return stations;
     }
 }

@@ -20,7 +20,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
 
-        androidPlot.title="Wind Speed"
+        androidPlot.title="Wind Speed at"
         androidPlot.domainLabel="Time"
         androidPlot.rangeLabel="WindSpeed"
         androidPlot.titleWidget.labelPaint.textSize="@dimen/title_font_size"

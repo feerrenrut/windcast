@@ -1,6 +1,5 @@
 package com.feer.windcast;
 
-import java.net.URL;
 import java.util.List;
 
 /**
@@ -8,19 +7,9 @@ import java.util.List;
  */
 public class WeatherData
 {
-
-    String ID;
-
-    URL url;
-
-    /* The name of the observation station
-     */
-    String WeatherStationName;
+    WeatherStation Station;
 
     /* The observation data for this location */
     List<ObservationReading> ObservationData;
-
-    String State;
-
-    String TimeZone;
 }
+
