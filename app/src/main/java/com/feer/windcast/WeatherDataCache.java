@@ -57,8 +57,22 @@ public class WeatherDataCache
         return wd;
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private static ArrayList<WeatherStation> sm_stations = new ArrayList<WeatherStation>();
+    private static boolean sm_initialised = false;
+
     public ArrayList<WeatherStation> GetWeatherStations()
+    {
+        if(!sm_initialised)
+        {
+            sm_stations = readWeatherStations();
+            sm_initialised = true;
+        }
+
+        return sm_stations;
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private ArrayList<WeatherStation> readWeatherStations()
     {
         InputStream is = m_res.openRawResource(R.raw.all_wa_stations);
         BufferedInputStream bis = new BufferedInputStream(is);
@@ -119,7 +133,6 @@ public class WeatherDataCache
         {
             Log.e("DATA", e.getMessage());
         }
-
         return stations;
     }
 }

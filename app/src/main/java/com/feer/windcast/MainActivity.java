@@ -1,22 +1,12 @@
 package com.feer.windcast;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
-import com.androidplot.xy.XYPlot;
-
-import java.net.URL;
-
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements WeatherStationFragment.OnFragmentInteractionListener
+{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +15,7 @@ public class MainActivity extends ActionBarActivity {
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
-                    .commit();
+                    .add(R.id.container, new WeatherStationFragment()).commit();
         }
     }
 
@@ -51,89 +40,16 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
 
-        public PlaceholderFragment() {
-        }
+    @Override
+    public void onFragmentInteraction(WeatherStation station)
+    {
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
-        }
-
-        private XYPlot plot;
-
-        @Override
-        public void onResume()
-        {
-            super.onResume();
-            new AsyncTask<Void, Void, Boolean>()
-            {
-                WeatherData wd;
-                String urls;
-
-                @Override
-                protected Boolean doInBackground(Void... params)
-                {
-                    WeatherDataCache cache = new WeatherDataCache(getActivity().getResources());
-
-                    URL url = cache.GetWeatherStations().get(0).url;
-                    Log.i("WindCast", "Getting data from: "+ url.toString());
-                    wd = cache.GetWeatherDataFor(url);
-                    return true;
-                }
-
-                @Override
-                protected void onPostExecute(Boolean result)
-                {
-                    final TextView label = (TextView) getActivity().findViewById(R.id.label);
-                    if (label == null)
-                    {
-                        throw new NullPointerException("unable to find the label");
-                    }
-
-                    if(wd == null)
-                    {
-                        label.setText("Weather data is null!");
-                    }else
-                    {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(wd.Station.Name); sb.append('\n');
-                        sb.append(wd.Station.State); sb.append('\n');
-
-                        if(wd.ObservationData != null && !wd.ObservationData.isEmpty())
-                        {
-                            ObservationReading reading = wd.ObservationData.get(0);
-                            sb.append(reading.LocalTime); sb.append("\n\n");
-                            sb.append("Latest Wind Reading:");
-
-                            if(reading.WindBearing != null && reading.CardinalWindDirection != null && reading.WindSpeed_KMH != null)
-                            {
-                                sb.append(reading.WindBearing);
-                                sb.append(" (" +reading.CardinalWindDirection + " ) ");
-                                sb.append(" " + reading.WindSpeed_KMH);
-                            }
-                        }
-
-                        sb.append(urls);
-
-                        label.setText(sb.toString());
-
-                    }
-                    // initialize our XYPlot reference:
-                    XYPlot  plot = (XYPlot) getActivity().findViewById(R.id.mySimpleXYPlot);
-                    WindGraph.SetupGraph(wd, plot, getActivity());
-                }
-            }.execute();
-
-
-
-        }
+        //Todo this should probably launch a new activity.
+        // the graph shows up as transparent over the top of the list. Back action exist the app!
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.container, new WindGraphFragment(station))
+                .commit();
     }
-
 }
+

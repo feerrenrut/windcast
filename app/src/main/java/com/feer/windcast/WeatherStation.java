@@ -1,6 +1,7 @@
 package com.feer.windcast;
 
 import java.net.URL;
+import java.util.Locale;
 
 public class WeatherStation
 {
@@ -17,4 +18,10 @@ public class WeatherStation
     String State;
 
     String TimeZone;
+
+    @Override
+    public String toString()
+    {
+        return String.format(Locale.US, "%s (%s)", Name, State);
+    }
 }
