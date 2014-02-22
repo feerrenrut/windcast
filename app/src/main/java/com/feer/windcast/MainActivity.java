@@ -1,6 +1,7 @@
 package com.feer.windcast;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,9 +48,10 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
 
         //Todo this should probably launch a new activity.
         // the graph shows up as transparent over the top of the list. Back action exist the app!
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, new WindGraphFragment(station))
-                .commit();
+        FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
+        trans.replace(R.id.container, new WindGraphFragment(station));
+        trans.addToBackStack(null);
+        trans.commit();
     }
 }
 
