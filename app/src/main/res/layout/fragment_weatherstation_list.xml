@@ -14,7 +14,6 @@
         android:id="@android:id/empty"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="hello from frag"/>
+        android:gravity="center"/>
 
 </FrameLayout>
