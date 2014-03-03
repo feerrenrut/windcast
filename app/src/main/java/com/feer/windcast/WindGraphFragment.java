@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.androidplot.xy.XYPlot;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -18,23 +19,53 @@ import java.net.URL;
  */
 public class WindGraphFragment extends Fragment
 {
+    private static final String TAG = "WindGraphFragment";
 
+    private static final String PARAM_KEY_STATION_URL = "weatherStationKey";
+
+    /*This is required so the fragment can be instantiated when restoring its activity's state*/
     public WindGraphFragment() {
     }
+
     public WindGraphFragment(WeatherStation station) {
-        mstation = station;
+        mStation = station;
     }
 
-    WeatherStation mstation;
+    WeatherStation mStation;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+        if(savedInstanceState != null)
+        {
+            readBundle(savedInstanceState);
+        }
+
         return rootView;
     }
 
-    private XYPlot plot;
+    private void readBundle(Bundle savedInstanceState)
+    {
+        Log.v(TAG, "Reading bundle");
+
+        String urlString = savedInstanceState.getString(PARAM_KEY_STATION_URL);
+
+        if(urlString != null)
+        {
+            Log.v(TAG, "Previous URL found: " + urlString);
+
+            mStation = new WeatherStation();
+            try
+            {
+                mStation.url = new URL(urlString);
+            } catch (MalformedURLException e)
+            {
+                Log.e("WindCast","url not valid: " + urlString + "\n\n" + e.toString());
+            }
+        }
+    }
 
     @Override
     public void onResume()
@@ -51,12 +82,13 @@ public class WindGraphFragment extends Fragment
                 WeatherDataCache cache = new WeatherDataCache(getActivity().getResources());
 
                 URL url;
-                if(mstation != null)
+                if(mStation != null)
                 {
-                    url = mstation.url;
+                    url = mStation.url;
                 }
                 else
                 {
+                    Log.w(TAG, "No weather station set using first one!");
                     url = cache.GetWeatherStations().get(0).url;
                 }
                 Log.i("WindCast", "Getting data from: " + url.toString());
@@ -109,5 +141,13 @@ public class WindGraphFragment extends Fragment
 
 
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(PARAM_KEY_STATION_URL, mStation.url.toString());
     }
 }

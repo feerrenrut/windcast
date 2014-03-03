@@ -26,6 +26,8 @@ public class WeatherDataCache
         m_res = res;
     }
 
+    private static final String TAG = "WeatherDataCache";
+
     public boolean ShouldUseStaticData = false;
 
     public WeatherData GetWeatherDataFor(URL url)
@@ -42,6 +44,7 @@ public class WeatherDataCache
             }
             else
             {
+                Log.w(TAG, "Using static test data");
                 InputStream is = m_res.openRawResource(R.raw.test_data);
                 bis = new BufferedInputStream(is);
             }
@@ -49,10 +52,10 @@ public class WeatherDataCache
 
         } catch (MalformedURLException e)
         {
-            Log.e("DATA", e.getMessage());
+            Log.e(TAG, e.getMessage());
         } catch (IOException e)
         {
-            Log.e("DATA", e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
         return wd;
     }
