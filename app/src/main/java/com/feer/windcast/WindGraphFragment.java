@@ -118,17 +118,15 @@ public class WindGraphFragment extends Fragment
                     {
                         ObservationReading reading = wd.ObservationData.get(0);
                         sb.append(reading.LocalTime); sb.append("\n\n");
-                        sb.append("Latest Wind Reading:");
+                        sb.append("Latest Wind Reading: ");
 
                         if(reading.WindBearing != null && reading.CardinalWindDirection != null && reading.WindSpeed_KMH != null)
                         {
                             sb.append(reading.WindBearing);
-                            sb.append(" (" +reading.CardinalWindDirection + " ) ");
-                            sb.append(" " + reading.WindSpeed_KMH);
+                            sb.append(" (").append(reading.CardinalWindDirection.toString()).append( " ) ");
+                            sb.append(" ").append(reading.WindSpeed_KMH).append(" kmh");
                         }
                     }
-
-                    sb.append(urls);
 
                     label.setText(sb.toString());
 
