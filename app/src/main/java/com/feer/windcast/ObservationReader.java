@@ -197,6 +197,10 @@ public class ObservationReader
             else if(dirs.equals("nnw"))
                 bearing = 337.5f;
         }
+        else if (dirs.equals("calm"))
+        {
+            bearing = 0.f;
+        }
         if(bearing == null)
         {
             throw new IllegalArgumentException("Unknown cardinal direction: " + dirs);
@@ -208,16 +212,17 @@ public class ObservationReader
     private static WeatherData ReadHeaderInfo(JsonReader reader) throws IOException
     {
         WeatherData wd = new WeatherData();
+        wd.Station = new WeatherStation();
         reader.beginArray();
         reader.beginObject();
         while (reader.hasNext()) {
             String name = reader.nextName();
             if (name.equals("name")) {
-                wd.WeatherStationName = reader.nextString();
+                wd.Station.Name = reader.nextString();
             } else if (name.equals("time_zone")) {
-                wd.TimeZone = reader.nextString();
+                wd.Station.TimeZone = reader.nextString();
             } else if (name.equals("state")) {
-                wd.State = reader.nextString();
+                wd.Station.State = reader.nextString();
             } else {
                 reader.skipValue();
             }

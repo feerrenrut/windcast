@@ -20,7 +20,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
 
-        androidPlot.title="Wind Speed"
+        androidPlot.title="Wind Speed at"
         androidPlot.domainLabel="Time"
         androidPlot.rangeLabel="WindSpeed"
         androidPlot.titleWidget.labelPaint.textSize="@dimen/title_font_size"
@@ -39,6 +39,6 @@
         androidPlot.legendWidget.iconSizeMetrics.widthMetric.value="15dp"
         androidPlot.legendWidget.heightMetric.value="25dp"
         androidPlot.legendWidget.positionMetrics.anchor="right_bottom"
-        androidPlot.graphWidget.gridLinePaint.color="#000000"/>
+        />
 
 </LinearLayout>

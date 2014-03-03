@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 
 /**
  *
@@ -21,34 +22,54 @@ public class WeatherDataCache
         m_res = res;
     }
 
-    public WeatherData GetWeatherData()
+    private static final String TAG = "WeatherDataCache";
+
+    public boolean ShouldUseStaticData = false;
+
+    public WeatherData GetWeatherDataFor(URL url)
     {
         WeatherData wd = null;
         try
         {
-            boolean getFromNet = false;
             BufferedInputStream bis;
-            if(getFromNet)
+            if(!ShouldUseStaticData)
             {
-                URL url = new URL("http://www.bom.gov.au/fwo/IDW60801/IDW60801.94603.json");
-                URLConnection ucon = url.openConnection();
-                InputStream is = ucon.getInputStream();
+                URLConnection urlConnection = url.openConnection();
+                InputStream is = urlConnection.getInputStream();
                 bis = new BufferedInputStream(is);
             }
             else
             {
-                InputStream is = m_res.openRawResource(R.raw.test_data);
+                Log.w(TAG, "Using static test data");
+                InputStream is = m_res.openRawResource(R.raw.test_observation_data_badgingarra);
                 bis = new BufferedInputStream(is);
             }
             wd = ObservationReader.ReadJsonStream(bis);
 
         } catch (MalformedURLException e)
         {
-            Log.e("DATA", e.getMessage());
+            Log.e(TAG, e.getMessage());
         } catch (IOException e)
         {
-            Log.e("DATA", e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
         return wd;
+    }
+
+    private static ArrayList<WeatherStation> sm_stations = new ArrayList<WeatherStation>();
+    private static boolean sm_initialised = false;
+
+    public ArrayList<WeatherStation> GetWeatherStations()
+    {
+        if(!sm_initialised)
+        {
+            InputStream is = m_res.openRawResource(R.raw.all_wa_stations);
+            BufferedInputStream bis = new BufferedInputStream(is);
+
+            sm_stations = StationListReader.GetWeatherStationList(bis);
+            sm_initialised = true;
+        }
+
+        return sm_stations;
     }
 }

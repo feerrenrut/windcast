@@ -1,0 +1,6 @@
+find and replace in sublime (using links_html_line.txt)
+
+<th id=\"t...-station-\w*" \w*=\"\w*\"><a \w*=\"([\/\w.]*shtml)\">(\w*).*
+
+replace with
+{"name":"\2","url":"http://www.bom.gov.au\1"}
