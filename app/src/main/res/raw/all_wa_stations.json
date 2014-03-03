@@ -1,4 +1,5 @@
 {
+    "state": "WA",
     "weatherStations":
     [
         {"name":"Argyle","url":"http://www.bom.gov.au/products/IDW60801/IDW60801.94217.shtml"},
