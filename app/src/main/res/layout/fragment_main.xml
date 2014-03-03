@@ -22,7 +22,7 @@
 
         androidPlot.title="Wind Speed at"
         androidPlot.domainLabel="Time"
-        androidPlot.rangeLabel="WindSpeed"
+        androidPlot.rangeLabel="WindSpeed km/h"
         androidPlot.titleWidget.labelPaint.textSize="@dimen/title_font_size"
         androidPlot.domainLabelWidget.labelPaint.textSize="@dimen/domain_label_font_size"
         androidPlot.rangeLabelWidget.labelPaint.textSize="@dimen/range_label_font_size"
