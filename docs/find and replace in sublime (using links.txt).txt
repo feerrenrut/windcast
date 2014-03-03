@@ -1,6 +1,31 @@
 find and replace in sublime (using links_html_line.txt)
 
-<th id=\"t...-station-\w*" \w*=\"\w*\"><a \w*=\"([\/\w.]*shtml)\">(\w*).*
+Step 1:
+    Find
+    <th id=\"t.*-station-.*" \w*=\"\w*\"><a \w*=\"([\/\w.]*shtml)\">(\w*).*
 
-replace with
-{"name":"\2","url":"http://www.bom.gov.au\1"}
+    replace with
+    Reef12345URL {"name":"\2","url":"http://www.bom.gov.au\1"},
+
+Step 2:
+    Find
+    ^((?!Reef12345URL).)*$
+
+    replace with nothing
+
+Step 3:
+    Find
+    ^\n
+
+    replace with nothing
+
+Step 4:
+    Find
+    ^.*Reef12345URL (\{.*\})
+
+    replace with
+    \1
+
+Step 5:
+    Copy all but the last comma. Paste into station data json file
+
