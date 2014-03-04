@@ -2,6 +2,7 @@ package com.feer.windcast;
 
 import android.app.Activity;
 
+import com.androidplot.ui.SeriesRenderer;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.PointLabelFormatter;
@@ -9,6 +10,7 @@ import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYSeries;
 import com.androidplot.xy.XYStepMode;
+import com.feer.windcast.graphing.CustomPointRenderer;
 
 import java.text.FieldPosition;
 import java.text.Format;
@@ -74,16 +76,32 @@ public class WindGraph
             }
         });
 
-        // Create a formatter to use for drawing a series using LineAndPointRenderer
-        // and configure it from xml:
-        LineAndPointFormatter series1Format = new LineAndPointFormatter();
-        series1Format.setPointLabelFormatter(new PointLabelFormatter());
-        series1Format.configure(act.getApplicationContext(),
+        LineAndPointFormatter formatter = new LineAndPointFormatter()
+        {
+            @Override
+            public SeriesRenderer getRendererInstance(XYPlot xyPlot)
+            {
+                return new CustomPointRenderer<LineAndPointFormatter>(xyPlot);
+            }
+
+            @Override
+            public Class<? extends SeriesRenderer> getRendererClass()
+            {
+                return CustomPointRenderer.class;
+            }
+        };
+
+        PointLabelFormatter labelFormatter = new PointLabelFormatter();
+        formatter.setPointLabelFormatter(labelFormatter);
+        formatter.configure(act.getApplicationContext(),
                 R.xml.line_point_formatter_with_plf1);
 
         // add a new series' to the xyplot:
-        plot.addSeries(series1, series1Format);
+        plot.addSeries(series1, formatter);
         plot.getLegendWidget().setVisible(false);
+        CustomPointRenderer renderer = (CustomPointRenderer) plot.getRenderer(CustomPointRenderer.class);
+        renderer.setWidth(8.0f);
+
 
         // reduce the number of range labels
         plot.setTicksPerRangeLabel(3);
