@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  *
@@ -67,6 +68,8 @@ public class WeatherDataCache
             BufferedInputStream bis = new BufferedInputStream(is);
 
             sm_stations = StationListReader.GetWeatherStationList(bis);
+            Collections.sort(sm_stations);
+
             sm_initialised = true;
         }
 
