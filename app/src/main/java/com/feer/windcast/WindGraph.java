@@ -1,6 +1,9 @@
 package com.feer.windcast;
 
 import android.app.Activity;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import com.androidplot.ui.SeriesRenderer;
 import com.androidplot.xy.BoundaryMode;
@@ -75,13 +78,15 @@ public class WindGraph
                 return null;
             }
         });
+        Resources res = act.getResources();
+        final Bitmap windArrow = BitmapFactory.decodeResource(res, R.drawable.wind_dir_arrow);
 
         LineAndPointFormatter formatter = new LineAndPointFormatter()
         {
             @Override
             public SeriesRenderer getRendererInstance(XYPlot xyPlot)
             {
-                return new CustomPointRenderer<LineAndPointFormatter>(xyPlot);
+                return new CustomPointRenderer<LineAndPointFormatter>(xyPlot, windArrow);
             }
 
             @Override
@@ -93,8 +98,10 @@ public class WindGraph
 
         PointLabelFormatter labelFormatter = new PointLabelFormatter();
         formatter.setPointLabelFormatter(labelFormatter);
-        formatter.configure(act.getApplicationContext(),
-                R.xml.line_point_formatter_with_plf1);
+        formatter.configure(
+                act.getApplicationContext(),
+                R.xml.line_point_formatter_with_plf1
+                           );
 
         // add a new series' to the xyplot:
         plot.addSeries(series1, formatter);

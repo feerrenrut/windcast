@@ -1,6 +1,9 @@
 package com.feer.windcast.graphing;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 
@@ -15,9 +18,11 @@ import com.androidplot.xy.XYSeriesRenderer;
 public class CustomPointRenderer<FormatterType extends LineAndPointFormatter> extends XYSeriesRenderer<FormatterType> {
 
     private float circleWidth = 1;
+    private Bitmap mWindArrow = null;
 
-    public CustomPointRenderer(XYPlot plot) {
+    public CustomPointRenderer(XYPlot plot, Bitmap windArrow) {
         super(plot);
+        mWindArrow = windArrow;
     }
 
     @Override
@@ -64,7 +69,18 @@ public class CustomPointRenderer<FormatterType extends LineAndPointFormatter> ex
                 if (formatter.getVertexPaint() != null) {
                     boolean offScreen = p.x > plotArea.right || p.y > plotArea.bottom || p.x < plotArea.left || p.y < plotArea.top;
                     if(!offScreen)
-                        canvas.drawCircle(p.x, p.y - circleWidth, circleWidth, formatter.getVertexPaint());
+                    {
+
+                        Matrix arrow = new Matrix();
+                        arrow.preScale(0.5f, 0.5f);
+
+                        final float rotateToNorth = 90.f;
+                        arrow.preRotate(rotateToNorth ); // clockwise
+                        arrow.postTranslate(p.x, p.y);
+
+                        canvas.drawBitmap(mWindArrow, arrow, new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
+                        //canvas.drawCircle(p.x, p.y - circleWidth, circleWidth, formatter.getVertexPaint());
+                    }
                 }
             }
         }
