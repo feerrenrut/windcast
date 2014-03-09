@@ -5,12 +5,15 @@ import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 
 /**
@@ -40,6 +43,8 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
     WeatherDataCache m_cache;
 
+    private EditText m_searchInput;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -67,6 +72,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
+        InitializeSearchBox(view);
 
         return view;
     }
@@ -93,9 +99,9 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-        WeatherStation station = m_cache.GetWeatherStations().get(position);
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+    {
+        WeatherStation station = ((ArrayAdapter<WeatherStation>)mAdapter).getItem(position);
         WeatherStationSelected(station);
     }
 
@@ -106,6 +112,29 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             // fragment is attached to one) that an item has been selected.
             mListener.onFragmentInteraction(station);
         }
+    }
+
+    /**
+     * Initializes the search box for filtering the list of weather stations
+     */
+    private void InitializeSearchBox(View view)
+    {
+        m_searchInput = (EditText)view.findViewById(R.id.weather_station_search_box);
+
+        m_searchInput.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i2, int i3)
+            {
+                ((ArrayAdapter<WeatherStation>)mAdapter).getFilter().filter(charSequence);
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3){}
+
+            @Override
+            public void afterTextChanged(Editable editable){}
+        });
     }
 
     /**
