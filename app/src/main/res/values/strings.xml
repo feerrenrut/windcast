@@ -5,4 +5,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
+    <string name="weather_station_search_text">Search weather stations...</string>
+
 </resources>
