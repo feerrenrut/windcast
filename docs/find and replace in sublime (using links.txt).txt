@@ -2,7 +2,7 @@ find and replace in sublime (using links_html_line.txt)
 
 Step 1:
     Find
-    <th id=\"t.*-station-.*" \w*=\"\w*\"><a \w*=\"([\/\w.]*shtml)\">(\w*).*
+    <th id=\"t.*-station-.*" \w*=\"\w*\"><a \w*=\"([\/\w.]*shtml)\">(.*)</a>.*
 
     replace with
     Reef12345URL {"name":"\2","url":"http://www.bom.gov.au\1"},
