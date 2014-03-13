@@ -105,12 +105,18 @@ public class StationListReader
             String urlString = GetStringOrThrow("url", reader);
             if (urlString != null)
             {
-                urlString = urlString.replaceAll("shtml", "json");
-                urlString = urlString.replaceAll("products", "fwo");
+                urlString = ConvertToJSONURL(urlString);
                 station.url = new URL(urlString);
             }
         }
         reader.endObject();
         return station;
+    }
+
+    public static String ConvertToJSONURL(String urlString)
+    {
+        urlString = urlString.replaceAll("shtml", "json");
+        urlString = urlString.replaceAll("products", "fwo");
+        return urlString;
     }
 }
