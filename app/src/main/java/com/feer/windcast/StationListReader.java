@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 public class StationListReader
 {
     static final String TAG = "StationListReader";
-    public static ArrayList<WeatherStation> GetWeatherStationsFromURL(URL fromUrl) throws Exception
+    public static ArrayList<WeatherStation> GetWeatherStationsFromURL(URL fromUrl, String state) throws Exception
     {
         BufferedReader buf;
         try
@@ -58,7 +58,7 @@ public class StationListReader
             while(m.find())
             {
                 WeatherStation ws = new WeatherStation();
-                ws.State = "WA";
+                ws.State = state;
                 ws.url = new URL("http://www.bom.gov.au" + StationListReader.ConvertToJSONURL(m.group(1)));
                 ws.Name = m.group(2);
                 weatherStations.add(ws);

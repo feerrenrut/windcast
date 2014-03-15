@@ -60,22 +60,46 @@ public class WeatherDataCache
     private static ArrayList<WeatherStation> sm_stations = new ArrayList<WeatherStation>();
     private static boolean sm_initialised = false;
 
+    private static class AllStationsURLForState
+    {
+        public AllStationsURLForState(String urlString, String state)
+        {mUrlString = urlString; mState = state;}
+
+        public String mUrlString;
+        public String mState;
+    }
+
+    private static final AllStationsURLForState[] mAllStationsInState_UrlList =
+    {
+            new AllStationsURLForState("http://www.bom.gov.au/wa/observations/waall.shtml", "WA"),
+            new AllStationsURLForState("http://www.bom.gov.au/nsw/observations/nswall.shtml", "NSW"), //Strangely some the stations for ACT (inc. Canberra) are on this page!
+            new AllStationsURLForState("http://www.bom.gov.au/vic/observations/vicall.shtml", "VIC"),
+            new AllStationsURLForState("http://www.bom.gov.au/qld/observations/qldall.shtml", "QLD"),
+            new AllStationsURLForState("http://www.bom.gov.au/sa/observations/saall.shtml", "SA"),
+            new AllStationsURLForState("http://www.bom.gov.au/tas/observations/tasall.shtml", "TAS"),
+            new AllStationsURLForState("http://www.bom.gov.au/act/observations/canberra.shtml", "ACT"),
+            new AllStationsURLForState("http://www.bom.gov.au/nt/observations/ntall.shtml", "NT")
+    };
+
     public ArrayList<WeatherStation> GetWeatherStations()
     {
         if(!sm_initialised)
         {
             sm_initialised = true;
-            try
+            for(AllStationsURLForState stationLink : mAllStationsInState_UrlList)
             {
-                URL url = new URL("http://www.bom.gov.au/wa/observations/waall.shtml");
-                sm_stations = StationListReader.GetWeatherStationsFromURL(url);
-                Collections.sort(sm_stations);
-            } catch (Exception e)
-            {
-                Log.e(TAG, "Couldnt create URL "+e.toString());
-                sm_initialised = false;
-                sm_stations = null;
+                try
+                {
+                    URL url = new URL(stationLink.mUrlString);
+                    sm_stations.addAll(StationListReader.GetWeatherStationsFromURL(url, stationLink.mState));
+                } catch (Exception e)
+                {
+                    Log.e(TAG, "Couldn't create URL "+e.toString());
+                    sm_initialised = false;
+                    sm_stations = null;
+                }
             }
+            Collections.sort(sm_stations);
         }
 
         return sm_stations;
