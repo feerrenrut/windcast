@@ -62,7 +62,10 @@ public class WindGraph
                 "");                             // Set the display title of the series
 
 
-        plot.setDomainBoundaries(numObs-11, numObs-1, BoundaryMode.FIXED);
+        final int lastReadingIndex = numObs -1;
+        final int numberOfReadingsToShow = Math.min(10, lastReadingIndex);
+        final int firstReadingIndex = lastReadingIndex - numberOfReadingsToShow;
+        plot.setDomainBoundaries(firstReadingIndex, lastReadingIndex, BoundaryMode.FIXED);
         plot.setDomainStepValue(1.0);
         plot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
 
