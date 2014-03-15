@@ -2,11 +2,13 @@ package com.feer.windcast;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +16,8 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListAdapter;
+
+import java.util.ArrayList;
 
 /**
  * A fragment representing a list of Items.
@@ -27,18 +30,14 @@ import android.widget.ListAdapter;
  */
 public class WeatherStationFragment extends Fragment implements AbsListView.OnItemClickListener {
 
+    private static final String TAG = "WeatherStationFragment" ;
     private OnFragmentInteractionListener mListener;
-
-    /**
-     * The fragment's ListView/GridView.
-     */
-    private AbsListView mListView;
 
     /**
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ListAdapter mAdapter;
+    private ArrayAdapter<WeatherStation> mAdapter;
 
 
     WeatherDataCache m_cache;
@@ -56,8 +55,28 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        final ArrayList<WeatherStation> stations = new ArrayList<WeatherStation>();
+
         mAdapter = new ArrayAdapter<WeatherStation>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, m_cache.GetWeatherStations());
+                android.R.layout.simple_list_item_1, android.R.id.text1, stations);
+
+        new AsyncTask<Void, Void, ArrayList<WeatherStation>>()
+        {
+
+            @Override
+            protected ArrayList<WeatherStation> doInBackground(Void... params)
+            {
+                return m_cache.GetWeatherStations();
+            }
+
+            @Override
+            protected void onPostExecute(ArrayList<WeatherStation> cacheStations)
+            {
+                stations.addAll(cacheStations);
+                mAdapter.notifyDataSetChanged();
+                Log.i(TAG, "Finished adding new stations.");
+            }
+        }.execute();
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -67,7 +86,10 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         View view = inflater.inflate(R.layout.fragment_weatherstation, container, false);
 
         // Set the adapter
-        mListView = (AbsListView) view.findViewById(android.R.id.list);
+        /*
+          The fragment's ListView/GridView.
+        */
+        AbsListView mListView = (AbsListView) view.findViewById(android.R.id.list);
         mListView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
@@ -101,7 +123,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
-        WeatherStation station = ((ArrayAdapter<WeatherStation>)mAdapter).getItem(position);
+        WeatherStation station = mAdapter.getItem(position);
         WeatherStationSelected(station);
     }
 
@@ -126,7 +148,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i2, int i3)
             {
-                ((ArrayAdapter<WeatherStation>)mAdapter).getFilter().filter(charSequence);
+                mAdapter.getFilter().filter(charSequence);
             }
 
             @Override
