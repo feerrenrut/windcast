@@ -14,7 +14,8 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListAdapter;
+
+import java.util.ArrayList;
 
 /**
  * A fragment representing a list of Items.
@@ -38,18 +39,30 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ListAdapter mAdapter;
+    private ArrayAdapter mAdapter;
+    private ArrayList<WeatherStation> mStations;
 
 
-    WeatherDataCache m_cache;
+    private WeatherDataCache m_cache;
 
     private EditText m_searchInput;
+
+    private static final String STATION_STATE = "weatherStationState";
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
     public WeatherStationFragment() {
+    }
+
+    public void ShowOnlyStationsInState(String state)
+    {
+        //TODO add the state to the args, also implement reading from the args
+        if(mAdapter != null && mStations != null)
+        {
+            mStations = m_cache.GetWeatherStations(); // need to pull in changes from all weather stations!!
+        }
     }
 
     @Override

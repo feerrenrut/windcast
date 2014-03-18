@@ -65,7 +65,6 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
     @Override
     public void onFragmentInteraction(WeatherStation station)
     {
-
         //Todo this should probably launch a new activity.
         // the graph shows up as transparent over the top of the list. Back action exist the app!
         FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
