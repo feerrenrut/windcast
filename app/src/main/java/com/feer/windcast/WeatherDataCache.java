@@ -17,10 +17,10 @@ import java.util.Collections;
  */
 public class WeatherDataCache
 {
-    Resources m_res;
+    Resources mRes;
     WeatherDataCache(Resources res)
     {
-        m_res = res;
+        mRes = res;
     }
 
     private static final String TAG = "WeatherDataCache";
@@ -42,7 +42,7 @@ public class WeatherDataCache
             else
             {
                 Log.w(TAG, "Using static test data");
-                InputStream is = m_res.openRawResource(R.raw.test_observation_data_badgingarra);
+                InputStream is = mRes.openRawResource(R.raw.test_observation_data_badgingarra);
                 bis = new BufferedInputStream(is);
             }
             wd = ObservationReader.ReadJsonStream(bis);
@@ -57,22 +57,22 @@ public class WeatherDataCache
         return wd;
     }
 
-    private static ArrayList<WeatherStation> sm_stations = new ArrayList<WeatherStation>();
-    private static boolean sm_initialised = false;
+    private static ArrayList<WeatherStation> smStations = new ArrayList<WeatherStation>();
+    private static boolean smInitialised = false;
 
     public ArrayList<WeatherStation> GetWeatherStations()
     {
-        if(!sm_initialised)
+        if(!smInitialised)
         {
-            InputStream is = m_res.openRawResource(R.raw.all_wa_stations);
+            InputStream is = mRes.openRawResource(R.raw.all_wa_stations);
             BufferedInputStream bis = new BufferedInputStream(is);
 
-            sm_stations = StationListReader.GetWeatherStationList(bis);
-            Collections.sort(sm_stations);
+            smStations = StationListReader.GetWeatherStationList(bis);
+            Collections.sort(smStations);
 
-            sm_initialised = true;
+            smInitialised = true;
         }
 
-        return sm_stations;
+        return smStations;
     }
 }

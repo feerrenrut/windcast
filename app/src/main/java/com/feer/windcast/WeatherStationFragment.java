@@ -41,9 +41,9 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     private ListAdapter mAdapter;
 
 
-    WeatherDataCache m_cache;
+    WeatherDataCache mCache;
 
-    private EditText m_searchInput;
+    private EditText mSearchInput;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -57,7 +57,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         super.onCreate(savedInstanceState);
 
         mAdapter = new ArrayAdapter<WeatherStation>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, m_cache.GetWeatherStations());
+                android.R.layout.simple_list_item_1, android.R.id.text1, mCache.GetWeatherStations());
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -84,7 +84,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             mListener = (OnFragmentInteractionListener) activity;
 
 
-            m_cache = new WeatherDataCache(activity.getResources());
+            mCache = new WeatherDataCache(activity.getResources());
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                 + " must implement OnFragmentInteractionListener");
@@ -119,22 +119,28 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
      */
     private void InitializeSearchBox(View view)
     {
-        m_searchInput = (EditText)view.findViewById(R.id.weather_station_search_box);
+        mSearchInput = (EditText)view.findViewById(R.id.weather_station_search_box);
 
-        m_searchInput.addTextChangedListener(new TextWatcher()
-        {
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i2, int i3)
-            {
-                ((ArrayAdapter<WeatherStation>)mAdapter).getFilter().filter(charSequence);
-            }
+        mSearchInput.addTextChangedListener(
+                new TextWatcher()
+                {
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i2, int i3)
+                    {
+                        ((ArrayAdapter<WeatherStation>) mAdapter).getFilter().filter(charSequence);
+                    }
 
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3){}
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3)
+                    {
+                    }
 
-            @Override
-            public void afterTextChanged(Editable editable){}
-        });
+                    @Override
+                    public void afterTextChanged(Editable editable)
+                    {
+                    }
+                }
+                                            );
     }
 
     /**
