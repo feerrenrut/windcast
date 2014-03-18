@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class WindDirectionPointRenderer<FormatterType extends LineAndPointFormatter> extends LineAndPointRenderer<FormatterType> {
 
     private Bitmap mWindArrow = null;
-    private ArrayList<Number> mWindDirections;
+    private ArrayList<Float> mWindDirections;
 
     public WindDirectionPointRenderer(XYPlot plot, Bitmap windArrow) {
         super(plot);
@@ -49,67 +49,74 @@ public class WindDirectionPointRenderer<FormatterType extends LineAndPointFormat
         final float arrowImageWidth = mWindArrow.getScaledWidth(canvas);
         final float arrowImageHeight = mWindArrow.getScaledHeight(canvas);
 
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++)
+        {
             Number y = series.getY(i);
             Number x = series.getX(i);
+            Float directionForPoint = mWindDirections.get(i);
 
-            if (y != null && x != null) {
-                p = ValPixConverter.valToPix(x, y, plotArea,
+            //TODO Some times there is NO direction for wind.. (ie if the speed is very low. We should use a different icon!
+            if (y != null && x != null && directionForPoint != null)
+            {
+                p = ValPixConverter.valToPix(
+                        x, y, plotArea,
                         plot.getCalculatedMinX(),
                         plot.getCalculatedMaxX(),
                         plot.getCalculatedMinY(),
-                        plot.getCalculatedMaxY());
+                        plot.getCalculatedMaxY()
+                                            );
 
-                if (formatter.getVertexPaint() != null) {
-                    boolean offScreen =
-                            p.x > plotArea.right||
-                            p.y > plotArea.bottom ||
-                            p.x < plotArea.left ||
-                            p.y < plotArea.top;
+                if (formatter.getVertexPaint() != null &&
+                        p.x > plotArea.right ||
+                        p.y > plotArea.bottom ||
+                        p.x < plotArea.left ||
+                        p.y < plotArea.top)
+                {
 
-                    if(!offScreen)
-                    {
+                    Matrix arrowMatrix = calculateMatrix(p, arrowImageWidth, arrowImageHeight, directionForPoint);
 
-                        Matrix arrowMatrix = new Matrix();
-
-                        /*
-                        *  Our image points left, we need to rotate it to point up.
-                         */
-                        final float rotateToNorth = 90.f; // degrees
-                        // the directions are the bearing for the "direction the wind comes from"
-                        // we want to show "the direction the wind goes t
-                        final float rotateToWindsDirection = 180.f;
-                        final float arrowRotation =
-                                rotateToNorth +
-                                rotateToWindsDirection +
-                                mWindDirections.get(i).floatValue();
-
-                        // center the arrow image
-                        arrowMatrix.preTranslate(
-                                -0.5f * arrowImageWidth,
-                                -0.5f * arrowImageHeight);
-
-                        // rotate it to the correct orientation
-                        arrowMatrix.postRotate(arrowRotation);
-
-                        final float scaleFactor = 0.25f;
-                        arrowMatrix.postScale(scaleFactor, scaleFactor);
-
-                        arrowMatrix.postTranslate(
-                                p.x,
-                                p.y );
-
-                        canvas.drawBitmap(
-                                mWindArrow,
-                                arrowMatrix,
-                                new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
-                    }
+                    canvas.drawBitmap(
+                            mWindArrow,
+                            arrowMatrix,
+                            new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG)
+                                     );
                 }
             }
         }
     }
 
-    public void SetWindDirections(ArrayList<Number> windDirections)
+    private Matrix calculateMatrix(PointF p, float arrowImageWidth, float arrowImageHeight, Float directionForPoint)
+    {
+        Matrix arrowMatrix = new Matrix();
+
+        // Our image points left, we need to rotate it to point up.
+        final float rotateToNorth = 90.f; // degrees
+
+        // the directions are the bearing for the "direction the wind comes from"
+        // we want to show "the direction the wind is going
+        final float rotateToWindsDirection = 180.f; //degrees
+
+        final float arrowRotation =
+                rotateToNorth +
+                rotateToWindsDirection +
+                directionForPoint;
+
+        // center the arrow image
+        arrowMatrix.preTranslate(
+                -0.5f * arrowImageWidth,
+                -0.5f * arrowImageHeight);
+
+        // rotate it to the correct orientation
+        arrowMatrix.postRotate(arrowRotation);
+
+        final float scaleFactor = 0.25f;
+        arrowMatrix.postScale(scaleFactor, scaleFactor);
+
+        arrowMatrix.postTranslate(p.x, p.y );
+        return arrowMatrix;
+    }
+
+    public void SetWindDirections(ArrayList<Float> windDirections)
     {
         mWindDirections = windDirections;
     }
