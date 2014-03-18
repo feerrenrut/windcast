@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.ListIterator;
 
 /**
  *
@@ -34,19 +33,15 @@ public class WindGraph
         int numObs = wd.ObservationData.size();
         ArrayList<Number> windSpeeds = new ArrayList<Number>(numObs);
         final ArrayList<Date> readingTimes = new ArrayList<Date>(numObs);
-        ArrayList<Number> windDirections = new ArrayList<Number>(numObs);
-
-        ListIterator windSpeedItr = windSpeeds.listIterator();
-        ListIterator readingTimesItr = readingTimes.listIterator();
-        ListIterator windDirectionsItr = windDirections.listIterator();
+        ArrayList<Float> windDirections = new ArrayList<Float>(numObs);
         for(ObservationReading reading1 : wd.ObservationData)
         {
             Number val = reading1.WindSpeed_KMH != null ?
                     reading1.WindSpeed_KMH : 0;
 
-            windSpeedItr.add(val);
-            readingTimesItr.add(reading1.LocalTime);
-            windDirectionsItr.add(reading1.WindBearing);
+            windSpeeds.add(val);
+            readingTimes.add(reading1.LocalTime);
+            windDirections.add(reading1.WindBearing);
         };
 
         Collections.reverse(windSpeeds);
