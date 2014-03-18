@@ -66,7 +66,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             @Override
             protected ArrayList<WeatherStation> doInBackground(Void... params)
             {
-                return m_cache.GetWeatherStations();
+                return mCache.GetWeatherStations();
             }
 
             @Override
