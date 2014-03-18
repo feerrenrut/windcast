@@ -6,6 +6,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.util.Log;
 
 import com.androidplot.exception.PlotRenderException;
 import com.androidplot.util.ValPixConverter;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 
 public class WindDirectionPointRenderer<FormatterType extends LineAndPointFormatter> extends LineAndPointRenderer<FormatterType> {
 
+    private static final String TAG = "WindDirectionPointRenderer";
     private Bitmap mWindArrow = null;
     private ArrayList<Float> mWindDirections;
 
@@ -37,6 +39,10 @@ public class WindDirectionPointRenderer<FormatterType extends LineAndPointFormat
             for(XYSeries series : getPlot().getSeriesListForRenderer(this.getClass())) {
                 drawSeries(canvas, plotArea, series, getFormatter(series));
             }
+        }
+        else
+        {
+            Log.e(TAG, "Unable to show directions for points. WindDirections array was null!");
         }
     }
 
@@ -66,13 +72,13 @@ public class WindDirectionPointRenderer<FormatterType extends LineAndPointFormat
                         plot.getCalculatedMaxY()
                                             );
 
-                if (formatter.getVertexPaint() != null &&
-                        p.x > plotArea.right ||
+                boolean offScreen = (p.x > plotArea.right ||
                         p.y > plotArea.bottom ||
                         p.x < plotArea.left ||
-                        p.y < plotArea.top)
-                {
+                        p.y < plotArea.top);
 
+                if (formatter.getVertexPaint() != null && !offScreen)
+                {
                     Matrix arrowMatrix = calculateMatrix(p, arrowImageWidth, arrowImageHeight, directionForPoint);
 
                     canvas.drawBitmap(
@@ -81,6 +87,14 @@ public class WindDirectionPointRenderer<FormatterType extends LineAndPointFormat
                             new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG)
                                      );
                 }
+            }
+            else if(directionForPoint == null)
+            {
+                Log.e(TAG, "Unable to draw point "+ i + " because the direction was null!");
+            }
+            else
+            {
+                Log.e(TAG, "Unable to draw point for some other reason.");
             }
         }
     }
