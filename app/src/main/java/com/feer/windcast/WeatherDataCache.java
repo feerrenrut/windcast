@@ -17,10 +17,10 @@ import java.util.Collections;
  */
 public class WeatherDataCache
 {
-    Resources m_res;
+    Resources mRes;
     WeatherDataCache(Resources res)
     {
-        m_res = res;
+        mRes = res;
     }
 
     private static final String TAG = "WeatherDataCache";
@@ -42,7 +42,7 @@ public class WeatherDataCache
             else
             {
                 Log.w(TAG, "Using static test data");
-                InputStream is = m_res.openRawResource(R.raw.test_observation_data_badgingarra);
+                InputStream is = mRes.openRawResource(R.raw.test_observation_data_badgingarra);
                 bis = new BufferedInputStream(is);
             }
             wd = ObservationReader.ReadJsonStream(bis);
@@ -57,8 +57,8 @@ public class WeatherDataCache
         return wd;
     }
 
-    private static ArrayList<WeatherStation> sm_stations = new ArrayList<WeatherStation>();
-    private static boolean sm_initialised = false;
+    private static ArrayList<WeatherStation> smStations = new ArrayList<WeatherStation>();
+    private static boolean smInitialised = false;
 
     private static class AllStationsURLForState
     {
@@ -83,25 +83,25 @@ public class WeatherDataCache
 
     public ArrayList<WeatherStation> GetWeatherStations()
     {
-        if(!sm_initialised)
+        if(!smInitialised)
         {
-            sm_initialised = true;
+            smInitialised = true;
             for(AllStationsURLForState stationLink : mAllStationsInState_UrlList)
             {
                 try
                 {
                     URL url = new URL(stationLink.mUrlString);
-                    sm_stations.addAll(StationListReader.GetWeatherStationsFromURL(url, stationLink.mState));
+                    smStations.addAll(StationListReader.GetWeatherStationsFromURL(url, stationLink.mState));
                 } catch (Exception e)
                 {
                     Log.e(TAG, "Couldn't create URL "+e.toString());
-                    sm_initialised = false;
-                    sm_stations = null;
+                    smInitialised = false;
+                    smStations = null;
                 }
             }
-            Collections.sort(sm_stations);
+            Collections.sort(smStations);
         }
 
-        return sm_stations;
+        return smStations;
     }
 }

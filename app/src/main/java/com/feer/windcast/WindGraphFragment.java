@@ -31,7 +31,7 @@ public class WindGraphFragment extends Fragment
         mStation = station;
     }
 
-    WeatherStation mStation;
+    private WeatherStation mStation;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -74,7 +74,6 @@ public class WindGraphFragment extends Fragment
         new AsyncTask<Void, Void, Boolean>()
         {
             WeatherData wd;
-            String urls;
 
             @Override
             protected Boolean doInBackground(Void... params)
@@ -126,7 +125,7 @@ public class WindGraphFragment extends Fragment
                         if(reading.WindBearing != null && reading.CardinalWindDirection != null && reading.WindSpeed_KMH != null)
                         {
                             sb.append(reading.WindBearing);
-                            sb.append(" (").append(reading.CardinalWindDirection.toString()).append( " ) ");
+                            sb.append(" (").append(reading.CardinalWindDirection).append(" ) ");
                             sb.append(" ").append(reading.WindSpeed_KMH).append(" kmh");
                         }
                     }

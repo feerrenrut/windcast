@@ -1,7 +1,11 @@
 package com.feer.windcast;
 
 import android.app.Activity;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
+import com.androidplot.ui.SeriesRenderer;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.PointLabelFormatter;
@@ -9,6 +13,7 @@ import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYSeries;
 import com.androidplot.xy.XYStepMode;
+import com.feer.windcast.graphing.WindDirectionPointRenderer;
 
 import java.text.FieldPosition;
 import java.text.Format;
@@ -17,7 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.ListIterator;
 
 /**
  *
@@ -29,20 +33,20 @@ public class WindGraph
         int numObs = wd.ObservationData.size();
         ArrayList<Number> windSpeeds = new ArrayList<Number>(numObs);
         final ArrayList<Date> readingTimes = new ArrayList<Date>(numObs);
-
-        ListIterator windSpeedItr = windSpeeds.listIterator();
-        ListIterator readingTimesItr = readingTimes.listIterator();
+        ArrayList<Float> windDirections = new ArrayList<Float>(numObs);
         for(ObservationReading reading1 : wd.ObservationData)
         {
             Number val = reading1.WindSpeed_KMH != null ?
                     reading1.WindSpeed_KMH : 0;
 
-            windSpeedItr.add(val);
-            readingTimesItr.add(reading1.LocalTime);
+            windSpeeds.add(val);
+            readingTimes.add(reading1.LocalTime);
+            windDirections.add(reading1.WindBearing);
         };
 
         Collections.reverse(windSpeeds);
         Collections.reverse(readingTimes);
+        Collections.reverse(windDirections);
 
         plot.setTitle("Wind Speed at " + wd.Station.Name);
 
@@ -53,7 +57,10 @@ public class WindGraph
                 "");                             // Set the display title of the series
 
 
-        plot.setDomainBoundaries(numObs-11, numObs-1, BoundaryMode.FIXED);
+        final int lastReadingIndex = numObs -1;
+        final int numberOfReadingsToShow = Math.min(10, lastReadingIndex);
+        final int firstReadingIndex = lastReadingIndex - numberOfReadingsToShow;
+        plot.setDomainBoundaries(firstReadingIndex, lastReadingIndex, BoundaryMode.FIXED);
         plot.setDomainStepValue(1.0);
         plot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
 
@@ -73,17 +80,38 @@ public class WindGraph
                 return null;
             }
         });
+        Resources res = act.getResources();
+        final Bitmap windArrow = BitmapFactory.decodeResource(res, R.drawable.wind_dir_arrow);
 
-        // Create a formatter to use for drawing a series using LineAndPointRenderer
-        // and configure it from xml:
-        LineAndPointFormatter series1Format = new LineAndPointFormatter();
-        series1Format.setPointLabelFormatter(new PointLabelFormatter());
-        series1Format.configure(act.getApplicationContext(),
-                R.xml.line_point_formatter_with_plf1);
+        LineAndPointFormatter formatter = new LineAndPointFormatter()
+        {
+            @Override
+            public SeriesRenderer getRendererInstance(XYPlot xyPlot)
+            {
+                return new WindDirectionPointRenderer<LineAndPointFormatter>(xyPlot, windArrow);
+            }
+
+            @Override
+            public Class<? extends SeriesRenderer> getRendererClass()
+            {
+                return WindDirectionPointRenderer.class;
+            }
+        };
+
+        PointLabelFormatter labelFormatter = new PointLabelFormatter();
+        formatter.setPointLabelFormatter(labelFormatter);
+        formatter.configure(
+                act.getApplicationContext(),
+                R.xml.line_point_formatter_with_plf1
+                           );
+
+        labelFormatter.vOffset -= 4.f;
 
         // add a new series' to the xyplot:
-        plot.addSeries(series1, series1Format);
+        plot.addSeries(series1, formatter);
         plot.getLegendWidget().setVisible(false);
+        WindDirectionPointRenderer renderer = (WindDirectionPointRenderer) plot.getRenderer(WindDirectionPointRenderer.class);
+        renderer.SetWindDirections(windDirections);
 
         // reduce the number of range labels
         plot.setTicksPerRangeLabel(3);
