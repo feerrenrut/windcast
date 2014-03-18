@@ -1,116 +1,78 @@
 package com.feer.windcast;
 
-import android.annotation.TargetApi;
-import android.os.Build;
-import android.util.JsonReader;
 import android.util.Log;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Reads weather stations from a strictly ordered config file
- * The file should have the following contents / order
- * {
- *     state : string,
- *     weatherStations:
- *     [
- *          {name:string, url:string}
- *     ]
- * }
- *
- * Any order of info will cause an exception to be thrown
- */
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+ * Reads weather stations embedded as links in html
+ * */
 public class StationListReader
 {
-
-    private static String GetStringOrThrow(String stringParamName, JsonReader reader) throws IllegalArgumentException, IOException
+    static final String TAG = "StationListReader";
+    public static ArrayList<WeatherStation> GetWeatherStationsFromURL(URL fromUrl, String state) throws Exception
     {
+        BufferedReader buf;
         try
         {
-            NextParamNameIsOrThrow(stringParamName, reader);
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new IllegalArgumentException("Could not get String Parameter.", e);
-        }
-        return reader.nextString();
-    }
-
-    private static void NextParamNameIsOrThrow(String paramName, JsonReader reader) throws IOException
-    {
-        String name = reader.nextName();
-        if(!name.equals(paramName))
-        {
-            throw new IllegalArgumentException(
-                    new StringBuilder()
-                            .append("The data or ordering of the json file was not as expected. ")
-                            .append("Unable to get parameter: ")
-                            .append(paramName).toString()
-            );
-        }
-    }
-    public static ArrayList<WeatherStation> GetWeatherStationList(BufferedInputStream bis)
-    {
-        ArrayList<WeatherStation> stations = new ArrayList<WeatherStation>();
-
-        try
-        {
-            JsonReader reader = new JsonReader(new InputStreamReader(bis, "UTF-8"));
-            reader.beginObject();
-
-            String state = GetStringOrThrow("state", reader);
-
-            NextParamNameIsOrThrow("weatherStations", reader);
-            {
-                ReadWeatherStationsArray(stations, state,  reader);
-            }
-            reader.endObject();
-
-
+            buf = new BufferedReader(
+                    new InputStreamReader(
+                            fromUrl.openStream()));
         } catch (IOException e)
         {
-            Log.e("DATA", e.getMessage());
+            Log.e(TAG, "Unable to get content from url: " + fromUrl.toString());
+            throw new Exception("Cant get content", e);
         }
-        return stations;
-    }
 
-    private static void ReadWeatherStationsArray(ArrayList<WeatherStation> stations, String state, JsonReader reader) throws IOException
-    {
-        reader.beginArray();
-        while(reader.hasNext())
+        ArrayList<WeatherStation> weatherStations = new ArrayList<WeatherStation>();
+
+        /* because we have to escape the slashes and quotes in the regex this is hard to read
+           without extra escapes:
+           <th id=\"t.*-station-.*" \w*=\"\w*\"><a \w*=\"([\/\w.]*shtml)\\">(.*)</a>.*
+
+           to break this down:
+           we are trying to match a line like this (in html)
+           <th id="tKIM-station-broome-port" class="rowleftcolumn"><a href="/products/IDW60801/IDW60801.95202.shtml">Broome Port</a></th>
+
+           we want two groups one for the url (group 1) and one for the full station name (group 2)
+           it seems all stations have an id that includes the word 'station'
+           Group 1: ([\/\w.]*shtml)
+           this is the relative link to the station page. It contains words, forward slashes('/') and
+           period characters. It ends with 'shtml'
+
+           Group 2: >(.*)</a>
+           is all characters inside the anchor tag
+        */
+        Pattern p = Pattern.compile("<th id=\\\"t.*-station-.*\" \\w*=\\\"\\w*\\\"><a \\w*=\\\"([\\/\\w.]*shtml)\\\">(.*)</a>.*");
+        String str;
+
+        while((str = buf.readLine()) != null)
         {
-            WeatherStation station = getWeatherStation(reader);
-            if(station.Name != null && station.url != null)
+            Matcher m = p.matcher(str);
+            while(m.find())
             {
-                station.State = state;
-                stations.add(station);
+                WeatherStation ws = new WeatherStation();
+                ws.State = state;
+                ws.url = new URL("http://www.bom.gov.au" + StationListReader.ConvertToJSONURL(m.group(1)));
+                ws.Name = m.group(2);
+                weatherStations.add(ws);
             }
         }
-        reader.endArray();
+
+        buf.close();
+        return weatherStations;
     }
 
-    private static WeatherStation getWeatherStation(JsonReader reader) throws IOException
+    public static String ConvertToJSONURL(String urlString)
     {
-        WeatherStation station = new WeatherStation();
-        reader.beginObject();
-        while(reader.hasNext())
-        {
-            station.Name = GetStringOrThrow("name", reader);
-
-            String urlString = GetStringOrThrow("url", reader);
-            if (urlString != null)
-            {
-                urlString = urlString.replaceAll("shtml", "json");
-                urlString = urlString.replaceAll("products", "fwo");
-                station.url = new URL(urlString);
-            }
-        }
-        reader.endObject();
-        return station;
+        urlString = urlString.replaceAll("shtml", "json");
+        urlString = urlString.replaceAll("products", "fwo");
+        return urlString;
     }
 }

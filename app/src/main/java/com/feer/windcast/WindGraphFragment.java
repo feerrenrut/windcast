@@ -88,7 +88,8 @@ public class WindGraphFragment extends Fragment
                 else
                 {
                     Log.w(TAG, "No weather station set using first one!");
-                    url = cache.GetWeatherStations().get(0).url;
+                    //TODO let the user know in a nice way!!
+                    return false;
                 }
                 Log.i("WindCast", "Getting data from: " + url.toString());
                 wd = cache.GetWeatherDataFor(url);
@@ -98,6 +99,8 @@ public class WindGraphFragment extends Fragment
             @Override
             protected void onPostExecute(Boolean result)
             {
+
+                //TODO check the result, let the user know if we don't know what data to show them.
                 final TextView label = (TextView) getActivity().findViewById(R.id.label);
                 if (label == null)
                 {

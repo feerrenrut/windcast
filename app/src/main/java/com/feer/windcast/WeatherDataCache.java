@@ -17,10 +17,10 @@ import java.util.Collections;
  */
 public class WeatherDataCache
 {
-    Resources m_res;
+    Resources mRes;
     WeatherDataCache(Resources res)
     {
-        m_res = res;
+        mRes = res;
     }
 
     private static final String TAG = "WeatherDataCache";
@@ -42,7 +42,7 @@ public class WeatherDataCache
             else
             {
                 Log.w(TAG, "Using static test data");
-                InputStream is = m_res.openRawResource(R.raw.test_observation_data_badgingarra);
+                InputStream is = mRes.openRawResource(R.raw.test_observation_data_badgingarra);
                 bis = new BufferedInputStream(is);
             }
             wd = ObservationReader.ReadJsonStream(bis);
@@ -57,22 +57,51 @@ public class WeatherDataCache
         return wd;
     }
 
-    private static ArrayList<WeatherStation> sm_stations = new ArrayList<WeatherStation>();
-    private static boolean sm_initialised = false;
+    private static ArrayList<WeatherStation> smStations = new ArrayList<WeatherStation>();
+    private static boolean smInitialised = false;
+
+    private static class AllStationsURLForState
+    {
+        public AllStationsURLForState(String urlString, String state)
+        {mUrlString = urlString; mState = state;}
+
+        public String mUrlString;
+        public String mState;
+    }
+
+    private static final AllStationsURLForState[] mAllStationsInState_UrlList =
+    {
+            new AllStationsURLForState("http://www.bom.gov.au/wa/observations/waall.shtml", "WA"),
+            new AllStationsURLForState("http://www.bom.gov.au/nsw/observations/nswall.shtml", "NSW"), //Strangely some the stations for ACT (inc. Canberra) are on this page!
+            new AllStationsURLForState("http://www.bom.gov.au/vic/observations/vicall.shtml", "VIC"),
+            new AllStationsURLForState("http://www.bom.gov.au/qld/observations/qldall.shtml", "QLD"),
+            new AllStationsURLForState("http://www.bom.gov.au/sa/observations/saall.shtml", "SA"),
+            new AllStationsURLForState("http://www.bom.gov.au/tas/observations/tasall.shtml", "TAS"),
+            new AllStationsURLForState("http://www.bom.gov.au/act/observations/canberra.shtml", "ACT"),
+            new AllStationsURLForState("http://www.bom.gov.au/nt/observations/ntall.shtml", "NT")
+    };
 
     public ArrayList<WeatherStation> GetWeatherStations()
     {
-        if(!sm_initialised)
+        if(!smInitialised)
         {
-            InputStream is = m_res.openRawResource(R.raw.all_wa_stations);
-            BufferedInputStream bis = new BufferedInputStream(is);
-
-            sm_stations = StationListReader.GetWeatherStationList(bis);
-            Collections.sort(sm_stations);
-
-            sm_initialised = true;
+            smInitialised = true;
+            for(AllStationsURLForState stationLink : mAllStationsInState_UrlList)
+            {
+                try
+                {
+                    URL url = new URL(stationLink.mUrlString);
+                    smStations.addAll(StationListReader.GetWeatherStationsFromURL(url, stationLink.mState));
+                } catch (Exception e)
+                {
+                    Log.e(TAG, "Couldn't create URL "+e.toString());
+                    smInitialised = false;
+                    smStations = null;
+                }
+            }
+            Collections.sort(smStations);
         }
 
-        return sm_stations;
+        return smStations;
     }
 }
