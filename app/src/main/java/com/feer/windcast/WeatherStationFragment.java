@@ -38,7 +38,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
      * Views.
      */
     private ArrayAdapter<WeatherStation> mAdapter;
-    private ArrayList<WeatherStation> mStations;
 
 
     WeatherDataCache mCache;
@@ -54,12 +53,15 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public WeatherStationFragment() {
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void ShowOnlyStationsInState(String state)
     {
         //TODO add the state to the args, also implement reading from the args
-        if(mAdapter != null && mStations != null)
+        if(mAdapter != null)
         {
-            mStations = mCache.GetWeatherStations(); // need to pull in changes from all weather stations!!
+            mAdapter.clear();
+            mAdapter.addAll(mCache.GetWeatherStationsFrom(state));
+            mAdapter.notifyDataSetChanged();
         }
     }
 
@@ -67,10 +69,11 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final ArrayList<WeatherStation> stations = new ArrayList<WeatherStation>();
-
-        mAdapter = new ArrayAdapter<WeatherStation>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, stations);
+        mAdapter = new ArrayAdapter<WeatherStation>(
+                getActivity(),
+                android.R.layout.simple_list_item_1,
+                android.R.id.text1,
+                new ArrayList<WeatherStation>());
 
         new AsyncTask<Void, Void, ArrayList<WeatherStation>>()
         {
@@ -78,13 +81,15 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             @Override
             protected ArrayList<WeatherStation> doInBackground(Void... params)
             {
-                return mCache.GetWeatherStations();
+                return mCache.GetWeatherStationsFromAllStates();
             }
 
+            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
             @Override
             protected void onPostExecute(ArrayList<WeatherStation> cacheStations)
             {
-                stations.addAll(cacheStations);
+                mAdapter.clear();
+                mAdapter.addAll(cacheStations);
                 mAdapter.notifyDataSetChanged();
                 Log.i(TAG, "Finished adding new stations.");
             }
@@ -97,10 +102,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_weatherstation, container, false);
 
-        // Set the adapter
-        /*
-          The fragment's ListView/GridView.
-        */
         AbsListView mListView = (AbsListView) view.findViewById(android.R.id.list);
         mListView.setAdapter(mAdapter);
 

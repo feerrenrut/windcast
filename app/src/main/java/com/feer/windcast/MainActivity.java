@@ -2,7 +2,6 @@ package com.feer.windcast;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,9 +13,9 @@ import android.widget.ListView;
 public class MainActivity extends ActionBarActivity implements WeatherStationFragment.OnFragmentInteractionListener
 {
 
-    private DrawerLayout mDrawerLayout;
     private String[] mDrawerOptions;
     private ListView mDrawerList;
+    private WeatherStationFragment mStationsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,7 +23,6 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         setContentView(R.layout.activity_main);
 
         mDrawerOptions = getResources().getStringArray(R.array.drawer_options);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.windcast_drawer);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -35,8 +33,9 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         if (savedInstanceState == null) {
+            mStationsFragment = new WeatherStationFragment();
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.content_frame, new WeatherStationFragment()).commit();
+                    .add(R.id.content_frame, mStationsFragment).commit();
         }
     }
 
@@ -78,7 +77,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         @Override
         public void onItemClick(AdapterView parent, View view, int position, long id)
         {
-
+            mStationsFragment.ShowOnlyStationsInState(mDrawerOptions[position]);
         }
     }
 }

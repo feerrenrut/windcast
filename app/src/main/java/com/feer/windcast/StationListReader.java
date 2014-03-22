@@ -49,7 +49,7 @@ public class StationListReader
            Group 2: >(.*)</a>
            is all characters inside the anchor tag
         */
-        Pattern p = Pattern.compile("<th id=\\\"t.*-station-.*\" \\w*=\\\"\\w*\\\"><a \\w*=\\\"([\\/\\w.]*shtml)\\\">(.*)</a>.*");
+        Pattern p = Pattern.compile("<th id=\\\".*-station-.*\" \\w*=\\\"\\w*\\\"><a \\w*=\\\"([\\/\\w.]*shtml)\\\">(.*)</a>.*");
         String str;
 
         while((str = buf.readLine()) != null)

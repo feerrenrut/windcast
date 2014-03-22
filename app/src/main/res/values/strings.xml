@@ -8,14 +8,14 @@
     <string name="weather_station_search_text">Search weather stations...</string>
 
     <string-array name="drawer_options">
-        <item>WA Stations</item>
-        <item>NSW Stations</item>
-        <item>VIC Stations</item>
-        <item>QLD Stations</item>
-        <item>SA Stations</item>
-        <item>TAS Stations</item>
-        <item>ACT Stations</item>
-        <item>NT Stations</item>
+        <item>WA</item>
+        <item>NSW</item>
+        <item>VIC</item>
+        <item>QLD</item>
+        <item>SA</item>
+        <item>TAS</item>
+        <item>ACT</item>
+        <item>NT</item>
     </string-array>
 
 </resources>

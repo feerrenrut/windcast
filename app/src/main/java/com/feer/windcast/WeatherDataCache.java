@@ -81,7 +81,7 @@ public class WeatherDataCache
             new AllStationsURLForState("http://www.bom.gov.au/nt/observations/ntall.shtml", "NT")
     };
 
-    public ArrayList<WeatherStation> GetWeatherStations()
+    public ArrayList<WeatherStation> GetWeatherStationsFromAllStates()
     {
         if(!smInitialised)
         {
@@ -103,5 +103,23 @@ public class WeatherDataCache
         }
 
         return smStations;
+    }
+
+    public ArrayList<WeatherStation> GetWeatherStationsFrom(String state)
+    {
+        if(!smInitialised)
+        {
+            GetWeatherStationsFromAllStates();
+        }
+
+        ArrayList<WeatherStation> stationsForState = new ArrayList<WeatherStation>();
+        for(WeatherStation station : smStations)
+        {
+            if(station.State.equals(state))
+            {
+                stationsForState.add(station);
+            }
+        }
+        return stationsForState;
     }
 }
