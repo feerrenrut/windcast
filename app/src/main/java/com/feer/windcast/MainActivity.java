@@ -1,7 +1,10 @@
 package com.feer.windcast;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,9 +16,11 @@ import android.widget.ListView;
 public class MainActivity extends ActionBarActivity implements WeatherStationFragment.OnFragmentInteractionListener
 {
 
+    private DrawerLayout mDrawerLayout;
     private String[] mDrawerOptions;
     private ListView mDrawerList;
     private WeatherStationFragment mStationsFragment;
+    private CharSequence mTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +28,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         setContentView(R.layout.activity_main);
 
         mDrawerOptions = getResources().getStringArray(R.array.drawer_options);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.windcast_drawer);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -72,12 +78,22 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         trans.commit();
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @Override
+    public void setTitle(CharSequence title) {
+        mTitle = title;
+        getActionBar().setTitle(mTitle);
+    }
+
     private class DrawerItemClickListener implements ListView.OnItemClickListener
     {
         @Override
         public void onItemClick(AdapterView parent, View view, int position, long id)
         {
             mStationsFragment.ShowOnlyStationsInState(mDrawerOptions[position]);
+            mDrawerList.setItemChecked(position, true);
+            setTitle("Wind Stations in " + mDrawerOptions[position]);
+            mDrawerLayout.closeDrawer(mDrawerList);
         }
     }
 }
