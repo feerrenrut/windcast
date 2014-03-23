@@ -90,9 +90,20 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         @Override
         public void onItemClick(AdapterView parent, View view, int position, long id)
         {
-            mStationsFragment.ShowOnlyStationsInState(mDrawerOptions[position]);
+            String itemText = mDrawerOptions[position];
+            if(itemText.equals("All"))
+            {
+                mStationsFragment.ShowAllStations();
+                setTitle(getString(R.string.app_name));
+            }
+            else
+            {
+                mStationsFragment.ShowOnlyStationsInState(itemText);
+                setTitle(String.format(getString(R.string.wind_stations_in), itemText));
+            }
+
+
             mDrawerList.setItemChecked(position, true);
-            setTitle("Wind Stations in " + mDrawerOptions[position]);
             mDrawerLayout.closeDrawer(mDrawerList);
         }
     }

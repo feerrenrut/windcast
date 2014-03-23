@@ -60,7 +60,23 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         if(mAdapter != null)
         {
             mAdapter.clear();
+            //mSearchInput.setText("");
+            //mAdapter.getFilter().filter("");
+
             mAdapter.addAll(mCache.GetWeatherStationsFrom(state));
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void ShowAllStations()
+    {
+        if(mAdapter != null)
+        {
+            mAdapter.clear();
+            //mSearchInput.setText("");
+            //mAdapter.getFilter().filter("");
+            mAdapter.addAll(mCache.GetWeatherStationsFromAllStates());
             mAdapter.notifyDataSetChanged();
         }
     }
@@ -91,6 +107,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 mAdapter.clear();
                 mAdapter.addAll(cacheStations);
                 mAdapter.notifyDataSetChanged();
+
                 Log.i(TAG, "Finished adding new stations.");
             }
         }.execute();
@@ -102,14 +119,22 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_weatherstation, container, false);
 
-        AbsListView mListView = (AbsListView) view.findViewById(android.R.id.list);
-        mListView.setAdapter(mAdapter);
+        AbsListView listView = (AbsListView) view.findViewById(android.R.id.list);
+        listView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
-        mListView.setOnItemClickListener(this);
-        InitializeSearchBox(view);
+        listView.setOnItemClickListener(this);
+        //InitializeSearchBox(view);
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView()
+    {
+        super.onDestroyView();
+
+        mSearchInput = null;
     }
 
     @Override
