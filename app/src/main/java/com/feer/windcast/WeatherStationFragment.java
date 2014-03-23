@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * A fragment representing a list of Items.
@@ -31,7 +32,7 @@ import java.util.ArrayList;
 public class WeatherStationFragment extends Fragment implements AbsListView.OnItemClickListener {
 
     private static final String TAG = "WeatherStationFragment" ;
-    private OnFragmentInteractionListener mListener;
+    private OnWeatherStationFragmentInteractionListener mListener;
 
     /**
      * The Adapter which will be used to populate the ListView/GridView with
@@ -59,12 +60,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         //TODO add the state to the args, also implement reading from the args
         if(mAdapter != null)
         {
-            mAdapter.clear();
-            //mSearchInput.setText("");
-            //mAdapter.getFilter().filter("");
-
-            mAdapter.addAll(mCache.GetWeatherStationsFrom(state));
-            mAdapter.notifyDataSetChanged();
+            SetListedStations(mCache.GetWeatherStationsFrom(state));
         }
     }
 
@@ -73,11 +69,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     {
         if(mAdapter != null)
         {
-            mAdapter.clear();
-            //mSearchInput.setText("");
-            //mAdapter.getFilter().filter("");
-            mAdapter.addAll(mCache.GetWeatherStationsFromAllStates());
-            mAdapter.notifyDataSetChanged();
+            SetListedStations(mCache.GetWeatherStationsFromAllStates());
         }
     }
 
@@ -124,7 +116,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
         // Set OnItemClickListener so we can be notified on item clicks
         listView.setOnItemClickListener(this);
-        //InitializeSearchBox(view);
+        InitializeSearchBox(view);
 
         return view;
     }
@@ -141,13 +133,13 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnFragmentInteractionListener) activity;
+            mListener = (OnWeatherStationFragmentInteractionListener) activity;
 
 
             mCache = new WeatherDataCache(activity.getResources());
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                + " must implement OnFragmentInteractionListener");
+                + " must implement OnWeatherStationFragmentInteractionListener");
         }
     }
 
@@ -170,8 +162,21 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(station);
+            mListener.onWeatherStationSelected(station);
         }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void SetListedStations(Collection<WeatherStation> stations)
+    {
+        mAdapter.clear();
+        mAdapter.addAll(stations);
+
+        // this has to be done to refresh the filter on mAdapter.
+        // Otherwise the previously set filter will persist, and the list of objects returned by
+        // the adapter will not change!
+        if(mSearchInput != null) mSearchInput.setText("");
+        mAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -204,18 +209,13 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     }
 
     /**
-    * This interface must be implemented by activities that contain this
-    * fragment to allow an interaction in this fragment to be communicated
-    * to the activity and potentially other fragments contained in that
-    * activity.
-    * <p>
-    * See the Android Training lesson <a href=
-    * "http://developer.android.com/training/basics/fragments/communicating.html"
-    * >Communicating with Other Fragments</a> for more information.
+    * Interface to allow actions to occur outside of this
+    * fragment, when the user interacts with this fragment
     */
-    public interface OnFragmentInteractionListener {
+    public interface OnWeatherStationFragmentInteractionListener
+    {
 
-        public void onFragmentInteraction(WeatherStation station);
+        public void onWeatherStationSelected(WeatherStation station);
     }
 
 }

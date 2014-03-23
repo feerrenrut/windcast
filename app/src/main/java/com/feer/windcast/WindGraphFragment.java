@@ -1,5 +1,6 @@
 package com.feer.windcast;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -99,9 +100,13 @@ public class WindGraphFragment extends Fragment
             @Override
             protected void onPostExecute(Boolean result)
             {
+                Activity act = getActivity();
+                // if the user hits back before this callback returns act could be null.
+                // In this case we exit early.
+                if (act == null) return;
 
                 //TODO check the result, let the user know if we don't know what data to show them.
-                final TextView label = (TextView) getActivity().findViewById(R.id.label);
+                final TextView label = (TextView) act.findViewById(R.id.label);
                 if (label == null)
                 {
                     throw new NullPointerException("unable to find the label");
@@ -134,8 +139,8 @@ public class WindGraphFragment extends Fragment
 
                 }
                 // initialize our XYPlot reference:
-                XYPlot  plot = (XYPlot) getActivity().findViewById(R.id.mySimpleXYPlot);
-                WindGraph.SetupGraph(wd, plot, getActivity());
+                XYPlot  plot = (XYPlot) act.findViewById(R.id.mySimpleXYPlot);
+                WindGraph.SetupGraph(wd, plot, act);
             }
         }.execute();
 

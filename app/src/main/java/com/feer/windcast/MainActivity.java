@@ -13,7 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class MainActivity extends ActionBarActivity implements WeatherStationFragment.OnFragmentInteractionListener
+public class MainActivity extends ActionBarActivity implements WeatherStationFragment.OnWeatherStationFragmentInteractionListener
 {
 
     private DrawerLayout mDrawerLayout;
@@ -68,7 +68,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
 
 
     @Override
-    public void onFragmentInteraction(WeatherStation station)
+    public void onWeatherStationSelected(WeatherStation station)
     {
         //Todo this should probably launch a new activity.
         // the graph shows up as transparent over the top of the list. Back action exist the app!
