@@ -32,13 +32,12 @@ public class StationListReader
 
         ArrayList<WeatherStation> weatherStations = new ArrayList<WeatherStation>();
 
-        /* because we have to escape the slashes and quotes in the regex this is hard to read
-           without extra escapes:
-           <th id=\"t.*-station-.*" \w*=\"\w*\"><a \w*=\"([\/\w.]*shtml)\\">(.*)</a>.*
+        /* because we have to escape the slashes and quotes in the regex this is hard to read.
 
            to break this down:
-           we are trying to match a line like this (in html)
+           we are trying to match a line like one of the following (in html)
            <th id="tKIM-station-broome-port" class="rowleftcolumn"><a href="/products/IDW60801/IDW60801.95202.shtml">Broome Port</a></th>
+           <th id="obs-station-braidwood" class="rowleftcolumn"><a href="/products/IDN60903/IDN60903.94927.shtml">Braidwood</a></th>
 
            we want two groups one for the url (group 1) and one for the full station name (group 2)
            it seems all stations have an id that includes the word 'station'
