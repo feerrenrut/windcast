@@ -18,15 +18,34 @@ tools:ignore="MergeRootFrame"
     />
 
 <!-- The navigation drawer -->
-<ListView
+<LinearLayout
+    android:orientation="vertical"
     android:id="@+id/left_drawer"
     android:layout_width="240dp"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:choiceMode="singleChoice"
-    android:divider="@android:color/transparent"
-    android:dividerHeight="0dp"
     android:background="#111"
-    />
+    >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/states"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/drawer_item_paddingleft"
+        android:textSize="@dimen/drawer_sub_item_size"
+        android:paddingRight="16dp"
+        android:textColor="#fff"/>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/left_drawer_list"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:background="#111"
+        tools:listitem="@layout/drawer_list_item"/>
+</LinearLayout>
 
 </android.support.v4.widget.DrawerLayout>

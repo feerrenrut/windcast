@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 public class MainActivity extends ActionBarActivity implements WeatherStationFragment.OnWeatherStationFragmentInteractionListener
@@ -19,6 +20,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
     private DrawerLayout mDrawerLayout;
     private String[] mDrawerOptions;
     private ListView mDrawerList;
+    private LinearLayout mDrawer;
     private WeatherStationFragment mStationsFragment;
     private CharSequence mTitle;
 
@@ -29,7 +31,8 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
 
         mDrawerOptions = getResources().getStringArray(R.array.drawer_options);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.windcast_drawer);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        mDrawerList = (ListView) findViewById(R.id.left_drawer_list);
+        mDrawer = (LinearLayout) findViewById(R.id.left_drawer);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 R.layout.drawer_list_item, mDrawerOptions);
@@ -104,7 +107,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
 
 
             mDrawerList.setItemChecked(position, true);
-            mDrawerLayout.closeDrawer(mDrawerList);
+            mDrawerLayout.closeDrawer(mDrawer);
         }
     }
 }
