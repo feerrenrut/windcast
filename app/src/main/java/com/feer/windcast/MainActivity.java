@@ -3,9 +3,12 @@ package com.feer.windcast;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,11 +20,12 @@ import android.widget.ListView;
 public class MainActivity extends ActionBarActivity implements WeatherStationFragment.OnWeatherStationFragmentInteractionListener
 {
 
+    private static final String TAG = "MainActivity";
+    private static final String STATIONS_FRAG_TAG = "stationsFrag";
     private DrawerLayout mDrawerLayout;
     private String[] mDrawerOptions;
     private ListView mDrawerList;
     private LinearLayout mDrawer;
-    private WeatherStationFragment mStationsFragment;
     private CharSequence mTitle;
 
     @Override
@@ -41,11 +45,10 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
 
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-        if (savedInstanceState == null) {
-            mStationsFragment = new WeatherStationFragment();
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.content_frame, mStationsFragment).commit();
-        }
+        Log.i(TAG, "no saved instance state, recreating weather station fragment");
+        WeatherStationFragment stationsFragment = new WeatherStationFragment();
+        getSupportFragmentManager().beginTransaction()
+                .add(R.id.content_frame, stationsFragment, STATIONS_FRAG_TAG).commit();
     }
 
 
@@ -94,20 +97,37 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         public void onItemClick(AdapterView parent, View view, int position, long id)
         {
             String itemText = mDrawerOptions[position];
+            Log.i(TAG, String.format("Selecting drawer item: %s", itemText));
+
+            mDrawerList.setItemChecked(position, true);
+            mDrawerLayout.closeDrawer(mDrawer);
+
+            FragmentManager fm = getSupportFragmentManager();
+            int numBackStacks = fm.getBackStackEntryCount();
+            Log.i(TAG, String.format("Number of transitions in back stack: %s", numBackStacks));
+
+            Fragment oldStationsFrag = fm.findFragmentByTag(STATIONS_FRAG_TAG);
+            if(oldStationsFrag != null)
+            {
+                Log.i(TAG, "Found old stations fragment. Removing last transition. Expect that the number of transitions in the back stack was 1.");
+                fm.popBackStack();
+            }
+
+            WeatherStationFragment stationsFragment = new WeatherStationFragment();
+
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.replace(R.id.content_frame, stationsFragment, STATIONS_FRAG_TAG).commit();
+
             if(itemText.equals("All"))
             {
-                mStationsFragment.ShowAllStations();
+                stationsFragment.ShowAllStations();
                 setTitle(getString(R.string.app_name));
             }
             else
             {
-                mStationsFragment.ShowOnlyStationsInState(itemText);
+                stationsFragment.ShowOnlyStationsInState(itemText);
                 setTitle(String.format(getString(R.string.wind_stations_in), itemText));
             }
-
-
-            mDrawerList.setItemChecked(position, true);
-            mDrawerLayout.closeDrawer(mDrawer);
         }
     }
 }
