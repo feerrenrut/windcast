@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -31,12 +32,13 @@ public class WindGraph
     public static void SetupGraph(WeatherData wd, XYPlot plot, Activity act)
     {
         int numObs = wd.ObservationData.size();
-        ArrayList<Number> windSpeeds = new ArrayList<Number>(numObs);
+        ArrayList<Integer> windSpeeds = new ArrayList<Integer>(numObs);
         final ArrayList<Date> readingTimes = new ArrayList<Date>(numObs);
         ArrayList<Float> windDirections = new ArrayList<Float>(numObs);
+
         for(ObservationReading reading1 : wd.ObservationData)
         {
-            Number val = reading1.WindSpeed_KMH != null ?
+            Integer val = reading1.WindSpeed_KMH != null ?
                     reading1.WindSpeed_KMH : 0;
 
             windSpeeds.add(val);
@@ -57,12 +59,35 @@ public class WindGraph
                 "");                             // Set the display title of the series
 
 
+        final float DOMAIN_STEP = 0.5f;
+        final float RANGE_BUFFER = 0.1f;//10% buffer from the top and bottom of the graph edge for clear display of graph points
+        final int MAX_READINGS_TO_SHOW = 10;
         final int lastReadingIndex = numObs -1;
-        final int numberOfReadingsToShow = Math.min(10, lastReadingIndex);
+        final int numberOfReadingsToShow = Math.min(MAX_READINGS_TO_SHOW, lastReadingIndex);
         final int firstReadingIndex = lastReadingIndex - numberOfReadingsToShow;
-        plot.setDomainBoundaries(firstReadingIndex, lastReadingIndex, BoundaryMode.FIXED);
-        plot.setDomainStepValue(1.0);
+
+        plot.setDomainBoundaries(firstReadingIndex + DOMAIN_STEP, lastReadingIndex + DOMAIN_STEP, BoundaryMode.FIXED);
+        plot.setDomainStepValue(DOMAIN_STEP);
         plot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
+
+        if(lastReadingIndex > MAX_READINGS_TO_SHOW)
+        {
+            List<Integer> sublist = windSpeeds.subList(windSpeeds.size() - MAX_READINGS_TO_SHOW, windSpeeds.size());
+
+            float maxValue = Collections.max(sublist).floatValue();
+            float minValue = Collections.min(sublist).floatValue();
+            float rangeOffset = (maxValue - minValue) * RANGE_BUFFER;
+
+            plot.setRangeBoundaries(minValue - rangeOffset , maxValue + rangeOffset, BoundaryMode.FIXED);
+        }
+        else
+        {
+            float maxValue = Collections.max(windSpeeds).floatValue();
+            float minValue = Collections.min(windSpeeds).floatValue();
+            float rangeOffset = (maxValue - minValue) * RANGE_BUFFER;
+
+            plot.setRangeBoundaries(minValue - rangeOffset , maxValue + rangeOffset, BoundaryMode.FIXED);
+        }
 
         plot.setDomainValueFormat(new Format() {
             private SimpleDateFormat dateFormat = new SimpleDateFormat("kk:mm");
@@ -71,8 +96,14 @@ public class WindGraph
             public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
 
                 long index = Math.round( ((Number)obj).doubleValue() ) ;
-                Date date = readingTimes.get((int)index);
-                return dateFormat.format(date, toAppendTo, pos);
+
+                if(index < readingTimes.size())
+                {
+                    Date date = readingTimes.get((int)index);
+                    return dateFormat.format(date, toAppendTo, pos);
+                }
+
+                return new StringBuffer();
             }
 
             @Override
@@ -115,6 +146,7 @@ public class WindGraph
 
         // reduce the number of range labels
         plot.setTicksPerRangeLabel(3);
+        plot.setTicksPerDomainLabel(2);
         plot.getGraphWidget().setDomainLabelOrientation(-45);
     }
 }
