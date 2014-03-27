@@ -22,7 +22,8 @@ public class WindGraphFragment extends Fragment
 {
     private static final String TAG = "WindGraphFragment";
 
-    private static final String PARAM_KEY_STATION_URL = "weatherStationKey";
+    private static final String PARAM_KEY_STATION_URL = "param_weatherStation_URL";
+    private static final String PARAM_KEY_STATION_NAME = "param_weatherStation_NAME";
 
     /*This is required so the fragment can be instantiated when restoring its activity's state*/
     public WindGraphFragment() {
@@ -32,7 +33,7 @@ public class WindGraphFragment extends Fragment
         mStation = station;
     }
 
-    private WeatherStation mStation;
+    private WeatherStation mStation = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -42,6 +43,10 @@ public class WindGraphFragment extends Fragment
         if(savedInstanceState != null)
         {
             readBundle(savedInstanceState);
+            if(mStation != null)
+            {
+                Log.e(TAG, "Strange state: mStation is set AND there is saved instance state. mStation could now be overridden");
+            }
         }
 
         return rootView;
@@ -52,15 +57,17 @@ public class WindGraphFragment extends Fragment
         Log.v(TAG, "Reading bundle");
 
         String urlString = savedInstanceState.getString(PARAM_KEY_STATION_URL);
+        String nameString = savedInstanceState.getString(PARAM_KEY_STATION_NAME);
 
         if(urlString != null)
         {
-            Log.v(TAG, "Previous URL found: " + urlString);
+            Log.v(TAG, String.format("Previous Name (%s) and URL (%s)", nameString, urlString));
 
             mStation = new WeatherStation();
             try
             {
                 mStation.url = new URL(urlString);
+                mStation.Name = nameString;
             } catch (MalformedURLException e)
             {
                 Log.e("WindCast","url not valid: " + urlString + "\n\n" + e.toString());
@@ -153,6 +160,10 @@ public class WindGraphFragment extends Fragment
     {
         super.onSaveInstanceState(outState);
 
-        outState.putString(PARAM_KEY_STATION_URL, mStation.url.toString());
+        if(mStation != null)
+        {
+            outState.putString(PARAM_KEY_STATION_URL, mStation.url.toString());
+            outState.putString(PARAM_KEY_STATION_NAME, mStation.Name);
+        }
     }
 }
