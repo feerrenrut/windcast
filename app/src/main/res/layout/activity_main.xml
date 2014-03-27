@@ -1,7 +1,51 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
+<?xml version="1.0" encoding="utf-8"?>
+
+<android.support.v4.widget.DrawerLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:id="@+id/windcast_drawer"
+tools:context="com.feer.windcast.MainActivity"
+tools:ignore="MergeRootFrame"
+>
+
+<!-- The main content view -->
+<FrameLayout
+    android:id="@+id/content_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.feer.windcast.MainActivity"
-    tools:ignore="MergeRootFrame" />
+    />
+
+<!-- The navigation drawer -->
+<LinearLayout
+    android:orientation="vertical"
+    android:id="@+id/left_drawer"
+    android:layout_width="240dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="#111"
+    >
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/states"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/drawer_item_paddingleft"
+        android:textSize="@dimen/drawer_sub_item_size"
+        android:paddingRight="16dp"
+        android:textColor="#fff"/>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/left_drawer_list"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:background="#111"
+        tools:listitem="@layout/drawer_list_item"/>
+</LinearLayout>
+
+</android.support.v4.widget.DrawerLayout>

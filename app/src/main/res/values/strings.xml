@@ -6,5 +6,19 @@
     <string name="action_settings">Settings</string>
 
     <string name="weather_station_search_text">Search weather stations...</string>
+    <string name="wind_stations_in">Wind Stations in %s</string>
+    <string name="states">States</string>
+
+    <string-array name="drawer_options">
+        <item>All</item>
+        <item>WA</item>
+        <item>NSW</item>
+        <item>VIC</item>
+        <item>QLD</item>
+        <item>SA</item>
+        <item>TAS</item>
+        <item>ACT</item>
+        <item>NT</item>
+    </string-array>
 
 </resources>

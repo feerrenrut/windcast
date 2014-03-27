@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * A fragment representing a list of Items.
@@ -31,18 +32,23 @@ import java.util.ArrayList;
 public class WeatherStationFragment extends Fragment implements AbsListView.OnItemClickListener {
 
     private static final String TAG = "WeatherStationFragment" ;
-    private OnFragmentInteractionListener mListener;
+    private static final String PARAM_SELECTED_STATE = "param_selected_state";
+    private OnWeatherStationFragmentInteractionListener mListener;
 
     /**
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
     private ArrayAdapter<WeatherStation> mAdapter;
+    private static final String ALL_STATES = "all";
+    private  String mShowStationsFromState = ALL_STATES;
 
 
     WeatherDataCache mCache;
 
     private EditText mSearchInput;
+
+    private static final String STATION_STATE = "weatherStationState";
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -51,14 +57,50 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public WeatherStationFragment() {
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void ShowOnlyStationsInState(String state)
+    {
+        mShowStationsFromState = state;
+        //TODO add the state to the args, also implement reading from the args
+        if(mAdapter != null)
+        {
+            SetListedStations(mCache.GetWeatherStationsFrom(state));
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void ShowAllStations()
+    {
+        mShowStationsFromState = ALL_STATES;
+        if(mAdapter != null)
+        {
+            SetListedStations(mCache.GetWeatherStationsFromAllStates());
+        }
+    }
+
+    private void readBundle(Bundle savedInstanceState)
+    {
+        Log.v(TAG, "Reading bundle");
+
+        String savedState = savedInstanceState.getString(PARAM_SELECTED_STATE);
+
+        if(savedState != null)
+        {
+            mShowStationsFromState = savedState;
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final ArrayList<WeatherStation> stations = new ArrayList<WeatherStation>();
+        mAdapter = new ArrayAdapter<WeatherStation>(
+                getActivity(),
+                android.R.layout.simple_list_item_1,
+                android.R.id.text1,
+                new ArrayList<WeatherStation>());
 
-        mAdapter = new ArrayAdapter<WeatherStation>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, stations);
+        if(savedInstanceState != null) readBundle(savedInstanceState);
 
         new AsyncTask<Void, Void, ArrayList<WeatherStation>>()
         {
@@ -66,14 +108,23 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             @Override
             protected ArrayList<WeatherStation> doInBackground(Void... params)
             {
-                return mCache.GetWeatherStations();
+                return mCache.GetWeatherStationsFromAllStates();
             }
 
+            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
             @Override
             protected void onPostExecute(ArrayList<WeatherStation> cacheStations)
             {
-                stations.addAll(cacheStations);
-                mAdapter.notifyDataSetChanged();
+                if(mShowStationsFromState.equals(ALL_STATES))
+                {
+                    SetListedStations(cacheStations);
+                }
+                else
+                {
+                    // cache is now built so we can do this on the UI thread
+                    SetListedStations(mCache.GetWeatherStationsFrom(mShowStationsFromState));
+                }
+
                 Log.i(TAG, "Finished adding new stations.");
             }
         }.execute();
@@ -85,31 +136,44 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_weatherstation, container, false);
 
-        // Set the adapter
-        /*
-          The fragment's ListView/GridView.
-        */
-        AbsListView mListView = (AbsListView) view.findViewById(android.R.id.list);
-        mListView.setAdapter(mAdapter);
+        AbsListView listView = (AbsListView) view.findViewById(android.R.id.list);
+        listView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
-        mListView.setOnItemClickListener(this);
+        listView.setOnItemClickListener(this);
         InitializeSearchBox(view);
 
         return view;
     }
 
     @Override
+    public void onDestroyView()
+    {
+        super.onDestroyView();
+
+        mSearchInput = null;
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+
+        outState.putString(PARAM_SELECTED_STATE, mShowStationsFromState);
+    }
+
+    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnFragmentInteractionListener) activity;
+            mListener = (OnWeatherStationFragmentInteractionListener) activity;
 
 
             mCache = new WeatherDataCache(activity.getResources());
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                + " must implement OnFragmentInteractionListener");
+                + " must implement OnWeatherStationFragmentInteractionListener");
         }
     }
 
@@ -124,16 +188,40 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
         WeatherStation station = mAdapter.getItem(position);
-        WeatherStationSelected(station);
+        Log.i(TAG, String.format("Selected station: %s", station.Name));
+        try
+        {
+            WeatherStationSelected(station);
+        } catch (Exception e)
+        {
+            Log.e(TAG, "Exception when selecting the station",e);
+        }
     }
 
-    private void WeatherStationSelected(WeatherStation station)
+    private void WeatherStationSelected(WeatherStation station) throws Exception
     {
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(station);
+            mListener.onWeatherStationSelected(station);
         }
+        else
+        {
+            throw new Exception("Weather station selected, but there is no listener set.");
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    private void SetListedStations(Collection<WeatherStation> stations)
+    {
+        mAdapter.clear();
+        mAdapter.addAll(stations);
+
+        // this has to be done to refresh the filter on mAdapter.
+        // Otherwise the previously set filter will persist, and the list of objects returned by
+        // the adapter will not change!
+        if(mSearchInput != null) mSearchInput.setText("");
+        mAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -166,18 +254,12 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     }
 
     /**
-    * This interface must be implemented by activities that contain this
-    * fragment to allow an interaction in this fragment to be communicated
-    * to the activity and potentially other fragments contained in that
-    * activity.
-    * <p>
-    * See the Android Training lesson <a href=
-    * "http://developer.android.com/training/basics/fragments/communicating.html"
-    * >Communicating with Other Fragments</a> for more information.
+    * Interface to allow actions to occur outside of this
+    * fragment, when the user interacts with this fragment
     */
-    public interface OnFragmentInteractionListener {
-
-        public void onFragmentInteraction(WeatherStation station);
+    public interface OnWeatherStationFragmentInteractionListener
+    {
+        public void onWeatherStationSelected(WeatherStation station);
     }
 
 }

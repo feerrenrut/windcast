@@ -51,7 +51,7 @@ public class ObservationReading
 
     /* The height in meters of the ocean swell
      */
-    Integer SwellHeight_meters;
+    Double SwellHeight_meters;
 
     /* The swell period in seconds
      */
