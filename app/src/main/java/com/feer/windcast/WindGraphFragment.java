@@ -1,5 +1,6 @@
 package com.feer.windcast;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -21,7 +22,8 @@ public class WindGraphFragment extends Fragment
 {
     private static final String TAG = "WindGraphFragment";
 
-    private static final String PARAM_KEY_STATION_URL = "weatherStationKey";
+    private static final String PARAM_KEY_STATION_URL = "param_weatherStation_URL";
+    private static final String PARAM_KEY_STATION_NAME = "param_weatherStation_NAME";
 
     /*This is required so the fragment can be instantiated when restoring its activity's state*/
     public WindGraphFragment() {
@@ -31,7 +33,7 @@ public class WindGraphFragment extends Fragment
         mStation = station;
     }
 
-    private WeatherStation mStation;
+    private WeatherStation mStation = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,6 +43,10 @@ public class WindGraphFragment extends Fragment
         if(savedInstanceState != null)
         {
             readBundle(savedInstanceState);
+            if(mStation != null)
+            {
+                Log.e(TAG, "Strange state: mStation is set AND there is saved instance state. mStation could now be overridden");
+            }
         }
 
         return rootView;
@@ -51,15 +57,17 @@ public class WindGraphFragment extends Fragment
         Log.v(TAG, "Reading bundle");
 
         String urlString = savedInstanceState.getString(PARAM_KEY_STATION_URL);
+        String nameString = savedInstanceState.getString(PARAM_KEY_STATION_NAME);
 
         if(urlString != null)
         {
-            Log.v(TAG, "Previous URL found: " + urlString);
+            Log.v(TAG, String.format("Previous Name (%s) and URL (%s)", nameString, urlString));
 
             mStation = new WeatherStation();
             try
             {
                 mStation.url = new URL(urlString);
+                mStation.Name = nameString;
             } catch (MalformedURLException e)
             {
                 Log.e("WindCast","url not valid: " + urlString + "\n\n" + e.toString());
@@ -88,7 +96,8 @@ public class WindGraphFragment extends Fragment
                 else
                 {
                     Log.w(TAG, "No weather station set using first one!");
-                    url = cache.GetWeatherStations().get(0).url;
+                    //TODO let the user know in a nice way!!
+                    return false;
                 }
                 Log.i("WindCast", "Getting data from: " + url.toString());
                 wd = cache.GetWeatherDataFor(url);
@@ -98,7 +107,13 @@ public class WindGraphFragment extends Fragment
             @Override
             protected void onPostExecute(Boolean result)
             {
-                final TextView label = (TextView) getActivity().findViewById(R.id.label);
+                Activity act = getActivity();
+                // if the user hits back before this callback returns act could be null.
+                // In this case we exit early.
+                if (act == null) return;
+
+                //TODO check the result, let the user know if we don't know what data to show them.
+                final TextView label = (TextView) act.findViewById(R.id.label);
                 if (label == null)
                 {
                     throw new NullPointerException("unable to find the label");
@@ -131,8 +146,8 @@ public class WindGraphFragment extends Fragment
 
                 }
                 // initialize our XYPlot reference:
-                XYPlot  plot = (XYPlot) getActivity().findViewById(R.id.mySimpleXYPlot);
-                WindGraph.SetupGraph(wd, plot, getActivity());
+                XYPlot  plot = (XYPlot) act.findViewById(R.id.mySimpleXYPlot);
+                WindGraph.SetupGraph(wd, plot, act);
             }
         }.execute();
 
@@ -145,6 +160,10 @@ public class WindGraphFragment extends Fragment
     {
         super.onSaveInstanceState(outState);
 
-        outState.putString(PARAM_KEY_STATION_URL, mStation.url.toString());
+        if(mStation != null)
+        {
+            outState.putString(PARAM_KEY_STATION_URL, mStation.url.toString());
+            outState.putString(PARAM_KEY_STATION_NAME, mStation.Name);
+        }
     }
 }

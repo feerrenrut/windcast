@@ -131,7 +131,7 @@ public class ObservationReader
                     ob.CardinalSwellDirection = reader.nextString().toLowerCase(Locale.US);
                     ob.SwellBearing = ConvertCardinalCharsToBearing(ob.CardinalSwellDirection);
                 }else if (name.equals("swell_height") ) {
-                    ob.SwellHeight_meters = reader.nextInt();
+                    ob.SwellHeight_meters = reader.nextDouble();
                 }else if (name.equals("swell_period")) {
                     ob.SwellPeriod_seconds = reader.nextInt();
                 }
