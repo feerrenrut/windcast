@@ -66,7 +66,6 @@ public class WindGraph
         final int numberOfReadingsToShow = Math.min(MAX_READINGS_TO_SHOW, lastReadingIndex);
         final int firstReadingIndex = lastReadingIndex - numberOfReadingsToShow;
 
-        plot.setDomainBoundaries(firstReadingIndex + DOMAIN_STEP, lastReadingIndex + DOMAIN_STEP, BoundaryMode.FIXED);
         plot.setDomainStepValue(DOMAIN_STEP);
         plot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
 
@@ -79,6 +78,7 @@ public class WindGraph
             float rangeOffset = (maxValue - minValue) * RANGE_BUFFER;
 
             plot.setRangeBoundaries(minValue - rangeOffset , maxValue + rangeOffset, BoundaryMode.FIXED);
+            plot.setDomainBoundaries((float)firstReadingIndex + DOMAIN_STEP, (float)lastReadingIndex + DOMAIN_STEP, BoundaryMode.FIXED);
         }
         else
         {
@@ -87,20 +87,27 @@ public class WindGraph
             float rangeOffset = (maxValue - minValue) * RANGE_BUFFER;
 
             plot.setRangeBoundaries(minValue - rangeOffset , maxValue + rangeOffset, BoundaryMode.FIXED);
+            plot.setDomainBoundaries((float)firstReadingIndex - DOMAIN_STEP, (float)lastReadingIndex + DOMAIN_STEP, BoundaryMode.FIXED);
         }
 
         plot.setDomainValueFormat(new Format() {
             private SimpleDateFormat dateFormat = new SimpleDateFormat("kk:mm");
+            private int domainTick = 0;
 
             @Override
-            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos)
+            {
+                domainTick++;
 
-                long index = Math.round( ((Number)obj).doubleValue() ) ;
-
-                if(index < readingTimes.size())
+                if(domainTick % 2 == 0)
                 {
-                    Date date = readingTimes.get((int)index);
-                    return dateFormat.format(date, toAppendTo, pos);
+                    long index = Math.round( ((Number)obj).doubleValue() ) ;
+
+                    if(index < readingTimes.size())
+                    {
+                        Date date = readingTimes.get((int)index);
+                        return dateFormat.format(date, toAppendTo, pos);
+                    }
                 }
 
                 return new StringBuffer();
@@ -146,7 +153,6 @@ public class WindGraph
 
         // reduce the number of range labels
         plot.setTicksPerRangeLabel(3);
-        plot.setTicksPerDomainLabel(2);
         plot.getGraphWidget().setDomainLabelOrientation(-45);
     }
 }
