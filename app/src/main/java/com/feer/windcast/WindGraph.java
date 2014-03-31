@@ -69,7 +69,7 @@ public class WindGraph
         plot.setDomainStepValue(DOMAIN_STEP);
         plot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
 
-        if(lastReadingIndex > MAX_READINGS_TO_SHOW)
+        if(numObs > MAX_READINGS_TO_SHOW)
         {
             List<Integer> sublist = windSpeeds.subList(windSpeeds.size() - MAX_READINGS_TO_SHOW, windSpeeds.size());
 
