@@ -29,6 +29,8 @@ import java.util.List;
  */
 public class WindGraph
 {
+    private static final int MAX_READINGS_TO_SHOW = 10;
+
     public static void SetupGraph(WeatherData wd, XYPlot plot, Activity act)
     {
         int numObs = wd.ObservationData.size();
@@ -59,35 +61,14 @@ public class WindGraph
                 "");                             // Set the display title of the series
 
 
-        final float DOMAIN_STEP = 0.5f;
-        final float RANGE_BUFFER = 0.1f;//10% buffer from the top and bottom of the graph edge for clear display of graph points
-        final int MAX_READINGS_TO_SHOW = 10;
-        final int lastReadingIndex = numObs -1;
-        final int numberOfReadingsToShow = Math.min(MAX_READINGS_TO_SHOW, lastReadingIndex);
-        final int firstReadingIndex = lastReadingIndex - numberOfReadingsToShow;
-
-        plot.setDomainStepValue(DOMAIN_STEP);
-        plot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
-
         if(numObs > MAX_READINGS_TO_SHOW)
         {
             List<Integer> sublist = windSpeeds.subList(windSpeeds.size() - MAX_READINGS_TO_SHOW, windSpeeds.size());
-
-            float maxValue = Collections.max(sublist).floatValue();
-            float minValue = Collections.min(sublist).floatValue();
-            float rangeOffset = (maxValue - minValue) * RANGE_BUFFER;
-
-            plot.setRangeBoundaries(minValue - rangeOffset , maxValue + rangeOffset, BoundaryMode.FIXED);
-            plot.setDomainBoundaries((float)firstReadingIndex + DOMAIN_STEP, (float)lastReadingIndex + DOMAIN_STEP, BoundaryMode.FIXED);
+            SetGraphBoundaries(sublist, plot, numObs, true);
         }
         else
         {
-            float maxValue = Collections.max(windSpeeds).floatValue();
-            float minValue = Collections.min(windSpeeds).floatValue();
-            float rangeOffset = (maxValue - minValue) * RANGE_BUFFER;
-
-            plot.setRangeBoundaries(minValue - rangeOffset , maxValue + rangeOffset, BoundaryMode.FIXED);
-            plot.setDomainBoundaries((float)firstReadingIndex - DOMAIN_STEP, (float)lastReadingIndex + DOMAIN_STEP, BoundaryMode.FIXED);
+            SetGraphBoundaries(windSpeeds, plot, numObs, false);
         }
 
         plot.setDomainValueFormat(new Format() {
@@ -154,5 +135,32 @@ public class WindGraph
         // reduce the number of range labels
         plot.setTicksPerRangeLabel(3);
         plot.getGraphWidget().setDomainLabelOrientation(-45);
+    }
+
+    private static void SetGraphBoundaries(List<Integer> windSpeedsList, XYPlot plot, int numObjs, boolean usingSublist)
+    {
+        final float DOMAIN_STEP = 0.5f;
+        final float RANGE_BUFFER = 0.1f;//10% buffer from the top and bottom of the graph edge for clear display of graph points
+        final int lastReadingIndex = numObjs -1;
+        final int numberOfReadingsToShow = Math.min(MAX_READINGS_TO_SHOW, lastReadingIndex);
+        final int firstReadingIndex = lastReadingIndex - numberOfReadingsToShow;
+
+        plot.setDomainStepValue(DOMAIN_STEP);
+        plot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
+
+        float maxValue = Collections.max(windSpeedsList).floatValue();
+        float minValue = Collections.min(windSpeedsList).floatValue();
+        float rangeOffset = (maxValue - minValue) * RANGE_BUFFER;
+
+        plot.setRangeBoundaries(minValue - rangeOffset , maxValue + rangeOffset, BoundaryMode.FIXED);
+
+        if(usingSublist)
+        {
+            plot.setDomainBoundaries((float)firstReadingIndex + DOMAIN_STEP, (float)lastReadingIndex + DOMAIN_STEP, BoundaryMode.FIXED);
+        }
+        else
+        {
+            plot.setDomainBoundaries((float)firstReadingIndex - DOMAIN_STEP, (float)lastReadingIndex + DOMAIN_STEP, BoundaryMode.FIXED);
+        }
     }
 }
