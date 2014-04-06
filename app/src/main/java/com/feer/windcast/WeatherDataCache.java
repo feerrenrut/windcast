@@ -1,6 +1,5 @@
 package com.feer.windcast;
 
-import android.content.res.Resources;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -17,15 +16,11 @@ import java.util.Collections;
  */
 public class WeatherDataCache
 {
-    Resources mRes;
-    WeatherDataCache(Resources res)
+    WeatherDataCache()
     {
-        mRes = res;
     }
 
     private static final String TAG = "WeatherDataCache";
-
-    public boolean ShouldUseStaticData = false;
 
     public WeatherData GetWeatherDataFor(URL url)
     {
@@ -33,18 +28,11 @@ public class WeatherDataCache
         try
         {
             BufferedInputStream bis;
-            if(!ShouldUseStaticData)
-            {
-                URLConnection urlConnection = url.openConnection();
-                InputStream is = urlConnection.getInputStream();
-                bis = new BufferedInputStream(is);
-            }
-            else
-            {
-                Log.w(TAG, "Using static test data");
-                InputStream is = mRes.openRawResource(R.raw.test_observation_data_badgingarra);
-                bis = new BufferedInputStream(is);
-            }
+
+            URLConnection urlConnection = url.openConnection();
+            InputStream is = urlConnection.getInputStream();
+            bis = new BufferedInputStream(is);
+
             wd = ObservationReader.ReadJsonStream(bis);
 
         } catch (MalformedURLException e)
