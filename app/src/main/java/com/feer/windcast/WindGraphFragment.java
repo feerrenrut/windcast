@@ -86,7 +86,7 @@ public class WindGraphFragment extends Fragment
             @Override
             protected Boolean doInBackground(Void... params)
             {
-                WeatherDataCache cache = new WeatherDataCache(getActivity().getResources());
+                WeatherDataCache cache = new WeatherDataCache();
 
                 URL url;
                 if(mStation != null)
