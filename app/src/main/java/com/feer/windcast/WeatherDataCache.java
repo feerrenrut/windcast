@@ -16,8 +16,24 @@ import java.util.Collections;
  */
 public class WeatherDataCache
 {
-    WeatherDataCache()
+    private WeatherDataCache()
     {
+    }
+
+    private static WeatherDataCache sWeatherDataCache = null;
+
+    public static WeatherDataCache GetWeatherDataCache()
+    {
+        if(sWeatherDataCache == null)
+        {
+            sWeatherDataCache = new WeatherDataCache();
+        }
+        return sWeatherDataCache;
+    }
+
+    public static void SetsWeatherDataCache(WeatherDataCache cache)
+    {
+        sWeatherDataCache = cache;
     }
 
     private static final String TAG = "WeatherDataCache";

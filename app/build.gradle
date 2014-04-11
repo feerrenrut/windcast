@@ -30,6 +30,8 @@ dependencies {
     androidTestCompile 'com.jakewharton.espresso:espresso:1.1-r2'
     androidTestCompile "org.mockito:mockito-core:1.9.5"
     androidTestCompile "org.objenesis:objenesis:1.0"
+    androidTestCompile 'com.google.dexmaker:dexmaker:1.1'
+    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.1'
 
 }
 

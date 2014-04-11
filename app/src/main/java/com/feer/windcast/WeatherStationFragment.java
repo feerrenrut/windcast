@@ -170,7 +170,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             mListener = (OnWeatherStationFragmentInteractionListener) activity;
 
 
-            mCache = new WeatherDataCache();
+            mCache = WeatherDataCache.GetWeatherDataCache();
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                 + " must implement OnWeatherStationFragmentInteractionListener");
