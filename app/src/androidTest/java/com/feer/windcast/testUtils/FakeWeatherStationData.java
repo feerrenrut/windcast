@@ -43,4 +43,14 @@ public class FakeWeatherStationData
         stations.add(mStations.get(0));
         return stations;
     }
+
+    public ArrayList<WeatherStation> EmptyStationList()
+    {
+        return new ArrayList<WeatherStation>();
+    }
+
+    public ArrayList<WeatherStation> GetAllStations()
+    {
+        return mStations;
+    }
 }

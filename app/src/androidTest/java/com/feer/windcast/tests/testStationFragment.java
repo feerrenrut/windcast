@@ -1,6 +1,5 @@
 package com.feer.windcast.tests;
 
-import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.feer.windcast.MainActivity;
@@ -14,6 +13,7 @@ import static com.feer.windcast.testUtils.AdapterMatchers.adapterHasCount;
 import static com.feer.windcast.testUtils.ItemHintMatchers.withItemHint;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
+import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 public class testStationFragment extends ActivityInstrumentationTestCase2<MainActivity>
 {
     private FakeWeatherStationData mFakeStations;
+    private WeatherDataCache mCache;
     private static final String PACKAGE_TO_TEST = "com.feer.windcast";
 
     @SuppressWarnings("deprecation")
@@ -42,26 +43,45 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
     protected void setUp() throws Exception
     {
         super.setUp();
-        mFakeStations = new FakeWeatherStationData("testStation");
+        mFakeStations = new FakeWeatherStationData("test Station");
+
+        // set up weather data cache before starting the activity.
+        mCache = mock(WeatherDataCache.class);
+        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.EmptyStationList());
+        WeatherDataCache.SetsWeatherDataCache(mCache);
     }
 
     public void test_searchBoxOnScreen()
     {
-        Activity act = getActivity();
+        getActivity();
         ViewInteraction searchBox = onView(withId(R.id.weather_station_search_box));
         searchBox.check(matches(isDisplayed()));
         searchBox.check(matches(withItemHint(R.string.weather_station_search_text)));
     }
 
+    public void test_enteringTextIntoSearchBox_FiltersStations()
+    {
+        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+        getActivity();
+
+        onView(withId(R.id.weather_station_search_box)).perform(typeText("Station3\n")); // \n is interpreted as an enter press
+
+       onView(withId(android.R.id.list))
+               .check(matches(adapterHasCount(equalTo(1))));
+
+        onData(instanceOf(WeatherStation.class))
+                .inAdapterView(withId(android.R.id.list))
+                .atPosition(0)
+                .check(matches(withText("test Station3 (null)")));
+    }
+
     public void test_withASingleStation_CreatingActivity_ShowsOneItem()
     {
         // set up weather data cache before starting the activity.
-        WeatherDataCache cache = mock(WeatherDataCache.class);
-        when(cache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetSingleStation());
-        WeatherDataCache.SetsWeatherDataCache(cache);
+        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetSingleStation());
 
         // Activity is not created until get activity is called
-        Activity act = getActivity();
+        getActivity();
 
         onView(withId(android.R.id.list)).check(matches(isDisplayed()));
 
@@ -74,8 +94,21 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         onData(instanceOf(WeatherStation.class))
                 .inAdapterView(withId(android.R.id.list))
                 .atPosition(expectedNumberOfItems-1)
-                .check(matches(withText("testStation0 (null)")));
+                .check(matches(withText("test Station0 (null)")));
     }
 
+    public void test_withNoStations_CreatingActivity_ShowsNoItems()
+    {
+        // Activity is not created until get activity is called
+        getActivity();
+
+        onView(withId(android.R.id.list)).check(matches(isDisplayed()));
+
+        final int expectedNumberOfItems = 0;
+        onView(withId(android.R.id.list))
+                .check(matches(adapterHasCount(equalTo(expectedNumberOfItems))));
+
+        //todo: Show something GOOD when there are no items
+    }
 
 }
