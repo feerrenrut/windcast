@@ -22,21 +22,25 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  *
  */
 public class WindGraph
 {
+    private static final int MAX_READINGS_TO_SHOW = 10;
+
     public static void SetupGraph(WeatherData wd, XYPlot plot, Activity act)
     {
         int numObs = wd.ObservationData.size();
-        ArrayList<Number> windSpeeds = new ArrayList<Number>(numObs);
+        ArrayList<Integer> windSpeeds = new ArrayList<Integer>(numObs);
         final ArrayList<Date> readingTimes = new ArrayList<Date>(numObs);
         ArrayList<Float> windDirections = new ArrayList<Float>(numObs);
+
         for(ObservationReading reading1 : wd.ObservationData)
         {
-            Number val = reading1.WindSpeed_KMH != null ?
+            Integer val = reading1.WindSpeed_KMH != null ?
                     reading1.WindSpeed_KMH : 0;
 
             windSpeeds.add(val);
@@ -57,22 +61,37 @@ public class WindGraph
                 "");                             // Set the display title of the series
 
 
-        final int lastReadingIndex = numObs -1;
-        final int numberOfReadingsToShow = Math.min(10, lastReadingIndex);
-        final int firstReadingIndex = lastReadingIndex - numberOfReadingsToShow;
-        plot.setDomainBoundaries(firstReadingIndex, lastReadingIndex, BoundaryMode.FIXED);
-        plot.setDomainStepValue(1.0);
-        plot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
+        if(numObs > MAX_READINGS_TO_SHOW)
+        {
+            List<Integer> sublist = windSpeeds.subList(windSpeeds.size() - MAX_READINGS_TO_SHOW, windSpeeds.size());
+            SetGraphBoundaries(sublist, plot, numObs, true);
+        }
+        else
+        {
+            SetGraphBoundaries(windSpeeds, plot, numObs, false);
+        }
 
         plot.setDomainValueFormat(new Format() {
             private SimpleDateFormat dateFormat = new SimpleDateFormat("kk:mm");
+            private int domainTick = 0;
 
             @Override
-            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos)
+            {
+                domainTick++;
 
-                long index = Math.round( ((Number)obj).doubleValue() ) ;
-                Date date = readingTimes.get((int)index);
-                return dateFormat.format(date, toAppendTo, pos);
+                if(domainTick % 2 == 0)
+                {
+                    long index = Math.round( ((Number)obj).doubleValue() ) ;
+
+                    if(index < readingTimes.size())
+                    {
+                        Date date = readingTimes.get((int)index);
+                        return dateFormat.format(date, toAppendTo, pos);
+                    }
+                }
+
+                return new StringBuffer();
             }
 
             @Override
@@ -116,5 +135,32 @@ public class WindGraph
         // reduce the number of range labels
         plot.setTicksPerRangeLabel(3);
         plot.getGraphWidget().setDomainLabelOrientation(-45);
+    }
+
+    private static void SetGraphBoundaries(List<Integer> windSpeedsList, XYPlot plot, int numObjs, boolean usingSublist)
+    {
+        final float DOMAIN_STEP = 0.5f;
+        final float RANGE_BUFFER = 0.1f;//10% buffer from the top and bottom of the graph edge for clear display of graph points
+        final int lastReadingIndex = numObjs -1;
+        final int numberOfReadingsToShow = Math.min(MAX_READINGS_TO_SHOW, lastReadingIndex);
+        final int firstReadingIndex = lastReadingIndex - numberOfReadingsToShow;
+
+        plot.setDomainStepValue(DOMAIN_STEP);
+        plot.setDomainStepMode(XYStepMode.INCREMENT_BY_VAL);
+
+        float maxValue = Collections.max(windSpeedsList).floatValue();
+        float minValue = Collections.min(windSpeedsList).floatValue();
+        float rangeOffset = (maxValue - minValue) * RANGE_BUFFER;
+
+        plot.setRangeBoundaries(minValue - rangeOffset , maxValue + rangeOffset, BoundaryMode.FIXED);
+
+        if(usingSublist)
+        {
+            plot.setDomainBoundaries((float)firstReadingIndex + DOMAIN_STEP, (float)lastReadingIndex + DOMAIN_STEP, BoundaryMode.FIXED);
+        }
+        else
+        {
+            plot.setDomainBoundaries((float)firstReadingIndex - DOMAIN_STEP, (float)lastReadingIndex + DOMAIN_STEP, BoundaryMode.FIXED);
+        }
     }
 }
