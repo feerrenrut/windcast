@@ -17,7 +17,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
-    packagingOptions { //  work around: hamcrest (included by esspresso) tries to bring in this file multiple times!
+    packagingOptions { //  work around: hamcrest (included by espresso) tries to bring in this file multiple times!
         exclude 'LICENSE.txt'
     }
 }
@@ -26,8 +26,9 @@ dependencies {
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.android.support:support-v4:+'
     compile files('libs/androidplot-core-0.6.1-SNAPSHOT.jar')
-    compile files('libs/espresso-1.1-bundled.jar')
+
     androidTestCompile 'com.jakewharton.espresso:espresso:1.1-r2'
+    androidTestCompile 'com.jakewharton.espresso:espresso-support-v4:1.1-r2'
     androidTestCompile "org.mockito:mockito-core:1.9.5"
     androidTestCompile "org.objenesis:objenesis:1.0"
     androidTestCompile 'com.google.dexmaker:dexmaker:1.1'

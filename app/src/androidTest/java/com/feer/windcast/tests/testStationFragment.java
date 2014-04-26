@@ -1,5 +1,6 @@
 package com.feer.windcast.tests;
 
+import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.feer.windcast.MainActivity;
@@ -15,11 +16,14 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
+import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.openDrawer;
+import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.hasSibling;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -109,6 +113,19 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
                 .check(matches(adapterHasCount(equalTo(expectedNumberOfItems))));
 
         //todo: Show something GOOD when there are no items
+    }
+
+    public void test_swipeToRight_ShowsDrawer()
+    {
+        //launch activity
+        Activity act = getActivity();
+
+        openDrawer(R.id.windcast_drawer);
+        //onView(withId(R.id.windcast_drawer)).perform(actionOpenDrawer());
+
+
+        onView(allOf(withText(R.string.states), hasSibling(withId(R.id.left_drawer_list)))).check(matches(isDisplayed()));
+
     }
 
 }
