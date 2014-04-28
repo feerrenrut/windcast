@@ -121,10 +121,9 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         Activity act = getActivity();
 
         openDrawer(R.id.windcast_drawer);
-        //onView(withId(R.id.windcast_drawer)).perform(actionOpenDrawer());
 
-
-        onView(allOf(withText(R.string.states), hasSibling(withId(R.id.left_drawer_list)))).check(matches(isDisplayed()));
+        onView(allOf(withText(R.string.states), hasSibling(withId(R.id.left_drawer_list))))
+                .check(matches(isDisplayed()));
 
     }
 
