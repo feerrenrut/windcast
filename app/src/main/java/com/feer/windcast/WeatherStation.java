@@ -1,5 +1,6 @@
 package com.feer.windcast;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
@@ -18,6 +19,15 @@ public class WeatherStation implements Comparable
     String State;
 
     String TimeZone;
+
+    public WeatherStation(String name, String dataUrl) throws MalformedURLException
+    {
+        Name = name;
+        url = new URL(dataUrl);
+    }
+
+    public WeatherStation()
+    {}
 
     @Override
     public String toString()

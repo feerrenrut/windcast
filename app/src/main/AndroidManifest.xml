@@ -20,6 +20,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- May need this... not sure... <uses-library android:name="android.test.runner" /> -->
     </application>
+
+    <!--suppress AndroidDomInspection -->
+    <instrumentation
+        android:name="com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
+        android:targetPackage="com.feer.windcast" />
 
 </manifest>
