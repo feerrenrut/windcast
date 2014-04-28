@@ -5,7 +5,7 @@ android {
     buildToolsVersion "19.0.3"
 
     defaultConfig {
-        minSdkVersion 8
+        minSdkVersion 18
         targetSdkVersion 19
         versionCode 1
         versionName "1.0"
@@ -26,8 +26,13 @@ dependencies {
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.android.support:support-v4:+'
     compile files('libs/androidplot-core-0.6.1-SNAPSHOT.jar')
-    compile files('libs/espresso-1.1-bundled.jar')
-    androidTestCompile 'com.jakewharton.espresso:espresso:1.1-r2'
+
+    androidTestCompile('com.jakewharton.espresso:espresso:1.1-r2')
+    androidTestCompile( 'com.jakewharton.espresso:espresso-support-v4:1.1-r2')
+    {
+        exclude group: 'com.android.support', module: 'support-v4'
+    }
+
     androidTestCompile "org.mockito:mockito-core:1.9.5"
     androidTestCompile "org.objenesis:objenesis:1.0"
     androidTestCompile 'com.google.dexmaker:dexmaker:1.1'
