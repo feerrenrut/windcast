@@ -1,6 +1,5 @@
 package com.feer.windcast.tests;
 
-import android.app.Activity;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.feer.windcast.MainActivity;
@@ -16,14 +15,11 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.openDrawer;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.hasSibling;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -65,12 +61,16 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 
     public void test_enteringTextIntoSearchBox_FiltersStations()
     {
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+        when(mCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mFakeStations.GetAllStations());
+
+        // launch activity
         getActivity();
 
-        onView(withId(R.id.weather_station_search_box)).perform(typeText("Station3\n")); // \n is interpreted as an enter press
+        onView(withId(R.id.weather_station_search_box))
+                .perform(typeText("Station3\n")); // '\n' is interpreted as an enter press
 
-       onView(withId(android.R.id.list))
+        onView(withId(android.R.id.list))
                .check(matches(adapterHasCount(equalTo(1))));
 
         onData(instanceOf(WeatherStation.class))
@@ -114,17 +114,4 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 
         //todo: Show something GOOD when there are no items
     }
-
-    public void test_swipeToRight_ShowsDrawer()
-    {
-        //launch activity
-        Activity act = getActivity();
-
-        openDrawer(R.id.windcast_drawer);
-
-        onView(allOf(withText(R.string.states), hasSibling(withId(R.id.left_drawer_list))))
-                .check(matches(isDisplayed()));
-
-    }
-
 }
