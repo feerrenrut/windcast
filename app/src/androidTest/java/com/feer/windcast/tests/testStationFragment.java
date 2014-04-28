@@ -61,12 +61,16 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 
     public void test_enteringTextIntoSearchBox_FiltersStations()
     {
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+        when(mCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mFakeStations.GetAllStations());
+
+        // launch activity
         getActivity();
 
-        onView(withId(R.id.weather_station_search_box)).perform(typeText("Station3\n")); // \n is interpreted as an enter press
+        onView(withId(R.id.weather_station_search_box))
+                .perform(typeText("Station3\n")); // '\n' is interpreted as an enter press
 
-       onView(withId(android.R.id.list))
+        onView(withId(android.R.id.list))
                .check(matches(adapterHasCount(equalTo(1))));
 
         onData(instanceOf(WeatherStation.class))
@@ -110,5 +114,4 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 
         //todo: Show something GOOD when there are no items
     }
-
 }

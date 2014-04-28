@@ -17,7 +17,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
-    packagingOptions { //  work around: hamcrest (included by esspresso) tries to bring in this file multiple times!
+    packagingOptions { //  work around: hamcrest (included by espresso) tries to bring in this file multiple times!
         exclude 'LICENSE.txt'
     }
 }

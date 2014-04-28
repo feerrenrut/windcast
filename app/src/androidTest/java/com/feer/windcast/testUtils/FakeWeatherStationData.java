@@ -14,6 +14,7 @@ import static java.lang.String.format;
 public class FakeWeatherStationData
 {
     private ArrayList<WeatherStation> mStations;
+    public static final int MAX_NUM_OF_ALL_STATIONS = 11;
 
     public FakeWeatherStationData(String stationNameBase) throws Exception
     {
@@ -21,7 +22,7 @@ public class FakeWeatherStationData
         final String urlFormat = "http://WindCastTestData.com/%s.json";
         final String nameFormat = "%s%d";
 
-        final int numToAdd = 11;
+        final int numToAdd = MAX_NUM_OF_ALL_STATIONS;
         mStations = new ArrayList<WeatherStation>(numToAdd);
         try
         {
