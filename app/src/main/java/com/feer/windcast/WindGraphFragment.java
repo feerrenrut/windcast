@@ -14,6 +14,7 @@ import com.androidplot.xy.XYPlot;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -125,21 +126,31 @@ public class WindGraphFragment extends Fragment
                 }else
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.append(wd.Station.Name); sb.append('\n');
-                    sb.append(wd.Station.State); sb.append('\n');
+                    sb.append(wd.Station.Name).append(", ").append(wd.Station.State).append("\n\n");
 
                     if(wd.ObservationData != null && !wd.ObservationData.isEmpty())
                     {
                         ObservationReading reading = wd.ObservationData.get(0);
-                        sb.append(reading.LocalTime); sb.append("\n\n");
-                        sb.append("Latest Wind Reading: ");
+
+                        DateFormat localDate = android.text.format.DateFormat
+                                .getDateFormat(act.getApplicationContext());
+                        DateFormat localTime = android.text.format.DateFormat
+                                .getTimeFormat(act.getApplicationContext());
+                        sb.append("Latest Wind Reading: (")
+                                .append(localTime.format(reading.LocalTime))
+                                .append(' ')
+                                .append(localDate.format(reading.LocalTime))
+                                .append(")\n");
 
                         if(reading.WindBearing != null && reading.CardinalWindDirection != null && reading.WindSpeed_KMH != null)
                         {
-                            sb.append(reading.WindBearing);
-                            sb.append(" (").append(reading.CardinalWindDirection).append(" ) ");
-                            sb.append(" ").append(reading.WindSpeed_KMH).append(" kmh");
+                            sb.append(reading.WindSpeed_KMH).append(" kmh");
+                            sb.append(" from ").append(getDirectionWordsFromChars(reading.CardinalWindDirection));
                         }
+                    }
+                    else
+                    {
+                        sb.append(act.getString(R.string.no_readings));
                     }
 
                     label.setText(sb.toString());
@@ -150,9 +161,28 @@ public class WindGraphFragment extends Fragment
                 WindGraph.SetupGraph(wd, plot, act);
             }
         }.execute();
+    }
 
+    private static String getDirectionWordsFromChars(String cardinalChars)
+    {
+        StringBuilder sb = new StringBuilder();
+        for(char c : cardinalChars.toCharArray())
+        {
+            sb.append(getCardinalWordFromChar(c)).append(' ');
+        }
+        return sb.toString().trim();
+    }
 
-
+    private static String getCardinalWordFromChar(char cardinalChar)
+    {
+        switch (cardinalChar)
+        {
+            case 'n' : return "north";
+            case 's' : return "south";
+            case 'w' : return "west";
+            case 'e' : return "east";
+        }
+        return "";
     }
 
     @Override
