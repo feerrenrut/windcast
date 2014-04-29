@@ -124,7 +124,7 @@ public class WindGraph
                 R.xml.line_point_formatter_with_plf1
                            );
 
-        labelFormatter.vOffset -= 4.f;
+        labelFormatter.vOffset -= 10.f;
 
         // add a new series' to the xyplot:
         plot.addSeries(series1, formatter);

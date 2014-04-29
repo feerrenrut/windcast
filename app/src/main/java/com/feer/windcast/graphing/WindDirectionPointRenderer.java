@@ -123,7 +123,7 @@ public class WindDirectionPointRenderer<FormatterType extends LineAndPointFormat
         // rotate it to the correct orientation
         arrowMatrix.postRotate(arrowRotation);
 
-        final float scaleFactor = 0.25f;
+        final float scaleFactor = 0.3f;
         arrowMatrix.postScale(scaleFactor, scaleFactor);
 
         arrowMatrix.postTranslate(p.x, p.y );
