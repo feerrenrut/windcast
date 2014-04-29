@@ -145,7 +145,10 @@ public class WindGraphFragment extends Fragment
                         if(reading.WindBearing != null && reading.CardinalWindDirection != null && reading.WindSpeed_KMH != null)
                         {
                             sb.append(reading.WindSpeed_KMH).append(" kmh");
-                            sb.append(" from ").append(getDirectionWordsFromChars(reading.CardinalWindDirection));
+                            if(!reading.CardinalWindDirection.equals("calm") && reading.WindSpeed_KMH > 0)
+                            {
+                                sb.append(" from ").append(getDirectionWordsFromChars(reading.CardinalWindDirection));
+                            }
                         }
                     }
                     else
