@@ -1,5 +1,8 @@
 package com.feer.windcast.tests;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.feer.windcast.MainActivity;
@@ -31,12 +34,16 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 {
     private FakeWeatherStationData mFakeStations;
     private WeatherDataCache mCache;
-    private static final String PACKAGE_TO_TEST = "com.feer.windcast";
 
-    @SuppressWarnings("deprecation")
+    // Activity is not created until get activity is called
+    private void launchActivity()
+    {
+        getActivity();
+    }
+
     public testStationFragment()
     {
-        super(PACKAGE_TO_TEST, MainActivity.class);
+        super(MainActivity.class);
     }
 
     @Override
@@ -51,9 +58,18 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         WeatherDataCache.SetsWeatherDataCache(mCache);
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void test_initialTitleBar()
+    {
+        launchActivity();
+        Activity act = getActivity();
+        final String expectedTitle = act.getResources().getString(R.string.app_name);
+        assertEquals(expectedTitle, act.getActionBar().getTitle().toString());
+    }
+
     public void test_searchBoxOnScreen()
     {
-        getActivity();
+        launchActivity();
         ViewInteraction searchBox = onView(withId(R.id.weather_station_search_box));
         searchBox.check(matches(isDisplayed()));
         searchBox.check(matches(withItemHint(R.string.weather_station_search_text)));
@@ -64,8 +80,7 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         when(mCache.GetWeatherStationsFromAllStates())
                 .thenReturn(mFakeStations.GetAllStations());
 
-        // launch activity
-        getActivity();
+        launchActivity();
 
         onView(withId(R.id.weather_station_search_box))
                 .perform(typeText("Station3\n")); // '\n' is interpreted as an enter press
@@ -84,8 +99,7 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         // set up weather data cache before starting the activity.
         when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetSingleStation());
 
-        // Activity is not created until get activity is called
-        getActivity();
+        launchActivity();
 
         onView(withId(android.R.id.list)).check(matches(isDisplayed()));
 
@@ -103,8 +117,7 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 
     public void test_withNoStations_CreatingActivity_ShowsNoItems()
     {
-        // Activity is not created until get activity is called
-        getActivity();
+        launchActivity();
 
         onView(withId(android.R.id.list)).check(matches(isDisplayed()));
 
