@@ -20,6 +20,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
 
     private static final String TAG = "MainActivity";
     private static final String STATIONS_FRAG_TAG = "stationsFrag";
+    private static final String GRAPH_FRAG_TAG = "graphFrag";
     private DrawerLayout mDrawerLayout;
     private String[] mDrawerOptions;
     private ListView mDrawerList;
@@ -43,10 +44,17 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
 
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-        Log.i(TAG, "no saved instance state, recreating weather station fragment");
-        WeatherStationFragment stationsFragment = new WeatherStationFragment();
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.content_frame, stationsFragment, STATIONS_FRAG_TAG).commit();
+        if(getSupportFragmentManager().findFragmentByTag(STATIONS_FRAG_TAG) == null)
+        {
+            Log.i(TAG, "no pre-existing GRAPH_FRAG_TAG, recreating weather station fragment");
+            WeatherStationFragment stationsFragment = new WeatherStationFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.content_frame, stationsFragment, STATIONS_FRAG_TAG).commit();
+        }
+        else
+        {
+            Log.i(TAG, "Pre-existing GRAPH_FRAG_TAG, not recreating weather station fragment");
+        }
     }
 
 
@@ -56,7 +64,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         //Todo this should probably launch a new activity.
         // the graph shows up as transparent over the top of the list. Back action exist the app!
         FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-        trans.replace(R.id.content_frame, new WindGraphFragment(station));
+        trans.replace(R.id.content_frame, new WindGraphFragment(station), GRAPH_FRAG_TAG);
         trans.addToBackStack(null);
         trans.commit();
     }
