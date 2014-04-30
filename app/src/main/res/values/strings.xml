@@ -8,6 +8,7 @@
     <string name="weather_station_search_text">Search weather stations...</string>
     <string name="wind_stations_in">Wind Stations in %s</string>
     <string name="states">States</string>
+    <string name="no_readings">No readings!</string>
 
     <string-array name="drawer_options">
         <item>All</item>
