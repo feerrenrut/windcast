@@ -62,9 +62,8 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
     public void onWeatherStationSelected(WeatherStation station)
     {
         //Todo this should probably launch a new activity.
-        // the graph shows up as transparent over the top of the list. Back action exist the app!
         FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-        trans.replace(R.id.content_frame, new WindGraphFragment(station), GRAPH_FRAG_TAG);
+        trans.replace(R.id.content_frame, WindGraphFragment.newInstance(station), GRAPH_FRAG_TAG);
         trans.addToBackStack(null);
         trans.commit();
     }
