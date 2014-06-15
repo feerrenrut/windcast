@@ -15,6 +15,8 @@ public class WeatherStation implements Comparable
      */
     String Name;
 
+    boolean IsFavourite = false;
+
 
     String State;
 

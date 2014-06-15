@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
 import java.util.ArrayList;
@@ -39,7 +38,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-    private ArrayAdapter<WeatherStation> mAdapter;
+    private WeatherStationArrayAdapter mAdapter;
     private static final String ALL_STATES = "all";
     private  String mShowStationsFromState = ALL_STATES;
 
@@ -94,11 +93,20 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mAdapter = new ArrayAdapter<WeatherStation>(
+        WeatherStationArrayAdapter.OnFavouriteChangedListener handleFavChange = new WeatherStationArrayAdapter.OnFavouriteChangedListener()
+        {
+            @Override
+            public void OnFavouriteChanged(WeatherStation station)
+            {
+
+            }
+        };
+
+        mAdapter = new WeatherStationArrayAdapter(
                 getActivity(),
-                android.R.layout.simple_list_item_1,
-                android.R.id.text1,
-                new ArrayList<WeatherStation>());
+                R.layout.weather_station_list_item,
+                new ArrayList<WeatherStation>(),
+                handleFavChange);
 
         if(savedInstanceState != null) readBundle(savedInstanceState);
 
