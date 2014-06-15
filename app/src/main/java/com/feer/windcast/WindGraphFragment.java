@@ -30,11 +30,17 @@ public class WindGraphFragment extends Fragment
     public WindGraphFragment() {
     }
 
-    public WindGraphFragment(WeatherStation station) {
-        mStation = station;
+    public static WindGraphFragment newInstance(WeatherStation station)
+    {
+        Bundle args = new Bundle();
+        addInstanceStateToBundle(args, station);
+
+        WindGraphFragment f = new WindGraphFragment();
+        f.setArguments(args);
+        return f;
     }
 
-    private WeatherStation mStation = null;
+    private WeatherStation mStation = new WeatherStation();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -44,10 +50,10 @@ public class WindGraphFragment extends Fragment
         if(savedInstanceState != null)
         {
             readBundle(savedInstanceState);
-            if(mStation != null)
-            {
-                Log.e(TAG, "Strange state: mStation is set AND there is saved instance state. mStation could now be overridden");
-            }
+        }
+        else if(this.getArguments() != null)
+        {
+            readBundle(this.getArguments());
         }
 
         return rootView;
@@ -192,11 +198,16 @@ public class WindGraphFragment extends Fragment
     public void onSaveInstanceState(Bundle outState)
     {
         super.onSaveInstanceState(outState);
-
         if(mStation != null)
         {
-            outState.putString(PARAM_KEY_STATION_URL, mStation.url.toString());
-            outState.putString(PARAM_KEY_STATION_NAME, mStation.Name);
+            addInstanceStateToBundle(outState, mStation);
         }
+
+    }
+
+    static private void addInstanceStateToBundle(Bundle outState, WeatherStation station)
+    {
+        outState.putString(PARAM_KEY_STATION_URL, station.url.toString());
+        outState.putString(PARAM_KEY_STATION_NAME, station.Name);
     }
 }

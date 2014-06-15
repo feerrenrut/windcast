@@ -104,7 +104,7 @@ public class WindDirectionPointRenderer<FormatterType extends LineAndPointFormat
         Matrix arrowMatrix = new Matrix();
 
         // Our image points left, we need to rotate it to point up.
-        final float rotateToNorth = 90.f; // degrees
+        final float rotateToNorth = -90.f; // degrees clockwise is positive
 
         // the directions are the bearing for the "direction the wind comes from"
         // we want to show "the direction the wind is going
@@ -123,7 +123,7 @@ public class WindDirectionPointRenderer<FormatterType extends LineAndPointFormat
         // rotate it to the correct orientation
         arrowMatrix.postRotate(arrowRotation);
 
-        final float scaleFactor = 0.3f;
+        final float scaleFactor = 0.4f;
         arrowMatrix.postScale(scaleFactor, scaleFactor);
 
         arrowMatrix.postTranslate(p.x, p.y );
