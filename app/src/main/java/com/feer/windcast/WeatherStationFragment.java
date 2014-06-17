@@ -16,6 +16,8 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
 
+import com.feer.windcast.database.FavouriteStation;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -46,6 +48,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     WeatherDataCache mCache;
 
     private EditText mSearchInput;
+    private FavouriteStation mFavs = null;
 
     private static final String STATION_STATE = "weatherStationState";
 
@@ -93,12 +96,31 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if(savedInstanceState != null) readBundle(savedInstanceState);
+
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_weatherstation, container, false);
+
+        mFavs = new FavouriteStation(getActivity());
+
         WeatherStationArrayAdapter.OnFavouriteChangedListener handleFavChange = new WeatherStationArrayAdapter.OnFavouriteChangedListener()
         {
             @Override
-            public void OnFavouriteChanged(WeatherStation station)
+            public void OnFavouriteChanged(final WeatherStation station)
             {
-
+                if(station.IsFavourite)
+                {
+                    mFavs.AddFavouriteStationAsync(station);
+                }
+                else
+                {
+                    mFavs.RemoveFavouriteStationAsync(station);
+                }
             }
         };
 
@@ -108,7 +130,8 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 new ArrayList<WeatherStation>(),
                 handleFavChange);
 
-        if(savedInstanceState != null) readBundle(savedInstanceState);
+        AbsListView listView = (AbsListView) view.findViewById(android.R.id.list);
+        listView.setAdapter(mAdapter);
 
         new AsyncTask<Void, Void, ArrayList<WeatherStation>>()
         {
@@ -136,16 +159,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 Log.i(TAG, "Finished adding new stations.");
             }
         }.execute();
-    }
-
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_weatherstation, container, false);
-
-        AbsListView listView = (AbsListView) view.findViewById(android.R.id.list);
-        listView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
         listView.setOnItemClickListener(this);
@@ -159,6 +172,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     {
         super.onDestroyView();
 
+        mAdapter = null;
         mSearchInput = null;
     }
 
@@ -189,6 +203,9 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onDetach() {
         super.onDetach();
         mListener = null;
+
+        mFavs.WaitForTasksComplete();
+        mFavs = null;
     }
 
 
@@ -220,16 +237,36 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void SetListedStations(Collection<WeatherStation> stations)
+    private void SetListedStations(final Collection<WeatherStation> newListOfStations)
     {
-        mAdapter.clear();
-        mAdapter.addAll(stations);
+        if(mFavs != null)
+        {
+            mFavs.GetFavouritesAsync(
+                    new FavouriteStation.AsyncComplete<ArrayList<WeatherStation>>()
+                    {
+                        @Override
+                        public void OnAsyncComplete(ArrayList<WeatherStation> favStations)
+                        {
+                            for (WeatherStation newStation : newListOfStations)
+                            {
+                                newStation.IsFavourite = favStations.contains(newStation);
+                            }
 
-        // this has to be done to refresh the filter on mAdapter.
-        // Otherwise the previously set filter will persist, and the list of objects returned by
-        // the adapter will not change!
-        if(mSearchInput != null) mSearchInput.setText("");
-        mAdapter.notifyDataSetChanged();
+                            if (mAdapter != null)
+                            {
+                                mAdapter.clear();
+                                mAdapter.addAll(newListOfStations);
+
+                                // this has to be done to refresh the filter on mAdapter.
+                                // Otherwise the previously set filter will persist, and the list of objects returned by
+                                // the adapter will not change!
+                                if (mSearchInput != null) mSearchInput.setText("");
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        }
+                    }
+                                    );
+        }
     }
 
     /**
