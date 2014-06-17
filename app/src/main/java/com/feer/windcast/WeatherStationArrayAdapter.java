@@ -21,7 +21,6 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherStation>
     }
 
     private final Context mContext;
-    private ArrayList<WeatherStation> mStations;
     private final int mLayoutResourceID;
     private final OnFavouriteChangedListener mFavChangedListener;
 
@@ -30,7 +29,6 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherStation>
         super(context, layoutResourceID, objects);
 
         mContext = context;
-        mStations = objects;
         mLayoutResourceID = layoutResourceID;
         mFavChangedListener = favChangedListner;
     }
@@ -41,11 +39,14 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherStation>
         LayoutInflater inflater = (LayoutInflater) mContext.
                 getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View rowView = inflater.inflate(mLayoutResourceID, parent, false);
-        ImageView imageView = (ImageView) rowView.findViewById(R.id.image);
-        TextView textView = (TextView) rowView.findViewById(R.id.text);
+        if(convertView == null)
+        {
+            convertView = inflater.inflate(mLayoutResourceID, parent, false);
+        }
+        ImageView imageView = (ImageView) convertView.findViewById(R.id.image);
+        TextView textView = (TextView) convertView.findViewById(R.id.text);
 
-        WeatherStation station = mStations.get(position);
+        WeatherStation station = super.getItem(position);
 
         if(station.IsFavourite)
         {
@@ -53,9 +54,10 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherStation>
         }
 
         imageView.setOnClickListener(new OnStarClicked(station, mFavChangedListener));
+        mFavChangedListener.OnFavouriteChanged(station); // set the initial state
 
         textView.setText(station.toString());
-        return rowView;
+        return convertView;
     }
 
 
