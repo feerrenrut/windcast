@@ -9,9 +9,11 @@
     <string name="wind_stations_in">Wind Stations in %s</string>
     <string name="states">States</string>
     <string name="no_readings">No readings!</string>
+    <string name="favourites">Favourites</string>
+    <string name="favourite_stations">Favourite Stations</string>
+    <string name="all">All</string>
 
-    <string-array name="drawer_options">
-        <item>All</item>
+    <string-array name="AustralianStates">
         <item>WA</item>
         <item>NSW</item>
         <item>VIC</item>

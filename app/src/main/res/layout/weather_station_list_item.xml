@@ -12,9 +12,7 @@
         android:text="Weather Station A"
         android:id="@+id/text"
         android:layout_alignParentLeft="true"
-        android:layout_marginLeft="0dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="0dp"/>
+        android:gravity="center_vertical"/>
 
     <ImageView
         android:layout_width="wrap_content"

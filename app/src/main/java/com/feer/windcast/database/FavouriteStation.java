@@ -25,6 +25,7 @@ public class FavouriteStation
 {
     private final Context mContext;
     private final ArrayList<AsyncTask> mTasks;
+    private ArrayList<WeatherStation> mFavs = null; // only populated once GetFavourites is called
 
     public FavouriteStation(Context context)
     {
@@ -57,6 +58,10 @@ public class FavouriteStation
 
         mTasks.add(t);
         t.execute();
+        if(mFavs != null && !mFavs.contains(station))
+        {
+            mFavs.add(station);
+        }
     }
 
     public void RemoveFavouriteStationAsync(final WeatherStation station)
@@ -79,10 +84,16 @@ public class FavouriteStation
 
         mTasks.add(t);
         t.execute();
+
+        if(mFavs != null && mFavs.contains(station))
+        {
+            mFavs.remove(station);
+        }
     }
 
     public void GetFavouritesAsync(final AsyncComplete<ArrayList<WeatherStation>> onComplete)
     {
+
         final AsyncTask<Void, Void, ArrayList<WeatherStation>> t = new AsyncTask<Void, Void, ArrayList<WeatherStation>>()
         {
             @Override
@@ -94,13 +105,29 @@ public class FavouriteStation
             @Override
             protected void onPostExecute(ArrayList<WeatherStation> favs)
             {
+                if(mFavs == null)
+                {
+                    mFavs = new ArrayList<WeatherStation>(favs);
+                }
+                else
+                {
+                    //should never happen
+                    Log.e("Windcast", "Calling GetFavouritesAsync when cache exists!");
+                }
                 onComplete.OnAsyncComplete(favs);
                 mTasks.remove(this);
             }
         };
 
-        mTasks.add(t);
-        t.execute();
+        if(mFavs == null)
+        {
+            mTasks.add(t);
+            t.execute();
+        }
+        else
+        {
+            onComplete.OnAsyncComplete(mFavs);
+        }
     }
 
     public synchronized void WaitForTasksComplete()
