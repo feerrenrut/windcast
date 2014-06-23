@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
-import android.widget.TextView;
 
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
@@ -20,7 +19,6 @@ import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewA
 import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.closeDrawer;
 import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.openDrawer;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.hasSibling;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
@@ -72,11 +70,11 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         launchActivity();
 
         openDrawer(drawerID);
-        onView(allOf(withText(R.string.states), hasSibling(withId(R.id.left_drawer_list))))
+        onView(withId(R.id.drawer_states))
                 .check(matches(isDisplayed()));
 
         closeDrawer(drawerID);
-        onView(allOf(withText(R.string.states), hasSibling(withId(R.id.left_drawer_list))))
+        onView(withId(R.id.drawer_states))
                 .check(matches(not(isDisplayed())));
     }
 
@@ -85,10 +83,10 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         launchActivity();
         openDrawer(drawerID);
 
-        onView(allOf(isAssignableFrom(TextView.class), hasSibling(withId(R.id.left_drawer_list))))
+        onView(withId(R.id.drawer_states))
                         .check(matches(withText(R.string.states)));
 
-        CharSequence[] stateList = getActivity().getResources().getTextArray(R.array.drawer_options);
+        CharSequence[] stateList = getActivity().getResources().getTextArray(R.array.AustralianStates);
 
         onView(withId(R.id.left_drawer_list))
                 .check(matches(adapterHasCount(equalTo(stateList.length))));
