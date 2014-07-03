@@ -1,4 +1,4 @@
-package com.feer.windcast.database;
+package com.feer.windcast.dataAccess;
 
 import android.provider.BaseColumns;
 

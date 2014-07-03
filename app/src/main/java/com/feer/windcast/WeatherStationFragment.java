@@ -16,7 +16,9 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
 
-import com.feer.windcast.database.FavouriteStation;
+import com.feer.windcast.dataAccess.BackgroundTaskManager;
+import com.feer.windcast.dataAccess.FavouriteStationCache;
+import com.feer.windcast.dataAccess.WeatherDataCache;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,10 +46,11 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     private  StationsToShow mShowOnlyStations = StationsToShow.All;
 
 
+    private BackgroundTaskManager mTaskManager  = new BackgroundTaskManager();
     WeatherDataCache mCache;
 
     private EditText mSearchInput;
-    private FavouriteStation mFavs = null;
+    private FavouriteStationCache mFavs = null;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -67,15 +70,16 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         SA,
         TAS,
         VIC,
-        WA;
+        WA
     }
 
     public static WeatherStationFragment NewWeatherStation(StationsToShow showstations)
     {
 
         Bundle bundle = new Bundle();
+        WeatherStationFragment.writeBundle(bundle, showstations);
+
         WeatherStationFragment frag = new WeatherStationFragment();
-        frag.writeBundle(bundle, showstations);
         frag.setArguments(bundle);
         return frag;
     }
@@ -110,17 +114,15 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_weatherstation, container, false);
 
-        mFavs = new FavouriteStation(getActivity());
-
         WeatherStationArrayAdapter.OnFavouriteChangedListener handleFavChange = new WeatherStationArrayAdapter.OnFavouriteChangedListener()
         {
             @Override
             public void OnFavouriteChanged(final WeatherStation station)
             {
                 if(station.IsFavourite) {
-                    mFavs.AddFavouriteStationAsync(station);
+                    mFavs.AddFavouriteStation(station);
                 } else {
-                    mFavs.RemoveFavouriteStationAsync(station);
+                    mFavs.RemoveFavouriteStation(station);
                 }
             }
         };
@@ -140,6 +142,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             @Override
             protected ArrayList<WeatherStation> doInBackground(Void... params)
             {
+                mFavs.Initialise(getActivity(), mTaskManager);
                 if(mShowOnlyStations == StationsToShow.All || mShowOnlyStations == StationsToShow.Favourites)
                 {
                     return mCache.GetWeatherStationsFromAllStates();
@@ -156,25 +159,17 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             {
                 if(mFavs!=null)
                 {
-                    mFavs.GetFavouritesAsync(
-                            new FavouriteStation.AsyncComplete<ArrayList<WeatherStation>>()
-                            {
-                                @Override
-                                public void OnAsyncComplete(ArrayList<WeatherStation> favs)
-                                {
-                                    ArrayList<WeatherStation> useStations = cacheStations;
-                                    SetFavStations(useStations, favs);
-                                    if (mShowOnlyStations == StationsToShow.Favourites)
-                                    {
-                                        SetFavStations(useStations, favs);
-                                        useStations = FilterToOnlyFavs(useStations);
-                                    }
-                                    SetStationList(useStations);
+                    ArrayList<WeatherStation> favs = mFavs.GetFavourites();
+                    ArrayList<WeatherStation> useStations = cacheStations;
+                    SetFavStations(useStations, favs);
+                    if (mShowOnlyStations == StationsToShow.Favourites)
+                    {
+                        SetFavStations(useStations, favs);
+                        useStations = FilterToOnlyFavs(useStations);
+                    }
+                    SetStationList(useStations);
 
-                                    Log.i(TAG, "Finished adding new stations.");
-                                }
-                            }
-                                            );
+                    Log.i(TAG, "Finished adding new stations.");
                 }
             }
         }.execute();
@@ -211,6 +206,8 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
 
             mCache = WeatherDataCache.GetWeatherDataCache();
+            mFavs = mCache.CreateNewFavouriteStationAccessor();
+
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                 + " must implement OnWeatherStationFragmentInteractionListener");
@@ -222,7 +219,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         super.onDetach();
         mListener = null;
 
-        mFavs.WaitForTasksComplete();
+        mTaskManager.WaitForTasksToComplete();
         mFavs = null;
     }
 
@@ -276,6 +273,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         return onlyFavs;
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void SetStationList(ArrayList<WeatherStation> listStations)
     {
         if (mAdapter != null)

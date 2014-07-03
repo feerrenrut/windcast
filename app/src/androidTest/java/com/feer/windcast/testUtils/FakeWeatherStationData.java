@@ -38,10 +38,10 @@ public class FakeWeatherStationData
         }
     }
 
-    public ArrayList<WeatherStation> GetSingleStation()
+    public ArrayList<WeatherStation> GetSingleStation(int index)
     {
         ArrayList<WeatherStation> stations = new ArrayList<WeatherStation>(1);
-        stations.add(mStations.get(0));
+        stations.add(mStations.get(index));
         return stations;
     }
 

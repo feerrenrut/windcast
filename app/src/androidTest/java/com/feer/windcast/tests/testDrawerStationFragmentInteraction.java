@@ -7,8 +7,13 @@ import android.test.ActivityInstrumentationTestCase2;
 
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
-import com.feer.windcast.WeatherDataCache;
+import com.feer.windcast.WeatherStation;
+import com.feer.windcast.dataAccess.FavouriteStationCache;
+import com.feer.windcast.dataAccess.WeatherDataCache;
 import com.feer.windcast.testUtils.FakeWeatherStationData;
+
+import java.net.MalformedURLException;
+import java.util.ArrayList;
 
 import static com.feer.windcast.testUtils.AdapterMatchers.adapterHasCount;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
@@ -20,7 +25,9 @@ import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerA
 import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.openDrawer;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.hasSibling;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
+import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withChild;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
+import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withParent;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -132,7 +139,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
     public void test_selectWA_showsWAStations()
     {
         when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
-        when(mCache.GetWeatherStationsFrom(anyString())).thenReturn(mFakeStations.GetSingleStation());
+        when(mCache.GetWeatherStationsFrom(anyString())).thenReturn(mFakeStations.GetSingleStation(0));
 
         launchActivity();
 
@@ -169,5 +176,88 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
 
         onView(withId(R.id.weather_station_search_box))
                 .check(matches(withText("")));
+    }
+
+    public void test_SelectFavourites_ShowsOnlyFavourites() throws MalformedURLException
+    {
+        FavouriteStationCache mFavs;
+        mFavs = mock(FavouriteStationCache.class);
+        when(mCache.CreateNewFavouriteStationAccessor()).thenReturn(mFavs);
+        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+
+
+        final ArrayList<WeatherStation> favStationList = new ArrayList<WeatherStation>();
+        ArrayList<WeatherStation> allStationList = mFakeStations.GetAllStations();
+        WeatherStation copy = allStationList.get(5);
+        favStationList.add(new WeatherStation(copy.Name, copy.url.toString()));
+        copy = allStationList.get(2);
+        favStationList.add(new WeatherStation(copy.Name, copy.url.toString()));
+
+        when(mFavs.GetFavourites()).thenReturn(favStationList);
+
+        launchActivity();
+
+        openDrawer(drawerID);
+        final String FAVOURITES_TEXT = "Favourites";
+        onView(withText(FAVOURITES_TEXT)).perform(click());
+
+        onView(withId(android.R.id.list))
+                .check(matches(
+                    adapterHasCount(equalTo(2))));
+
+        onView(withId(R.id.weather_station_search_box))
+                .check(matches(withText("")));
+    }
+
+    public void test_ClickBlackStar_CallsAddFav() throws MalformedURLException
+    {
+        FavouriteStationCache mFavs;
+        mFavs = mock(FavouriteStationCache.class);
+        when(mCache.CreateNewFavouriteStationAccessor()).thenReturn(mFavs);
+        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+
+        when(mFavs.GetFavourites()).thenReturn(mFakeStations.EmptyStationList());
+
+        launchActivity();
+
+        WeatherStation newFav = mFakeStations.GetAllStations().get(4);
+        assertTrue(
+                "Station not yet clicked, it should not be a favourite!",
+                newFav.IsFavourite == false);
+
+        onView(allOf(
+                        withParent(withChild(withText(newFav.toString()))),
+                        withId(R.id.image)))
+                .perform(click());
+
+        verify(mFavs).AddFavouriteStation(newFav);
+        assertTrue(
+                "Station clicked, it should now be a favourite!",
+                newFav.IsFavourite == true);
+    }
+
+    public void test_ClickYellowStar_CallsRemoveFav() throws MalformedURLException
+    {
+        FavouriteStationCache mFavs;
+        mFavs = mock(FavouriteStationCache.class);
+        when(mCache.CreateNewFavouriteStationAccessor()).thenReturn(mFavs);
+        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+
+        final int STATION_INDEX = 4;
+        WeatherStation oldFav = mFakeStations.GetAllStations().get(STATION_INDEX);
+        oldFav.IsFavourite = true;
+        when(mFavs.GetFavourites()).thenReturn(mFakeStations.GetSingleStation(STATION_INDEX));
+
+        launchActivity();
+
+        onView(allOf(
+                        withParent(withChild(withText(oldFav.toString()))),
+                        withId(R.id.image)))
+                .perform(click());
+
+        verify(mFavs).RemoveFavouriteStation(oldFav);
+        assertTrue(
+                "Station clicked, it should now no longer be a favourite!",
+                oldFav.IsFavourite == false);
     }
 }

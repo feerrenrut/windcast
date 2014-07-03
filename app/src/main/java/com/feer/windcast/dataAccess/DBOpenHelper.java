@@ -1,4 +1,4 @@
-package com.feer.windcast.database;
+package com.feer.windcast.dataAccess;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

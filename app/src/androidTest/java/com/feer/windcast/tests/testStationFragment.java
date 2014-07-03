@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
-import com.feer.windcast.WeatherDataCache;
+import com.feer.windcast.dataAccess.WeatherDataCache;
 import com.feer.windcast.WeatherStation;
 import com.feer.windcast.testUtils.FakeWeatherStationData;
 import com.google.android.apps.common.testing.ui.espresso.ViewInteraction;
@@ -99,7 +99,7 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
     public void test_withASingleStation_CreatingActivity_ShowsOneItem()
     {
         // set up weather data cache before starting the activity.
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetSingleStation());
+        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetSingleStation(0));
 
         launchActivity();
 

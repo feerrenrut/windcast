@@ -48,9 +48,11 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherStation>
 
         WeatherStation station = super.getItem(position);
 
-        if(station.IsFavourite)
-        {
+        if(station.IsFavourite) {
             imageView.setImageResource(R.drawable.star_solid);
+        }
+        else{
+            imageView.setImageResource(R.drawable.star_outline);
         }
 
         imageView.setOnClickListener(new OnStarClicked(station, mFavChangedListener));

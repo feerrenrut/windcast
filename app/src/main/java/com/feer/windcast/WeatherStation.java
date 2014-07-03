@@ -18,7 +18,7 @@ public class WeatherStation implements Comparable
     public boolean IsFavourite = false;
 
 
-    String State;
+    public String State;
 
     String TimeZone;
 
