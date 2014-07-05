@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.androidplot.xy.XYPlot;
+import com.feer.windcast.dataAccess.WeatherDataCache;
 
 import java.net.MalformedURLException;
 import java.net.URL;

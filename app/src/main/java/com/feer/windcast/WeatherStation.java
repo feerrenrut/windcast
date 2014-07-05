@@ -9,14 +9,16 @@ public class WeatherStation implements Comparable
 
     String ID;
 
-    URL url;
+    public URL url;
 
     /* The name of the observation station
      */
-    String Name;
+    public String Name;
+
+    public boolean IsFavourite = false;
 
 
-    String State;
+    public String State;
 
     String TimeZone;
 

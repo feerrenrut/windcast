@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 public class MainActivity extends ActionBarActivity implements WeatherStationFragment.OnWeatherStationFragmentInteractionListener
 {
@@ -22,7 +23,10 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
     private static final String STATIONS_FRAG_TAG = "stationsFrag";
     private static final String GRAPH_FRAG_TAG = "graphFrag";
     private DrawerLayout mDrawerLayout;
-    private String[] mDrawerOptions;
+    private String[] mAustralianStates;
+    private TextView mDrawerFavStations;
+    private TextView mDrawerAllStations;
+    private TextView mDrawerStates;
     private ListView mDrawerList;
     private LinearLayout mDrawer;
     private CharSequence mTitle;
@@ -32,17 +36,52 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mDrawerOptions = getResources().getStringArray(R.array.drawer_options);
+        mAustralianStates = getResources().getStringArray(R.array.AustralianStates);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.windcast_drawer);
         mDrawerList = (ListView) findViewById(R.id.left_drawer_list);
+        mDrawerFavStations = (TextView) findViewById(R.id.drawer_favs);
+        mDrawerAllStations = (TextView) findViewById(R.id.drawer_allStations);
+
+        mDrawerStates = (TextView) findViewById(R.id.drawer_states);
         mDrawer = (LinearLayout) findViewById(R.id.left_drawer);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mDrawerOptions);
+                R.layout.drawer_list_item, mAustralianStates
+        );
 
         mDrawerList.setAdapter(adapter);
 
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        class ReplaceStationsOnClick implements View.OnClickListener
+        {
+            final WeatherStationFragment.StationsToShow mStationsToShow;
+            final String mNewTitle;
+
+            ReplaceStationsOnClick(WeatherStationFragment.StationsToShow showStations, String newTitle)
+            {
+                mStationsToShow = showStations;
+                mNewTitle = newTitle;
+            }
+
+            @Override
+            public void onClick(View v)
+            {
+                v.setSelected(true);
+                ReplaceStationListFragment(
+                        mStationsToShow,
+                        mNewTitle);
+            }
+        }
+
+        mDrawerFavStations.setOnClickListener(new ReplaceStationsOnClick(
+                        WeatherStationFragment.StationsToShow.Favourites,
+                        getResources().getString(R.string.favourite_stations)));
+
+        mDrawerAllStations.setOnClickListener(new ReplaceStationsOnClick(
+                        WeatherStationFragment.StationsToShow.All,
+                        getResources().getString(R.string.app_name)
+                ));
 
         if(getSupportFragmentManager().findFragmentByTag(STATIONS_FRAG_TAG) == null)
         {
@@ -75,43 +114,40 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         getActionBar().setTitle(mTitle);
     }
 
+    private void ReplaceStationListFragment(WeatherStationFragment.StationsToShow filter, String title)
+    {
+        mDrawerLayout.closeDrawer(mDrawer);
+        FragmentManager fm = getSupportFragmentManager();
+        int numBackStacks = fm.getBackStackEntryCount();
+        Log.i(TAG, String.format("Number of transitions in back stack: %s", numBackStacks));
+
+        Fragment oldStationsFrag = fm.findFragmentByTag(STATIONS_FRAG_TAG);
+        if(oldStationsFrag != null)
+        {
+            Log.i(TAG, "Found old stations fragment. Removing last transition. Expect that the number of transitions in the back stack was 1.");
+            fm.popBackStack();
+        }
+
+        WeatherStationFragment stationsFragment = WeatherStationFragment.NewWeatherStation(filter);
+
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.replace(R.id.content_frame, stationsFragment, STATIONS_FRAG_TAG).commit();
+        setTitle(title);
+    }
+
     private class DrawerItemClickListener implements ListView.OnItemClickListener
     {
         @Override
         public void onItemClick(AdapterView parent, View view, int position, long id)
         {
-            String itemText = mDrawerOptions[position];
+            String itemText = mAustralianStates[position];
             Log.i(TAG, String.format("Selecting drawer item: %s", itemText));
 
             mDrawerList.setItemChecked(position, true);
-            mDrawerLayout.closeDrawer(mDrawer);
 
-            FragmentManager fm = getSupportFragmentManager();
-            int numBackStacks = fm.getBackStackEntryCount();
-            Log.i(TAG, String.format("Number of transitions in back stack: %s", numBackStacks));
-
-            Fragment oldStationsFrag = fm.findFragmentByTag(STATIONS_FRAG_TAG);
-            if(oldStationsFrag != null)
-            {
-                Log.i(TAG, "Found old stations fragment. Removing last transition. Expect that the number of transitions in the back stack was 1.");
-                fm.popBackStack();
-            }
-
-            WeatherStationFragment stationsFragment = new WeatherStationFragment();
-
-            FragmentTransaction ft = fm.beginTransaction();
-            ft.replace(R.id.content_frame, stationsFragment, STATIONS_FRAG_TAG).commit();
-
-            if(itemText.equals("All"))
-            {
-                stationsFragment.ShowAllStations();
-                setTitle(getString(R.string.app_name));
-            }
-            else
-            {
-                stationsFragment.ShowOnlyStationsInState(itemText);
-                setTitle(String.format(getString(R.string.wind_stations_in), itemText));
-            }
+            ReplaceStationListFragment(
+                    WeatherStationFragment.StationsToShow.valueOf(itemText),
+                    String.format(getString(R.string.wind_stations_in), itemText));
         }
     }
 }

@@ -4,10 +4,11 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
+import android.widget.TextView;
 
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
-import com.feer.windcast.WeatherDataCache;
+import com.feer.windcast.dataAccess.WeatherDataCache;
 import com.feer.windcast.WeatherStation;
 import com.feer.windcast.testUtils.FakeWeatherStationData;
 import com.google.android.apps.common.testing.ui.espresso.ViewInteraction;
@@ -18,6 +19,7 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
+import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
@@ -90,14 +92,14 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 
         onData(instanceOf(WeatherStation.class))
                 .inAdapterView(withId(android.R.id.list))
-                .atPosition(0)
+                .atPosition(0).onChildView(isAssignableFrom(TextView.class))
                 .check(matches(withText("test Station3 (null)")));
     }
 
     public void test_withASingleStation_CreatingActivity_ShowsOneItem()
     {
         // set up weather data cache before starting the activity.
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetSingleStation());
+        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetSingleStation(0));
 
         launchActivity();
 
@@ -111,7 +113,7 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 
         onData(instanceOf(WeatherStation.class))
                 .inAdapterView(withId(android.R.id.list))
-                .atPosition(expectedNumberOfItems-1)
+                .atPosition(expectedNumberOfItems-1).onChildView(isAssignableFrom(TextView.class))
                 .check(matches(withText("test Station0 (null)")));
     }
 

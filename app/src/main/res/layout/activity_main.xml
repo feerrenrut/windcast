@@ -28,8 +28,33 @@ tools:ignore="MergeRootFrame"
     >
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/drawer_favs"
+        android:text="@string/favourites"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/drawer_item_paddingleft"
+        android:textSize="@dimen/drawer_sub_item_size"
+        android:paddingRight="16dp"
+        android:textColor="#fff"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/drawer_allStations"
+        android:text="@string/all"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/drawer_item_paddingleft"
+        android:textSize="@dimen/drawer_sub_item_size"
+        android:paddingRight="16dp"
+        android:textColor="#fff"
+        />
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/drawer_states"
         android:text="@string/states"
         android:gravity="center_vertical"
         android:paddingLeft="@dimen/drawer_item_paddingleft"

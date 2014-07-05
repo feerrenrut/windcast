@@ -1,6 +1,11 @@
-package com.feer.windcast;
+package com.feer.windcast.dataAccess;
 
 import android.util.Log;
+
+import com.feer.windcast.ObservationReader;
+import com.feer.windcast.StationListReader;
+import com.feer.windcast.WeatherData;
+import com.feer.windcast.WeatherStation;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -31,12 +36,20 @@ public class WeatherDataCache
         return sWeatherDataCache;
     }
 
+    /*
+    *Used in tests... unfortunate
+     */
     public static void SetsWeatherDataCache(WeatherDataCache cache)
     {
         sWeatherDataCache = cache;
     }
 
     private static final String TAG = "WeatherDataCache";
+
+    public FavouriteStationCache CreateNewFavouriteStationAccessor()
+    {
+        return new FavouriteStationCache();
+    }
 
     public WeatherData GetWeatherDataFor(URL url)
     {
