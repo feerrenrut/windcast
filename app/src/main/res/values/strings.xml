@@ -12,6 +12,8 @@
     <string name="favourites">Favourites</string>
     <string name="favourite_stations">Favourite Stations</string>
     <string name="all">All</string>
+    <string name="drawer_open">Open Navigation Drawer</string>
+    <string name="drawer_close">Close Navigation Drawer</string>
 
     <string-array name="AustralianStates">
         <item>WA</item>

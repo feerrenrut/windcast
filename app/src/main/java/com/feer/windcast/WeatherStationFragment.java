@@ -203,15 +203,13 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         super.onAttach(activity);
         try {
             mListener = (OnWeatherStationFragmentInteractionListener) activity;
-
-
-            mCache = WeatherDataCache.GetWeatherDataCache();
-            mFavs = mCache.CreateNewFavouriteStationAccessor();
-
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                 + " must implement OnWeatherStationFragmentInteractionListener");
         }
+
+        mCache = WeatherDataCache.GetWeatherDataCache();
+        mFavs = mCache.CreateNewFavouriteStationAccessor();
     }
 
     @Override
