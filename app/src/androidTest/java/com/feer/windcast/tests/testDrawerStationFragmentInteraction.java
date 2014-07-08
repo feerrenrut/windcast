@@ -23,7 +23,7 @@ import static com.google.android.apps.common.testing.ui.espresso.action.ViewActi
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.closeDrawer;
 import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.openDrawer;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.hasSibling;
+import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withChild;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
@@ -51,7 +51,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
 
     private FakeWeatherStationData mFakeStations;
     private WeatherDataCache mCache;
-    private final int drawerID = R.id.windcast_drawer;
+    private final int drawerID = R.id.drawer_layout;
 
     // Activity is not created until get activity is called
     private void launchActivity()
@@ -69,6 +69,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         mCache = mock(WeatherDataCache.class);
         when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.EmptyStationList());
         when(mCache.GetWeatherStationsFrom(anyString())).thenReturn(mFakeStations.EmptyStationList());
+        when(mCache.CreateNewFavouriteStationAccessor()).thenCallRealMethod();
         WeatherDataCache.SetsWeatherDataCache(mCache);
     }
 
@@ -85,36 +86,69 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
                 .check(matches(not(isDisplayed())));
     }
 
-    public void test_drawerOpen_hasExpectedContents()
+    public void test_drawerOpen_ExpandStates_hasExpectedContents()
     {
         launchActivity();
         openDrawer(drawerID);
 
         onView(withId(R.id.drawer_states))
-                        .check(matches(withText(R.string.states)));
+                .perform(click())
+                .check(matches(withText(R.string.states)));
 
         CharSequence[] stateList = getActivity().getResources().getTextArray(R.array.AustralianStates);
 
-        onView(withId(R.id.left_drawer_list))
+        onView(withId(R.id.drawer_states_list))
                 .check(matches(adapterHasCount(equalTo(stateList.length))));
 
         for(int i = 0; i < stateList.length; ++i)
         {
             onData(instanceOf(String.class))
-                    .inAdapterView(withId(R.id.left_drawer_list))
+                    .inAdapterView(withId(R.id.drawer_states_list))
                     .atPosition(i)
                     .check(matches(withText(stateList[i].toString())));
         }
     }
+
+    public void test_drawerOpen_hasExpectedContents()
+    {
+        launchActivity();
+        openDrawer(drawerID);
+
+        onView(withId(R.id.drawer_favs))
+                .check(matches(allOf(
+                    withText(R.string.favourites),
+                    isCompletelyDisplayed() )));
+        onView(withId(R.id.drawer_favs_image))
+                .check(matches(isCompletelyDisplayed()));
+
+        onView(withId(R.id.drawer_allStations))
+                .check(matches(allOf(
+                    withText(R.string.all),
+                    isCompletelyDisplayed() )));
+        onView(withId(R.id.drawer_all_image))
+                .check(matches(isCompletelyDisplayed()));
+
+        onView(withId(R.id.drawer_states))
+                .check(matches(allOf(
+                    withText(R.string.states),
+                    isCompletelyDisplayed() )));
+        onView(withId(R.id.drawer_states_image))
+                .check(matches(isCompletelyDisplayed()));
+
+        onView(withId(R.id.drawer_states_list))
+                .check(matches(not(isDisplayed())));
+    }
+
 
     public void test_selectWA_closesDrawer()
     {
         launchActivity();
 
         openDrawer(drawerID);
+        onView(withId(R.id.drawer_states)).perform(click());
 
         onView(withText("WA")).perform(click());
-        onView(allOf(withText(R.string.states), hasSibling(withId(R.id.left_drawer_list))))
+        onView(withId(R.id.drawer_states))
                 .check(matches(not(isDisplayed())));
     }
 
@@ -125,6 +159,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         final Activity act = getActivity();
 
         openDrawer(drawerID);
+        onView(withId(R.id.drawer_states)).perform(click());
         onView(withText("WA")).perform(click());
 
         assertEquals("Wind Stations in WA", act.getActionBar().getTitle().toString());
@@ -150,6 +185,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
                     adapterHasCount(equalTo(FakeWeatherStationData.MAX_NUM_OF_ALL_STATIONS))));
 
         openDrawer(drawerID);
+        onView(withId(R.id.drawer_states)).perform(click());
         onView(withText(STATE_TO_CLICK)).perform(click());
 
         verify(mCache, times(1)).GetWeatherStationsFrom(STATE_TO_CLICK);
@@ -168,6 +204,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
                 .check(matches(adapterHasCount(equalTo(1))));
 
         openDrawer(drawerID);
+        onView(withId(R.id.drawer_states)).perform(click());
         final String STATE_TO_CLICK = "WA";
         onView(withText(STATE_TO_CLICK)).perform(click());
         onView(withId(android.R.id.list))

@@ -57,6 +57,7 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         // set up weather data cache before starting the activity.
         mCache = mock(WeatherDataCache.class);
         when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.EmptyStationList());
+        when(mCache.CreateNewFavouriteStationAccessor()).thenCallRealMethod();
         WeatherDataCache.SetsWeatherDataCache(mCache);
     }
 
