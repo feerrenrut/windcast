@@ -16,6 +16,7 @@
     >
 
     <ImageView
+        android:id="@+id/drawer_favs_image"
         android:src="@drawable/star_solid"
         app:layout_row="0"
         app:layout_column="0"/>
@@ -35,6 +36,7 @@
         android:gravity="center_vertical|left"/>
 
     <ImageView
+        android:id="@+id/drawer_all_image"
         android:src="@drawable/aust_outline"
         app:layout_row="1"
         app:layout_column="0"/>

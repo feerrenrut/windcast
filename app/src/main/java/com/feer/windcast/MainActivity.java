@@ -74,14 +74,17 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
             }
         }
 
-        mDrawerFavStations.setOnClickListener(new ReplaceStationsOnClick(
-                        WeatherStationFragment.StationsToShow.Favourites,
-                        getResources().getString(R.string.favourite_stations)));
+        ReplaceStationsOnClick favsClicked = new ReplaceStationsOnClick(
+                WeatherStationFragment.StationsToShow.Favourites,
+                getResources().getString(R.string.favourite_stations));
+        findViewById(R.id.drawer_favs_image).setOnClickListener(favsClicked);
+        mDrawerFavStations.setOnClickListener(favsClicked);
 
-        mDrawerAllStations.setOnClickListener(new ReplaceStationsOnClick(
-                        WeatherStationFragment.StationsToShow.All,
-                        getResources().getString(R.string.app_name)
-                ));
+        ReplaceStationsOnClick allClicked = new ReplaceStationsOnClick(
+                WeatherStationFragment.StationsToShow.All,
+                getResources().getString(R.string.app_name));
+        findViewById(R.id.drawer_all_image).setOnClickListener(allClicked);
+        mDrawerAllStations.setOnClickListener(allClicked);
 
         if(getSupportFragmentManager().findFragmentByTag(STATIONS_FRAG_TAG) == null)
         {
