@@ -8,11 +8,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.GridLayout;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -28,7 +28,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
     private TextView mDrawerAllStations;
     private TextView mDrawerStates;
     private ListView mDrawerList;
-    private LinearLayout mDrawer;
+    private GridLayout mDrawer;
     private CharSequence mTitle;
 
     @Override
@@ -43,7 +43,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         mDrawerAllStations = (TextView) findViewById(R.id.drawer_allStations);
 
         mDrawerStates = (TextView) findViewById(R.id.drawer_states);
-        mDrawer = (LinearLayout) findViewById(R.id.left_drawer);
+        mDrawer = (GridLayout) findViewById(R.id.left_drawer);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 R.layout.drawer_list_item, mAustralianStates

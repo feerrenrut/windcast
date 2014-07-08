@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- The navigation drawer -->
+    <android.support.v7.widget.GridLayout
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:id="@+id/left_drawer"
+    android:layout_width="240dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="#111"
+
+    >
+
+    <ImageView
+        android:src="@drawable/star_solid"
+        app:layout_row="0"
+        app:layout_column="0"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/drawer_favs"
+        android:text="@string/favourites"
+        android:paddingLeft="@dimen/drawer_item_paddingleft"
+        android:textSize="@dimen/drawer_sub_item_size"
+        android:paddingRight="16dp"
+        android:textColor="#fff"
+        app:layout_row="0"
+        app:layout_column="1"
+        app:layout_gravity="fill"
+        android:gravity="center_vertical|left"/>
+
+    <ImageView
+        android:src="@drawable/aust_outline"
+        app:layout_row="1"
+        app:layout_column="0"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/drawer_allStations"
+        android:text="@string/all"
+        android:paddingLeft="@dimen/drawer_item_paddingleft"
+        android:textSize="@dimen/drawer_sub_item_size"
+        android:paddingRight="16dp"
+        android:textColor="#fff"
+        app:layout_row="1"
+        app:layout_column="1"
+        app:layout_gravity="fill"
+        android:gravity="center_vertical|left"/>
+
+    <ImageView
+        android:id="@+id/drawer_states_image"
+        android:src="@drawable/down_arrow"
+        app:layout_row="2"
+        app:layout_column="0"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/drawer_states"
+        android:text="@string/states"
+        android:paddingLeft="@dimen/drawer_item_paddingleft"
+        android:textSize="@dimen/drawer_sub_item_size"
+        android:paddingRight="16dp"
+        android:textColor="#fff"
+        app:layout_row="2"
+        app:layout_column="1"
+        app:layout_gravity="fill"
+        android:gravity="center_vertical|left"/>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/left_drawer_list"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:background="#111"
+        tools:listitem="@layout/drawer_list_item"
+        app:layout_row="3"
+        app:layout_column="1"
+        app:layout_gravity="fill"
+        />
+
+</android.support.v7.widget.GridLayout>
