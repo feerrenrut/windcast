@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -50,7 +51,6 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         );
 
         mDrawerList.setAdapter(adapter);
-
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         class ReplaceStationsOnClick implements View.OnClickListener
@@ -85,6 +85,27 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
                 getResources().getString(R.string.app_name));
         findViewById(R.id.drawer_all_image).setOnClickListener(allClicked);
         mDrawerAllStations.setOnClickListener(allClicked);
+
+        final ImageView statesImage = (ImageView) findViewById(R.id.drawer_states_image);
+        View.OnClickListener toggleStatesArray = new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(mDrawerList.getVisibility() == View.VISIBLE) {
+                    mDrawerList.setVisibility(View.INVISIBLE);
+                    statesImage.setImageResource(R.drawable.down_arrow);
+                }
+                else {
+                    mDrawerList.setVisibility(View.VISIBLE);
+                    statesImage.setImageResource(R.drawable.up_arrow);
+                }
+            }
+        };
+
+        findViewById(R.id.drawer_states).setOnClickListener(toggleStatesArray);
+        mDrawerList.setVisibility(View.INVISIBLE);
+        statesImage.setOnClickListener(toggleStatesArray);
 
         if(getSupportFragmentManager().findFragmentByTag(STATIONS_FRAG_TAG) == null)
         {
