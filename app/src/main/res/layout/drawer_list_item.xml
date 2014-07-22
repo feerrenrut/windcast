@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
+
           android:id="@+id/drawer_list_item_text"
+
+          style="@style/DrawerTextItem"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:gravity="center_vertical"
-          android:paddingLeft="@dimen/drawer_sub_item_paddingleft"
-          android:paddingRight="16dp"
-          android:textColor="#fff"
-          android:text="lorem Ipsum"
-          android:singleLine="false"
-          android:textSize="@dimen/drawer_sub_item_size"
+
+          tools:background="#111"
+          tools:text="lorem Ipsum"
     />

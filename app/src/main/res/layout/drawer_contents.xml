@@ -2,110 +2,98 @@
 
 <!-- The navigation drawer -->
     <LinearLayout
-
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
 
-    android:orientation="vertical"
     android:id="@+id/drawer_contents"
+
+    android:orientation="vertical"
     android:layout_width="240dp"
     android:layout_height="match_parent"
     android:layout_gravity="start"
     android:background="#111"
     >
 
-    <LinearLayout
+    <LinearLayout android:id="@+id/drawer_favs_layout"
+
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="@dimen/drawer_item_size"
+        android:background="@drawable/drawer_item_selector"
+        >
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:id="@+id/drawer_favs_image"
+        <ImageView android:id="@+id/drawer_favs_image"
             android:src="@drawable/star_solid"
-            android:adjustViewBounds="false"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/drawer_favs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+        <TextView android:id="@+id/drawer_favs"
             android:text="@string/favourites"
-            android:paddingLeft="@dimen/drawer_item_paddingleft"
-            android:textSize="@dimen/drawer_sub_item_size"
-            android:paddingRight="16dp"
-            android:textColor="#fff"
-            android:gravity="center_vertical|left"
-            android:clickable="false"
+
+            style="@style/DrawerTextItem"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             />
     </LinearLayout>
 
-    <LinearLayout
+    <LinearLayout android:id="@+id/drawer_all_layout"
+
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical">
+        android:layout_height="@dimen/drawer_item_size"
+        android:background="@drawable/drawer_item_selector"
+        >
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:id="@+id/drawer_all_image"
+        <ImageView android:id="@+id/drawer_all_image"
             android:src="@drawable/aust_outline"
-            />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/drawer_allStations"
-            android:text="@string/all"
-            android:paddingLeft="@dimen/drawer_item_paddingleft"
-            android:textSize="@dimen/drawer_sub_item_size"
-            android:paddingRight="16dp"
-            android:textColor="#fff"
-            android:gravity="center_vertical|left"
-            />
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
-            android:id="@+id/drawer_states_image"
-            android:src="@drawable/down_arrow"
             />
 
-        <TextView
+        <TextView android:id="@+id/drawer_allStations"
+            android:text="@string/all"
+
+            style="@style/DrawerTextItem"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/drawer_states"
+            />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/drawer_states_layout"
+
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/drawer_item_size"
+        android:background="@drawable/drawer_item_selector"
+        >
+
+        <ImageView android:id="@+id/drawer_states_image"
+            android:src="@drawable/down_arrow"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+
+        <TextView android:id="@+id/drawer_states"
             android:text="@string/states"
-            android:paddingLeft="@dimen/drawer_item_paddingleft"
-            android:textSize="@dimen/drawer_sub_item_size"
-            android:paddingRight="16dp"
-            android:textColor="#fff"
-            android:gravity="center_vertical|left"
+
+            style="@style/DrawerTextItem"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             />
     </LinearLayout>
 
 
-    <ListView
+    <ListView android:id="@+id/drawer_states_list"
+
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/drawer_states_list"
-        android:choiceMode="singleChoice"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"
-        android:background="#111"
+        android:paddingLeft="@dimen/drawer_item_paddingleft"
+
         tools:listitem="@layout/drawer_list_item"
-        android:drawSelectorOnTop="false"
         />
 
 </LinearLayout>
