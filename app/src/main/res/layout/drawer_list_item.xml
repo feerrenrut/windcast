@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
 
-          android:id="@+id/drawer_list_item_text"
+      style="@style/DrawerTextItem"
+      android:gravity="center_vertical"
+      android:paddingLeft="@dimen/drawer_subitem_paddingleft"
+      android:layout_height="@dimen/drawer_item_height"
+      android:paddingTop="@dimen/drawer_item_vertical_padding"
+      android:paddingBottom="@dimen/drawer_item_vertical_padding"
 
-          style="@style/DrawerTextItem"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:gravity="center_vertical"
-
-          tools:background="#111"
-          tools:text="lorem Ipsum"
+      tools:background="@color/drawer_background"
+      tools:text="lorem Ipsum"
+      tools:layout_height="@dimen/drawer_item_height"
     />

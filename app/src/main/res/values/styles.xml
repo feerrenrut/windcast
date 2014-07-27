@@ -5,11 +5,31 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="DrawerItemLayout" parent="@style/AppTheme">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:background">@drawable/drawer_item_selector</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/drawer_item_height</item>
+        <item name="android:divider">@drawable/abc_list_divider_holo_dark</item>
+    </style>
+
     <style name="DrawerTextItem" parent="@style/AppTheme">
         <item name="android:textSize">@dimen/drawer_item_text_size</item>
-        <item name="android:paddingRight">16dp</item>
-        <item name="android:textColor">#fff</item>
+        <item name="android:paddingRight">@dimen/drawer_item_paddingright</item>
+        <item name="android:paddingTop">@dimen/drawer_item_vertical_padding</item>
+        <item name="android:paddingBottom">@dimen/drawer_item_vertical_padding</item>
+        <item name="android:paddingLeft">@dimen/drawer_item_paddingleft</item>
+        <item name="android:textColor">@android:color/white</item>
         <item name="android:gravity">center_vertical|left</item>
+
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <style name="DrawerImageItem" parent="@style/AppTheme">
+        <item name="android:layout_width">@dimen/drawer_image_size</item>
+        <item name="android:layout_height">@dimen/drawer_image_size</item>
+        <item name="android:layout_gravity">center</item>
     </style>
 
 
