@@ -87,6 +87,9 @@ public class WindGraphFragment extends Fragment
     public void onResume()
     {
         super.onResume();
+        final Activity act = getActivity();
+        final XYPlot  plot = (XYPlot) act.findViewById(R.id.mySimpleXYPlot);
+        WindGraph.FormatGraph(plot, act);
         new AsyncTask<Void, Void, Boolean>()
         {
             WeatherData wd;
@@ -166,8 +169,6 @@ public class WindGraphFragment extends Fragment
                     label.setText(sb.toString());
 
                 }
-                // initialize our XYPlot reference:
-                XYPlot  plot = (XYPlot) act.findViewById(R.id.mySimpleXYPlot);
                 WindGraph.SetupGraph(wd, plot, act);
             }
         }.execute();

@@ -4,8 +4,15 @@ import android.app.Activity;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 
+import com.androidplot.ui.AnchorPosition;
+import com.androidplot.ui.PositionMetrics;
 import com.androidplot.ui.SeriesRenderer;
+import com.androidplot.ui.SizeLayoutType;
+import com.androidplot.ui.SizeMetrics;
+import com.androidplot.ui.XLayoutStyle;
+import com.androidplot.ui.YLayoutStyle;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.PointLabelFormatter;
@@ -24,12 +31,55 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import static com.androidplot.Plot.BorderStyle.NONE;
+
 /**
  *
  */
 public class WindGraph
 {
     private static final int MAX_READINGS_TO_SHOW = 10;
+
+    public static void FormatGraph(XYPlot plot, Activity act)
+    {
+        // reduce the number of range labels
+        plot.setTicksPerRangeLabel(3);
+        plot.getGraphWidget().setRangeLabelVerticalOffset(-10);
+
+        plot.getLayoutManager().remove(plot.getLegendWidget());
+        plot.getLayoutManager().remove(plot.getTitleWidget());
+        plot.getLayoutManager().remove(plot.getDomainLabelWidget());
+        plot.setBorderStyle(NONE, 0.0f, 0.0f);
+        plot.setMarkupEnabled(false);
+
+        final int offWhite = Color.parseColor("#ffececec");
+
+        plot.setPlotMargins(0, 0, 0, 0);
+        plot.setPlotPadding(0, 0, 0, 0);
+
+        plot.getGraphWidget().setSize(new SizeMetrics(0, SizeLayoutType.FILL, 0, SizeLayoutType.FILL));
+
+        plot.getRangeLabelWidget().getLabelPaint().setColor(Color.BLACK);
+        plot.getRangeLabelWidget().setMarginLeft(20.0f);
+
+        plot.getGraphWidget().setPositionMetrics(
+                new PositionMetrics(
+                        0.0f, XLayoutStyle.ABSOLUTE_FROM_LEFT,
+                        0.0f, YLayoutStyle.ABSOLUTE_FROM_TOP,
+                        AnchorPosition.LEFT_TOP));
+
+        plot.getGraphWidget().getRangeLabelPaint().setColor(Color.BLACK);
+        plot.getGraphWidget().getDomainLabelPaint().setColor(Color.BLACK);
+        plot.getGraphWidget().getDomainOriginLabelPaint().setColor(Color.BLACK);
+        plot.getGraphWidget().getDomainOriginLinePaint().setColor(Color.BLACK);
+        plot.getGraphWidget().getRangeOriginLabelPaint().setColor(Color.BLACK);
+        plot.getGraphWidget().getRangeOriginLinePaint().setColor(Color.BLACK);
+        plot.getGraphWidget().setDomainLabelVerticalOffset(3);
+        plot.getGraphWidget().setDomainLabelOrientation(-45);
+
+        plot.getGraphWidget().getGridBackgroundPaint().setColor(offWhite); // sets the colour of teh part of the graph behind the grid
+        plot.getGraphWidget().getBackgroundPaint().setColor(offWhite); // sets the colour of the part of the graph where the axis labels are
+    }
 
     public static void SetupGraph(WeatherData wd, XYPlot plot, Activity act)
     {
@@ -124,17 +174,14 @@ public class WindGraph
                 R.xml.line_point_formatter_with_plf1
                            );
 
+        labelFormatter.hOffset = 0.f;
         labelFormatter.vOffset -= 10.f;
 
         // add a new series' to the xyplot:
         plot.addSeries(series1, formatter);
-        plot.getLegendWidget().setVisible(false);
+
         WindDirectionPointRenderer renderer = (WindDirectionPointRenderer) plot.getRenderer(WindDirectionPointRenderer.class);
         renderer.SetWindDirections(windDirections);
-
-        // reduce the number of range labels
-        plot.setTicksPerRangeLabel(3);
-        plot.getGraphWidget().setDomainLabelOrientation(-45);
     }
 
     private static void SetGraphBoundaries(List<Integer> windSpeedsList, XYPlot plot, int numObjs, boolean usingSublist)
