@@ -87,6 +87,12 @@ public class WindGraphFragment extends Fragment
     public void onResume()
     {
         super.onResume();
+        populateUI();
+    }
+
+    private void populateUI()
+    {
+
         final Activity act = getActivity();
         final XYPlot  plot = (XYPlot) act.findViewById(R.id.mySimpleXYPlot);
         WindGraph.FormatGraph(plot, act);
@@ -124,19 +130,14 @@ public class WindGraphFragment extends Fragment
                 if (act == null) return;
 
                 //TODO check the result, let the user know if we don't know what data to show them.
-                final TextView label = (TextView) act.findViewById(R.id.label);
-                if (label == null)
-                {
-                    throw new NullPointerException("unable to find the label");
-                }
+                final TextView stationNameLabel = (TextView) act.findViewById(R.id.stationNameLabel);
 
                 if(wd == null)
                 {
-                    label.setText("Weather data is null!");
+                    stationNameLabel.setText("Weather data is null!");
                 }else
                 {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(wd.Station.Name).append(", ").append(wd.Station.State).append("\n\n");
+                    stationNameLabel.setText(wd.Station.Name + ", " + wd.Station.State);
 
                     if(wd.ObservationData != null && !wd.ObservationData.isEmpty())
                     {
@@ -144,29 +145,32 @@ public class WindGraphFragment extends Fragment
 
                         DateFormat localDate = android.text.format.DateFormat
                                 .getDateFormat(act.getApplicationContext());
+
                         DateFormat localTime = android.text.format.DateFormat
                                 .getTimeFormat(act.getApplicationContext());
-                        sb.append("Latest Wind Reading: (")
-                                .append(localTime.format(reading.LocalTime))
-                                .append(' ')
-                                .append(localDate.format(reading.LocalTime))
-                                .append(")\n");
+
+                        ((TextView) act.findViewById(R.id.readingTimeLabel)).setText(
+                                localTime.format(reading.LocalTime) + ' ' + localDate.format(reading.LocalTime)
+                                + "\n"                                                    );
 
                         if(reading.WindBearing != null && reading.CardinalWindDirection != null && reading.WindSpeed_KMH != null)
                         {
-                            sb.append(reading.WindSpeed_KMH).append(" kmh");
+                            TextView speedLabel = (TextView)act.findViewById(R.id.latestReadingLabel);
+
                             if(!reading.CardinalWindDirection.equals("calm") && reading.WindSpeed_KMH > 0)
                             {
-                                sb.append(" from ").append(getDirectionWordsFromChars(reading.CardinalWindDirection));
+                                speedLabel.setText(reading.WindSpeed_KMH + " Km/H from " + getDirectionWordsFromChars(reading.CardinalWindDirection));
+                            }
+                            else
+                            {
+                                speedLabel.setText("Calm conditions");
                             }
                         }
                     }
                     else
                     {
-                        sb.append(act.getString(R.string.no_readings));
+                        ((TextView)act.findViewById(R.id.latestReadingLabel)).setText(act.getString(R.string.no_readings));
                     }
-
-                    label.setText(sb.toString());
 
                 }
                 WindGraph.SetupGraph(wd, plot, act);
@@ -188,10 +192,10 @@ public class WindGraphFragment extends Fragment
     {
         switch (cardinalChar)
         {
-            case 'n' : return "north";
-            case 's' : return "south";
-            case 'w' : return "west";
-            case 'e' : return "east";
+            case 'n' : return "North";
+            case 's' : return "South";
+            case 'w' : return "West";
+            case 'e' : return "East";
         }
         return "";
     }

@@ -182,6 +182,12 @@ public class WindGraph
 
         WindDirectionPointRenderer renderer = (WindDirectionPointRenderer) plot.getRenderer(WindDirectionPointRenderer.class);
         renderer.SetWindDirections(windDirections);
+
+        plot.getGraphWidget().setPositionMetrics(
+                new PositionMetrics(
+                        0.0f, XLayoutStyle.ABSOLUTE_FROM_LEFT,
+                        0.0f, YLayoutStyle.ABSOLUTE_FROM_TOP,
+                        AnchorPosition.LEFT_TOP));
     }
 
     private static void SetGraphBoundaries(List<Integer> windSpeedsList, XYPlot plot, int numObjs, boolean usingSublist)

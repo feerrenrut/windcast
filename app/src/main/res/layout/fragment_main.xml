@@ -11,10 +11,31 @@
     tools:context="com.feer.windcast.MainActivity$PlaceholderFragment">
 
     <TextView
-        android:id="@+id/label"
+        android:id="@+id/stationNameLabel"
         android:text=""
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+
+        android:layout_gravity="center_horizontal"
+        />
+
+    <TextView
+        android:id="@+id/latestReadingLabel"
+        android:text=""
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"/>
+
+    <TextView
+        android:id="@+id/readingTimeLabel"
+        android:text=""
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="10sp"
+        android:layout_gravity="center_horizontal"
+        />
 
     <com.androidplot.xy.XYPlot
         android:id="@+id/mySimpleXYPlot"
