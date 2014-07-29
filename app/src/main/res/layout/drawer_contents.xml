@@ -2,110 +2,69 @@
 
 <!-- The navigation drawer -->
     <LinearLayout
-
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
 
-    android:orientation="vertical"
     android:id="@+id/drawer_contents"
-    android:layout_width="240dp"
+    style="@style/DrawerItemLayout"
+    android:showDividers="beginning|middle"
+    android:orientation="vertical"
+    android:layout_width="@dimen/drawer_total_width"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:background="#111"
+    android:background="@color/drawer_background"
     >
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <LinearLayout android:id="@+id/drawer_favs_layout"
+                  style="@style/DrawerItemLayout"
+        >
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:id="@+id/drawer_favs_image"
+        <ImageView android:id="@+id/drawer_favs_image"
             android:src="@drawable/star_solid"
-            android:adjustViewBounds="false"/>
+            style="@style/DrawerImageItem"
+            />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/drawer_favs"
+        <TextView android:id="@+id/drawer_favs"
             android:text="@string/favourites"
-            android:paddingLeft="@dimen/drawer_item_paddingleft"
-            android:textSize="@dimen/drawer_sub_item_size"
-            android:paddingRight="16dp"
-            android:textColor="#fff"
-            android:gravity="center_vertical|left"
-            android:clickable="false"
+            style="@style/DrawerTextItem"
             />
     </LinearLayout>
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical">
+    <LinearLayout android:id="@+id/drawer_all_layout"
+                  style="@style/DrawerItemLayout"
+        >
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:id="@+id/drawer_all_image"
+        <ImageView android:id="@+id/drawer_all_image"
             android:src="@drawable/aust_outline"
-            />
+            style="@style/DrawerImageItem"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/drawer_allStations"
+        <TextView android:id="@+id/drawer_allStations"
             android:text="@string/all"
-            android:paddingLeft="@dimen/drawer_item_paddingleft"
-            android:textSize="@dimen/drawer_sub_item_size"
-            android:paddingRight="16dp"
-            android:textColor="#fff"
-            android:gravity="center_vertical|left"
+            style="@style/DrawerTextItem"
             />
     </LinearLayout>
 
+    <LinearLayout android:id="@+id/drawer_states_layout"
+                  style="@style/DrawerItemLayout"
+        >
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:id="@+id/drawer_states_image"
+        <ImageView android:id="@+id/drawer_states_image"
             android:src="@drawable/down_arrow"
+            style="@style/DrawerImageItem"
             />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/drawer_states"
+        <TextView android:id="@+id/drawer_states"
             android:text="@string/states"
-            android:paddingLeft="@dimen/drawer_item_paddingleft"
-            android:textSize="@dimen/drawer_sub_item_size"
-            android:paddingRight="16dp"
-            android:textColor="#fff"
-            android:gravity="center_vertical|left"
+            style="@style/DrawerTextItem"
             />
     </LinearLayout>
 
 
-    <ListView
-        android:layout_width="match_parent"
+    <ListView android:id="@+id/drawer_states_list"
+        style="@style/DrawerItemLayout"
         android:layout_height="match_parent"
-        android:id="@+id/drawer_states_list"
-        android:choiceMode="singleChoice"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"
-        android:background="#111"
+
         tools:listitem="@layout/drawer_list_item"
-        android:drawSelectorOnTop="false"
         />
 
 </LinearLayout>
