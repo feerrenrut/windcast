@@ -131,6 +131,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 handleFavChange);
 
         AbsListView listView = (AbsListView) view.findViewById(android.R.id.list);
+        listView.setEmptyView(view.findViewById(android.R.id.empty));
         listView.setAdapter(mAdapter);
 
         new AsyncTask<Void, Void, ArrayList<WeatherStation>>()
