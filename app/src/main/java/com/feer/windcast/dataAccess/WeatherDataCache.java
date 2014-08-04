@@ -74,8 +74,7 @@ public class WeatherDataCache
         return wd;
     }
 
-    private static ArrayList<WeatherStation> smStations = new ArrayList<WeatherStation>();
-    private static boolean smInitialised = false;
+    private static ArrayList<WeatherStation> smStations;
 
     private static class AllStationsURLForState
     {
@@ -100,9 +99,9 @@ public class WeatherDataCache
 
     public ArrayList<WeatherStation> GetWeatherStationsFromAllStates()
     {
-        if(!smInitialised)
+        if(smStations == null)
         {
-            smInitialised = true;
+            smStations = new ArrayList<WeatherStation>();
             for(AllStationsURLForState stationLink : mAllStationsInState_UrlList)
             {
                 try
@@ -112,11 +111,13 @@ public class WeatherDataCache
                 } catch (Exception e)
                 {
                     Log.e(TAG, "Couldn't create URL "+e.toString());
-                    smInitialised = false;
                     smStations = null;
                 }
             }
-            Collections.sort(smStations);
+            if(smStations != null )
+            {
+                Collections.sort(smStations);
+            }
         }
 
         return smStations;
@@ -124,9 +125,9 @@ public class WeatherDataCache
 
     public ArrayList<WeatherStation> GetWeatherStationsFrom(String state)
     {
-        if(!smInitialised)
+        if( GetWeatherStationsFromAllStates() == null)
         {
-            GetWeatherStationsFromAllStates();
+            return null;
         }
 
         ArrayList<WeatherStation> stationsForState = new ArrayList<WeatherStation>();

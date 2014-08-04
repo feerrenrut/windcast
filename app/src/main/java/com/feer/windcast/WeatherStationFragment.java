@@ -153,7 +153,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             @Override
             protected void onPostExecute(final ArrayList<WeatherStation> cacheStations)
             {
-                if(mFavs!=null)
+                if(mFavs != null && cacheStations != null)
                 {
                     ArrayList<WeatherStation> favs = mFavs.GetFavourites();
                     ArrayList<WeatherStation> useStations = cacheStations;
@@ -166,6 +166,15 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                     SetStationList(useStations);
 
                     Log.i(TAG, "Finished adding new stations.");
+                }
+                else
+                {
+                    Boolean favsNull = mFavs == null;
+                    Boolean cacheStationsNull = cacheStations == null;
+                    Log.i(TAG,
+                            "Could not add new stations." +
+                                    " mFavs is null: " + favsNull.toString() +
+                                    " cacheStations is null: " + cacheStationsNull.toString());
                 }
             }
         }.execute();
