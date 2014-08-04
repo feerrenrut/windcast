@@ -1,7 +1,5 @@
 package com.feer.windcast;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.util.JsonReader;
 import android.util.Log;
 
@@ -17,7 +15,6 @@ import java.util.Locale;
 /**
  *
  */
-@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class ObservationReader
 {
     public static WeatherData ReadJsonStream(InputStream in) throws IOException

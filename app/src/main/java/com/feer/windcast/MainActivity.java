@@ -1,8 +1,6 @@
 package com.feer.windcast;
 
-import android.annotation.TargetApi;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
@@ -183,7 +181,6 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         trans.commit();
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public void setTitle(CharSequence title) {
         mTitle = title;

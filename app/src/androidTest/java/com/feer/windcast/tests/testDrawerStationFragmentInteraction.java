@@ -1,8 +1,6 @@
 package com.feer.windcast.tests;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.feer.windcast.MainActivity;
@@ -152,7 +150,6 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
                 .check(matches(not(isDisplayed())));
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void test_selectWA_titleShowsSelection()
     {
         launchActivity();

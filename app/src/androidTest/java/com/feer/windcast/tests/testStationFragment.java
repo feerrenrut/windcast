@@ -1,15 +1,13 @@
 package com.feer.windcast.tests;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.TextView;
 
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
-import com.feer.windcast.dataAccess.WeatherDataCache;
 import com.feer.windcast.WeatherStation;
+import com.feer.windcast.dataAccess.WeatherDataCache;
 import com.feer.windcast.testUtils.FakeWeatherStationData;
 import com.google.android.apps.common.testing.ui.espresso.ViewInteraction;
 
@@ -61,7 +59,6 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         WeatherDataCache.SetsWeatherDataCache(mCache);
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void test_initialTitleBar()
     {
         launchActivity();

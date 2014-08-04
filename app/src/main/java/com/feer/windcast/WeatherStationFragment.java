@@ -1,9 +1,7 @@
 package com.feer.windcast;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -108,7 +106,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -153,7 +150,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 }
             }
 
-            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
             @Override
             protected void onPostExecute(final ArrayList<WeatherStation> cacheStations)
             {
@@ -271,7 +267,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         return onlyFavs;
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void SetStationList(ArrayList<WeatherStation> listStations)
     {
         if (mAdapter != null)
