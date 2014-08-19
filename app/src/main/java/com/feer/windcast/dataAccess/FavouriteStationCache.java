@@ -4,11 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.feer.windcast.WeatherStation;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import static com.feer.windcast.dataAccess.DBContract.FavouriteStation.COLUMN_NAME_STATION_NAME;
@@ -21,7 +19,7 @@ public class FavouriteStationCache
 {
     private Context mContext = null;
     private BackgroundTaskManager mTaskManager = null;
-    private ArrayList<WeatherStation> mFavs = null; // only populated once GetFavouritesFromDB is called
+    private ArrayList<String> mFavUrls = null; // only populated once GetFavouritesFromDB is called
 
     /**
      * Initialises the FavouriteStationCache so calls to all other functions
@@ -32,7 +30,7 @@ public class FavouriteStationCache
     {
         mContext = context;
         mTaskManager = taskManager;
-        mFavs = GetFavouritesFromDB();
+        mFavUrls = GetFavouritesFromDB();
     }
 
     public void AddFavouriteStation(final WeatherStation station)
@@ -47,9 +45,9 @@ public class FavouriteStationCache
                 }
         );
 
-        if(mFavs != null && !mFavs.contains(station))
+        if(mFavUrls != null && !mFavUrls.contains(station.GetURL().toString()))
         {
-            mFavs.add(station);
+            mFavUrls.add(station.GetURL().toString());
         }
     }
 
@@ -65,19 +63,19 @@ public class FavouriteStationCache
                 }
         );
 
-        if(mFavs != null && mFavs.contains(station))
+        if(mFavUrls != null && mFavUrls.contains(station.GetURL().toString()))
         {
-            mFavs.remove(station);
+            mFavUrls.remove(station.GetURL().toString());
         }
     }
 
-    public ArrayList<WeatherStation> GetFavourites()
+    public ArrayList<String> GetFavouriteURLs()
     {
-        if(mFavs == null)
+        if(mFavUrls == null)
         {
-            throw new IllegalStateException("GetFavourites() called before Initialise() was called or complete!!");
+            throw new IllegalStateException("GetFavouriteURLs() called before Initialise() was called or complete!!");
         }
-        return mFavs;
+        return mFavUrls;
     }
 
     private synchronized void AddFavouriteStationToDB(WeatherStation station)
@@ -86,8 +84,8 @@ public class FavouriteStationCache
 
         SQLiteDatabase db = DBOpenHelper.Instance(mContext).getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NAME_STATION_NAME, station.Name); //todo i dont think that name is unique, it may need to be combined with state?
-        values.put(COLUMN_NAME_URL, station.url.toString());
+        values.put(COLUMN_NAME_STATION_NAME, station.GetName());
+        values.put(COLUMN_NAME_URL, station.GetURL().toString());
         db.insert(
                 DBContract.FavouriteStation.TABLE_NAME,
                 "null", values
@@ -99,36 +97,24 @@ public class FavouriteStationCache
         station.IsFavourite = false;
 
         SQLiteDatabase db = DBOpenHelper.Instance(mContext).getWritableDatabase();
-        String selection = COLUMN_NAME_STATION_NAME + " LIKE ?";
-        String[] selectionArgs = { station.Name };
+        String selection = COLUMN_NAME_STATION_NAME + " LIKE ?";//todo BUG? can you accidentally remove two favourite stations with similar names
+        String[] selectionArgs = { station.GetName() };
         db.delete(DBContract.FavouriteStation.TABLE_NAME, selection, selectionArgs);
     }
 
-    private synchronized ArrayList<WeatherStation> GetFavouritesFromDB()
+    private synchronized ArrayList<String> GetFavouritesFromDB()
     {
         SQLiteDatabase db = DBOpenHelper.Instance(mContext).getReadableDatabase();
         Cursor c = db.query(
                 DBContract.FavouriteStation.TABLE_NAME,
-                new String[]{COLUMN_NAME_STATION_NAME, COLUMN_NAME_URL},
+                new String[]{COLUMN_NAME_URL},
                 null, null, null, null, null
                            );
-        ArrayList<WeatherStation> favs = new ArrayList<WeatherStation>();
+        ArrayList<String> favs = new ArrayList<String>();
 
         while(c.moveToNext())
         {
-            try
-            {
-                WeatherStation station = new WeatherStation(
-                        c.getString(c.getColumnIndexOrThrow(COLUMN_NAME_STATION_NAME)),
-                        c.getString(c.getColumnIndexOrThrow(COLUMN_NAME_URL)));
-                station.IsFavourite = true;
-                favs.add(station);
-            } catch (MalformedURLException e)
-            {
-                Log.e("WindCast",
-                        "MalformedURLException while getting favourites from DB. For station: "
-                                + c.getString(c.getColumnIndexOrThrow(COLUMN_NAME_URL)));
-            }
+            favs.add(c.getString(c.getColumnIndexOrThrow(COLUMN_NAME_URL)));
         }
         return favs;
     }

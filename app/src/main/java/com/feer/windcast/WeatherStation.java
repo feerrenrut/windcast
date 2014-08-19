@@ -1,40 +1,117 @@
 package com.feer.windcast;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
 public class WeatherStation implements Comparable
 {
+    public enum States
+    {
+        WA,
+        SA,
+        ACT,
+        QLD,
+        NT,
+        TAS,
+        NSW,
+        VIC
+    }
 
-    String ID;
+    public static class WeatherStationBuilder
+    {
+        private URL url;
+        private String name;
+        private States state;
+        private boolean isFav;
 
-    public URL url;
+        public WeatherStationBuilder WithURL(URL url)
+        {
+            this.url = url;
+            return this;
+        }
+
+        public WeatherStationBuilder WithName(String name)
+        {
+            this.name = name;
+            return this;
+        }
+
+        public WeatherStationBuilder WithState(States state)
+        {
+            this.state = state;
+            return this;
+        }
+
+        public void IsFavourite(boolean isFav) {
+            this.isFav = isFav;
+        }
+
+        public WeatherStation Build()
+        {
+            if (url == null) throw new IllegalArgumentException("Can not create station where URL is NULL");
+            if (name == null) throw new IllegalArgumentException("Can not create station where Name is NULL");
+            if (state == null) throw new IllegalArgumentException("Can not create station where State is NULL");
+
+            return new WeatherStation(this);
+        }
+
+        public WeatherStationBuilder(){}
+
+    }
 
     /* The name of the observation station
      */
-    public String Name;
+    private final String mName;
+    private final URL mUrl;
+    private States mState;
 
     public boolean IsFavourite = false;
 
-
-    public String State;
-
-    String TimeZone;
-
-    public WeatherStation(String name, String dataUrl) throws MalformedURLException
+    private WeatherStation(WeatherStationBuilder builder)
     {
-        Name = name;
-        url = new URL(dataUrl);
+        mName = builder.name;
+        mUrl = builder.url;
+        mState = builder.state;
+        IsFavourite = builder.isFav;
     }
 
-    public WeatherStation()
-    {}
+    public WeatherStation(WeatherStation other)
+    {
+        mName = other.mName;
+        mUrl = other.mUrl;
+        mState = other.mState;
+        IsFavourite = other.IsFavourite;
+    }
+
+    public String GetLongStateName()
+    {
+        switch (mState)
+        {
+            case WA: return "Western Australia";
+            case SA: return "South Australia";
+            case VIC: return "Victoria";
+            case TAS: return "Tasmania";
+            case NSW: return "New South Wales";
+            case NT:  return "Northern Territory";
+            case QLD: return "Queensland";
+            case ACT: return "Aust Capital Territory";
+        }
+        return "";
+    }
+
+    public String GetStateAbbreviated()
+    {
+        return mState.toString();
+    }
+
+    public URL GetURL() { return mUrl; }
+
+    public String GetName() { return mName; }
 
     @Override
     public String toString()
     {
-        return String.format(Locale.US, "%s (%s)", Name, State);
+        return String.format(Locale.US, "%s (%s)", mName, GetStateAbbreviated());
     }
 
     @Override
@@ -53,7 +130,7 @@ public class WeatherStation implements Comparable
 
     private int compareTo(WeatherStation other)
     {
-        return Name.compareTo(other.Name);
+        return mName.compareTo(other.mName);
     }
 
     @Override
@@ -66,9 +143,8 @@ public class WeatherStation implements Comparable
             WeatherStation other = (WeatherStation) object;
             sameSame =
                     this.compareTo(other) == 0 &&
-                    this.url.toString().equals(other.url.toString());
+                    this.mUrl.toString().equals(other.mUrl.toString());
         }
-
         return sameSame;
     }
 
@@ -80,7 +156,7 @@ public class WeatherStation implements Comparable
             mHashCode = 42;
 
             mHashCode = 3 * mHashCode + toString().hashCode();
-            mHashCode = 3 * mHashCode + url.hashCode();
+            mHashCode = 3 * mHashCode + mUrl.hashCode();
         }
         return mHashCode;
     }

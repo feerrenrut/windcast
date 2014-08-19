@@ -1,8 +1,6 @@
 package com.feer.windcast;
 
-import android.annotation.TargetApi;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
@@ -19,7 +17,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 
 public class MainActivity extends ActionBarActivity implements WeatherStationFragment.OnWeatherStationFragmentInteractionListener
 {
@@ -30,8 +27,6 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] mAustralianStates;
-    private TextView mDrawerFavStations;
-    private TextView mDrawerAllStations;
     private ListView mDrawerStatesList;
     private LinearLayout mDrawerContents;
     private CharSequence mTitle;
@@ -45,8 +40,6 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         mDrawerContents = (LinearLayout) findViewById(R.id.drawer_contents);
 
         mDrawerStatesList = (ListView) findViewById(R.id.drawer_states_list);
-        mDrawerFavStations = (TextView) findViewById(R.id.drawer_favs);
-        mDrawerAllStations = (TextView) findViewById(R.id.drawer_allStations);
         mTitle = super.getTitle();
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
@@ -107,14 +100,12 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         ReplaceStationsOnClick favsClicked = new ReplaceStationsOnClick(
                 WeatherStationFragment.StationsToShow.Favourites,
                 getResources().getString(R.string.favourite_stations));
-        findViewById(R.id.drawer_favs_image).setOnClickListener(favsClicked);
-        mDrawerFavStations.setOnClickListener(favsClicked);
+        findViewById(R.id.drawer_favs_layout).setOnClickListener(favsClicked);
 
         ReplaceStationsOnClick allClicked = new ReplaceStationsOnClick(
                 WeatherStationFragment.StationsToShow.All,
                 getResources().getString(R.string.app_name));
-        findViewById(R.id.drawer_all_image).setOnClickListener(allClicked);
-        mDrawerAllStations.setOnClickListener(allClicked);
+        findViewById(R.id.drawer_all_layout).setOnClickListener(allClicked);
 
         final ImageView statesImage = (ImageView) findViewById(R.id.drawer_states_image);
         View.OnClickListener toggleStatesArray = new View.OnClickListener()
@@ -133,9 +124,8 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
             }
         };
 
-        findViewById(R.id.drawer_states).setOnClickListener(toggleStatesArray);
+        findViewById(R.id.drawer_states_layout).setOnClickListener(toggleStatesArray);
         mDrawerStatesList.setVisibility(View.INVISIBLE);
-        statesImage.setOnClickListener(toggleStatesArray);
 
         if(getSupportFragmentManager().findFragmentByTag(STATIONS_FRAG_TAG) == null)
         {
@@ -178,9 +168,6 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
     /* Called whenever we call invalidateOptionsMenu() */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        // If the nav drawer is open, hide action items related to the content view
-        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerContents);
-        //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -194,7 +181,6 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         trans.commit();
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     @Override
     public void setTitle(CharSequence title) {
         mTitle = title;

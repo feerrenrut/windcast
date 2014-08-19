@@ -1,8 +1,6 @@
 package com.feer.windcast.tests;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.os.Build;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.feer.windcast.MainActivity;
@@ -152,7 +150,6 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
                 .check(matches(not(isDisplayed())));
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void test_selectWA_titleShowsSelection()
     {
         launchActivity();
@@ -223,14 +220,14 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
 
 
-        final ArrayList<WeatherStation> favStationList = new ArrayList<WeatherStation>();
+        final ArrayList<String> favStationURLsList = new ArrayList<String>();
         ArrayList<WeatherStation> allStationList = mFakeStations.GetAllStations();
         WeatherStation copy = allStationList.get(5);
-        favStationList.add(new WeatherStation(copy.Name, copy.url.toString()));
+        favStationURLsList.add(copy.GetURL().toString());
         copy = allStationList.get(2);
-        favStationList.add(new WeatherStation(copy.Name, copy.url.toString()));
+        favStationURLsList.add(copy.GetURL().toString());
 
-        when(mFavs.GetFavourites()).thenReturn(favStationList);
+        when(mFavs.GetFavouriteURLs()).thenReturn(favStationURLsList);
 
         launchActivity();
 
@@ -253,7 +250,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         when(mCache.CreateNewFavouriteStationAccessor()).thenReturn(mFavs);
         when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
 
-        when(mFavs.GetFavourites()).thenReturn(mFakeStations.EmptyStationList());
+        when(mFavs.GetFavouriteURLs()).thenReturn(new ArrayList<String>());
 
         launchActivity();
 
@@ -283,7 +280,9 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         final int STATION_INDEX = 4;
         WeatherStation oldFav = mFakeStations.GetAllStations().get(STATION_INDEX);
         oldFav.IsFavourite = true;
-        when(mFavs.GetFavourites()).thenReturn(mFakeStations.GetSingleStation(STATION_INDEX));
+        ArrayList<String> favUrls = new ArrayList<String>();
+        favUrls.add(oldFav.GetURL().toString());
+        when(mFavs.GetFavouriteURLs()).thenReturn(favUrls);
 
         launchActivity();
 

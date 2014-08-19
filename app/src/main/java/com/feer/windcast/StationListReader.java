@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.feer.windcast.WeatherStation.*;
+
 /**
  * Reads weather stations embedded as links in html
  * */
@@ -56,11 +58,12 @@ public class StationListReader
             Matcher m = p.matcher(str);
             while(m.find())
             {
-                WeatherStation ws = new WeatherStation();
-                ws.State = state;
-                ws.url = new URL("http://www.bom.gov.au" + StationListReader.ConvertToJSONURL(m.group(1)));
-                ws.Name = m.group(2);
-                weatherStations.add(ws);
+                weatherStations.add(
+                        new WeatherStation.WeatherStationBuilder()
+                        .WithState(States.valueOf(state))
+                        .WithURL(new URL("http://www.bom.gov.au" + StationListReader.ConvertToJSONURL(m.group(1))))
+                        .WithName(m.group(2))
+                        .Build());
             }
         }
 

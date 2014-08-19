@@ -3,8 +3,10 @@ package com.feer.windcast.testUtils;
 import com.feer.windcast.WeatherStation;
 
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
+import static com.feer.windcast.WeatherStation.States.*;
 import static com.google.android.apps.common.testing.testrunner.util.Checks.checkNotNull;
 import static java.lang.String.format;
 
@@ -19,7 +21,7 @@ public class FakeWeatherStationData
     public FakeWeatherStationData(String stationNameBase) throws Exception
     {
         checkNotNull(stationNameBase);
-        final String urlFormat = "http://WindCastTestData.com/%s.json";
+        final String urlFormat = "http://WindCastTestData.com/%d.json";
         final String nameFormat = "%s%d";
 
         final int numToAdd = MAX_NUM_OF_ALL_STATIONS;
@@ -28,9 +30,12 @@ public class FakeWeatherStationData
         {
             for(int stationIndex = 0; stationIndex < numToAdd; ++stationIndex)
             {
-                final String stationName = format(nameFormat, stationNameBase, stationIndex);
-                final String stationUrl = format(urlFormat, stationNameBase);
-                mStations.add(new WeatherStation(stationName, stationUrl));
+                WeatherStation.WeatherStationBuilder builder = new WeatherStation.WeatherStationBuilder();
+                builder.WithName(format(nameFormat, stationNameBase, stationIndex));
+                builder.WithURL(new URL(format(urlFormat, stationIndex)));
+                builder.WithState(WA);
+
+                mStations.add(builder.Build());
             }
         } catch (MalformedURLException e)
         {
