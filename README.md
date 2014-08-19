@@ -6,7 +6,7 @@ Australia. Information is collected by BOM (Bureau of Meteorology, http://www.bo
 
 ##Requirements
 
-* Android Studio 0.5.8
+* Android Studio 0.8.6
 * See docs/SDK-installedPackages.PNG for sdk versions required.
 * Other dependencies are retrieved via gradle
 
