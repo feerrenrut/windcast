@@ -23,6 +23,7 @@ import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMat
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -91,7 +92,7 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         onData(instanceOf(WeatherStation.class))
                 .inAdapterView(withId(android.R.id.list))
                 .atPosition(0).onChildView(isAssignableFrom(TextView.class))
-                .check(matches(withText("test Station3 (null)")));
+                .check(matches(withText("test Station3 (WA)")));
     }
 
     public void test_withASingleStation_CreatingActivity_ShowsOneItem()
@@ -112,18 +113,15 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         onData(instanceOf(WeatherStation.class))
                 .inAdapterView(withId(android.R.id.list))
                 .atPosition(expectedNumberOfItems-1).onChildView(isAssignableFrom(TextView.class))
-                .check(matches(withText("test Station0 (null)")));
+                .check(matches(withText("test Station0 (WA)")));
     }
 
     public void test_withNoStations_CreatingActivity_ShowsNoItems()
     {
         launchActivity();
 
-        onView(withId(android.R.id.list)).check(matches(isDisplayed()));
-
-        final int expectedNumberOfItems = 0;
-        onView(withId(android.R.id.list))
-                .check(matches(adapterHasCount(equalTo(expectedNumberOfItems))));
+        onView(withId(android.R.id.list)).check(matches(not(isDisplayed())));
+        onView(withId(android.R.id.empty)).check(matches(isDisplayed()));
 
         //todo: Show something GOOD when there are no items
     }

@@ -156,12 +156,11 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             {
                 if(mFavs != null && cacheStations != null)
                 {
-                    ArrayList<WeatherStation> favs = mFavs.GetFavourites();
+                    ArrayList<String> favs = mFavs.GetFavouriteURLs();
                     ArrayList<WeatherStation> useStations = cacheStations;
                     SetFavStations(useStations, favs);
                     if (mShowOnlyStations == StationsToShow.Favourites)
                     {
-                        SetFavStations(useStations, favs);
                         useStations = FilterToOnlyFavs(useStations);
                     }
                     SetStationList(useStations);
@@ -232,7 +231,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
         WeatherStation station = mAdapter.getItem(position);
-        Log.i(TAG, String.format("Selected station: %s", station.Name));
+        Log.i(TAG, String.format("Selected station: %s", station.GetName()));
         try
         {
             WeatherStationSelected(station);
@@ -255,11 +254,11 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         }
     }
 
-    private void SetFavStations(final Collection<WeatherStation> fullListOfStations, final Collection<WeatherStation> favStations)
+    private void SetFavStations(final Collection<WeatherStation> fullListOfStations, final Collection<String> favStations)
     {
         for(WeatherStation station : fullListOfStations)
         {
-            station.IsFavourite = (favStations.contains(station));
+            station.IsFavourite = (favStations.contains(station.GetURL().toString()));
         }
     }
 

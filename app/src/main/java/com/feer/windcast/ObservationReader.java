@@ -3,9 +3,11 @@ package com.feer.windcast;
 import android.util.JsonReader;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,68 +19,74 @@ import java.util.Locale;
  */
 public class ObservationReader
 {
-    public static WeatherData ReadJsonStream(InputStream in) throws IOException
+    private final WeatherData mWeatherData = new WeatherData();
+
+    public ObservationReader(WeatherStation station)
+    {
+        mWeatherData.Station = station;
+    }
+
+    public WeatherData GetWeatherData() throws IOException
+    {
+        BufferedInputStream bis;
+
+        URLConnection urlConnection = mWeatherData.Station.GetURL().openConnection();
+        InputStream is = urlConnection.getInputStream();
+        bis = new BufferedInputStream(is);
+        ReadJsonStream(bis);
+
+        return mWeatherData;
+    }
+
+    private void ReadJsonStream(InputStream in) throws IOException
     {
         JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
         try{
-            WeatherData wd = null;
-
             reader.beginObject();
             while(reader.hasNext())
             {
                 String name = reader.nextName();
                 if(name.equals("observations"))
-                    wd = ReadObservations(reader);
+                    ReadObservations(reader);
                 else
                     reader.skipValue();
             }
             reader.endObject();
-            return wd;
         }finally
         {
             reader.close();
         }
     }
 
-    public static WeatherData ReadObservations(JsonReader reader)  throws IOException
+    private void ReadObservations(JsonReader reader)  throws IOException
     {
-        WeatherData weatherData = null;
-        List observationData = null;
-
         reader.beginObject();
         while(reader.hasNext())
         {
             String name = reader.nextName();
             if(name.equals("header"))
             {
-                weatherData = ReadHeaderInfo(reader);
+                reader.skipValue();
             }
             else if(name.equals("data"))
             {
-                observationData = ReadAllObservationData(reader);
+                mWeatherData.ObservationData = ReadAllObservationData(reader);
             } else
             {
                 reader.skipValue();
             }
         }
-
         reader.endObject();
 
-        if(weatherData != null)
+        if (mWeatherData.ObservationData == null)
         {
-            weatherData.ObservationData = observationData;
+            throw new IOException("No observations found in JSON stream");
         }
-        else
-        {
-            throw new IOException("No header found in JSON stream");
-        }
-
-        return weatherData;
     }
 
-    private static List ReadAllObservationData(JsonReader reader) throws IOException
+    private static List<ObservationReading> ReadAllObservationData(JsonReader reader) throws IOException
     {
-        List obs = new ArrayList<ObservationReading>();
+        List<ObservationReading> obs = new ArrayList<ObservationReading>();
         reader.beginArray();
         while (reader.hasNext()) {
             obs.add(ReadObservation(reader));
@@ -87,8 +95,7 @@ public class ObservationReader
         return obs;
     }
 
-    private static ObservationReading ReadObservation(JsonReader reader) throws IOException
-    {
+    private static ObservationReading ReadObservation(JsonReader reader) throws IOException {
         ObservationReading ob = new ObservationReading();
         reader.beginObject();
         while (reader.hasNext()) {
@@ -107,8 +114,9 @@ public class ObservationReader
                     } catch (ParseException e)
                     {
                         Log.e("WindCast", "unable to parse date string: " + dateString);
+                        throw new IOException("Unable to parse date string", e);
                     }
-
+                // read wind info
                 } else if (name.equals("wind_spd_kmh") ) {
                     ob.WindSpeed_KMH = reader.nextInt();
                 }else if (name.equals("wind_dir") ) {
@@ -117,13 +125,13 @@ public class ObservationReader
                 }else if (name.equals("gust_kmh") ) {
                     ob.WindGustSpeed_KMH = reader.nextInt();
                 }
-
+                // read temp info
                 else if (name.equals("air_temp")) {
                     ob.AirTemp_DegCel = (float)reader.nextDouble();
                 }else if (name.equals("apparent_t")) {
                     ob.ApparentTemp_DegCel = (float)reader.nextDouble();
                 }
-
+                // read swell info
                 else if (name.equals("swell_dir_worded")) {
                     ob.CardinalSwellDirection = reader.nextString().toLowerCase(Locale.US);
                     ob.SwellBearing = ConvertCardinalCharsToBearing(ob.CardinalSwellDirection);
@@ -132,7 +140,6 @@ public class ObservationReader
                 }else if (name.equals("swell_period")) {
                     ob.SwellPeriod_seconds = reader.nextInt();
                 }
-
                 else {
                     reader.skipValue();
                 }
@@ -203,30 +210,5 @@ public class ObservationReader
             throw new IllegalArgumentException("Unknown cardinal direction: " + dirs);
         }
         return bearing;
-    }
-
-
-    private static WeatherData ReadHeaderInfo(JsonReader reader) throws IOException
-    {
-        WeatherData wd = new WeatherData();
-        wd.Station = new WeatherStation();
-        reader.beginArray();
-        reader.beginObject();
-        while (reader.hasNext()) {
-            String name = reader.nextName();
-            if (name.equals("name")) {
-                wd.Station.Name = reader.nextString();
-            } else if (name.equals("time_zone")) {
-                wd.Station.TimeZone = reader.nextString();
-            } else if (name.equals("state")) {
-                wd.Station.State = reader.nextString();
-            } else {
-                reader.skipValue();
-            }
-        }
-        reader.endObject();
-        reader.endArray();
-
-        return wd;
     }
 }

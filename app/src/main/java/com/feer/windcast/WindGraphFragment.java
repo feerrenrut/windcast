@@ -11,12 +11,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.androidplot.xy.XYPlot;
+import com.feer.windcast.WeatherStation.WeatherStationBuilder;
 import com.feer.windcast.dataAccess.WeatherDataCache;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
-
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -26,6 +26,8 @@ public class WindGraphFragment extends Fragment
 
     private static final String PARAM_KEY_STATION_URL = "param_weatherStation_URL";
     private static final String PARAM_KEY_STATION_NAME = "param_weatherStation_NAME";
+    private static final String PARAM_KEY_STATION_STATE = "param_weatherStation_STATE";
+
 
     /*This is required so the fragment can be instantiated when restoring its activity's state*/
     public WindGraphFragment() {
@@ -41,7 +43,7 @@ public class WindGraphFragment extends Fragment
         return f;
     }
 
-    private WeatherStation mStation = new WeatherStation();
+    private WeatherStation mStation = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -66,16 +68,19 @@ public class WindGraphFragment extends Fragment
 
         String urlString = savedInstanceState.getString(PARAM_KEY_STATION_URL);
         String nameString = savedInstanceState.getString(PARAM_KEY_STATION_NAME);
+        String stateString = savedInstanceState.getString(PARAM_KEY_STATION_STATE);
 
         if(urlString != null)
         {
             Log.v(TAG, String.format("Previous Name (%s) and URL (%s)", nameString, urlString));
 
-            mStation = new WeatherStation();
             try
             {
-                mStation.url = new URL(urlString);
-                mStation.Name = nameString;
+                WeatherStationBuilder builder = new WeatherStation.WeatherStationBuilder();
+                builder.WithName(nameString);
+                builder.WithURL(new URL(urlString));
+                builder.WithState(WeatherStation.States.valueOf(stateString));
+                mStation = builder.Build();
             } catch (MalformedURLException e)
             {
                 Log.e("WindCast","url not valid: " + urlString + "\n\n" + e.toString());
@@ -90,12 +95,20 @@ public class WindGraphFragment extends Fragment
         populateUI();
     }
 
+    static private String FormatStationName(WeatherStation station)
+    {
+        return station.GetName() + ", " + station.GetLongStateName();
+    }
+
     private void populateUI()
     {
-
         final Activity act = getActivity();
         final XYPlot  plot = (XYPlot) act.findViewById(R.id.mySimpleXYPlot);
         WindGraph.FormatGraph(plot, act);
+
+        final TextView stationNameLabel = (TextView) act.findViewById(R.id.stationNameLabel);
+        stationNameLabel.setText(FormatStationName(mStation));
+
         new AsyncTask<Void, Void, Boolean>()
         {
             WeatherData wd;
@@ -103,21 +116,15 @@ public class WindGraphFragment extends Fragment
             @Override
             protected Boolean doInBackground(Void... params)
             {
-                WeatherDataCache cache = WeatherDataCache.GetWeatherDataCache();
-
-                URL url;
-                if(mStation != null)
+                if(mStation == null)
                 {
-                    url = mStation.url;
-                }
-                else
-                {
-                    Log.w(TAG, "No weather station set using first one!");
-                    //TODO let the user know in a nice way!!
+                    Log.w(TAG, "No weather station!");
                     return false;
                 }
-                Log.i("WindCast", "Getting data from: " + url.toString());
-                wd = cache.GetWeatherDataFor(url);
+
+                WeatherDataCache cache = WeatherDataCache.GetWeatherDataCache();
+                Log.i("WindCast", "Getting data from: " + mStation.GetURL().toString());
+                wd = cache.GetWeatherDataFor(mStation);
                 return true;
             }
 
@@ -129,51 +136,52 @@ public class WindGraphFragment extends Fragment
                 // In this case we exit early.
                 if (act == null) return;
 
-                //TODO check the result, let the user know if we don't know what data to show them.
                 final TextView stationNameLabel = (TextView) act.findViewById(R.id.stationNameLabel);
 
-                if(wd == null)
+                final TextView readingTime = (TextView) act.findViewById(R.id.readingTimeLabel);
+                if(wd == null || result == false)
                 {
-                    stationNameLabel.setText("Weather data is null!");
-                }else
-                {
-                    stationNameLabel.setText(wd.Station.Name + ", " + wd.Station.State);
+                    readingTime.setText("Weather data not available");
+                    return;
+                }
 
-                    if(wd.ObservationData != null && !wd.ObservationData.isEmpty())
+                stationNameLabel.setText(FormatStationName(wd.Station));
+
+                if(wd.ObservationData != null && !wd.ObservationData.isEmpty())
+                {
+                    ObservationReading reading = wd.ObservationData.get(0);
+
+                    DateFormat localDate = android.text.format.DateFormat
+                            .getDateFormat(act.getApplicationContext());
+
+                    DateFormat localTime = android.text.format.DateFormat
+                            .getTimeFormat(act.getApplicationContext());
+
+                    readingTime.setText(
+                            localTime.format(reading.LocalTime) + ' ' + localDate.format(reading.LocalTime)
+                            + "\n"                                                    );
+
+                    if(reading.WindBearing != null && reading.CardinalWindDirection != null && reading.WindSpeed_KMH != null)
                     {
-                        ObservationReading reading = wd.ObservationData.get(0);
+                        final TextView speedLabel = (TextView)act.findViewById(R.id.latestReadingLabel);
 
-                        DateFormat localDate = android.text.format.DateFormat
-                                .getDateFormat(act.getApplicationContext());
-
-                        DateFormat localTime = android.text.format.DateFormat
-                                .getTimeFormat(act.getApplicationContext());
-
-                        ((TextView) act.findViewById(R.id.readingTimeLabel)).setText(
-                                localTime.format(reading.LocalTime) + ' ' + localDate.format(reading.LocalTime)
-                                + "\n"                                                    );
-
-                        if(reading.WindBearing != null && reading.CardinalWindDirection != null && reading.WindSpeed_KMH != null)
+                        if(!reading.CardinalWindDirection.equals("calm") && reading.WindSpeed_KMH > 0)
                         {
-                            TextView speedLabel = (TextView)act.findViewById(R.id.latestReadingLabel);
-
-                            if(!reading.CardinalWindDirection.equals("calm") && reading.WindSpeed_KMH > 0)
-                            {
-                                speedLabel.setText(reading.WindSpeed_KMH + " Km/H from " + getDirectionWordsFromChars(reading.CardinalWindDirection));
-                            }
-                            else
-                            {
-                                speedLabel.setText("Calm conditions");
-                            }
+                            speedLabel.setText(reading.WindSpeed_KMH + " Km/H from " + getDirectionWordsFromChars(reading.CardinalWindDirection));
+                        }
+                        else
+                        {
+                            speedLabel.setText("Calm conditions");
                         }
                     }
-                    else
-                    {
-                        ((TextView)act.findViewById(R.id.latestReadingLabel)).setText(act.getString(R.string.no_readings));
-                    }
-
                 }
+                else
+                {
+                    readingTime.setText(act.getString(R.string.no_readings));
+                }
+
                 WindGraph.SetupGraph(wd, plot, act);
+                plot.setVisibility(View.VISIBLE);
             }
         }.execute();
     }
@@ -213,7 +221,8 @@ public class WindGraphFragment extends Fragment
 
     static private void addInstanceStateToBundle(Bundle outState, WeatherStation station)
     {
-        outState.putString(PARAM_KEY_STATION_URL, station.url.toString());
-        outState.putString(PARAM_KEY_STATION_NAME, station.Name);
+        outState.putString(PARAM_KEY_STATION_URL, station.GetURL().toString());
+        outState.putString(PARAM_KEY_STATION_NAME, station.GetName());
+        outState.putString(PARAM_KEY_STATION_STATE, station.GetStateAbbreviated());
     }
 }

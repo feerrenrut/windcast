@@ -86,22 +86,22 @@
     <orderEntry type="library" exported="" name="gridlayout-v7-18.0.0" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-19.0.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="dagger-1.2.1" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="espresso-runner-1.1-r2" level="project" />
     <orderEntry type="library" exported="" name="support-v4-19.0.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="javax.annotation-api-1.2" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-core-1.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="espresso-runner-1.1-r3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="mockito-core-1.9.5" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="dexmaker-mockito-1.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="espresso-support-v4-1.1-r3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-library-1.1" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="espresso-1.1-r2" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="espresso-1.1-r3" level="project" />
     <orderEntry type="library" exported="" name="androidplot-core-0.6.1-SNAPSHOT" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="espresso-runner-runtime-1.1-r2" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="espresso-runner-runtime-1.1-r3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="javax.inject-1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="objenesis-1.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="guava-16.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="dexmaker-1.1" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-integration-1.1" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="espresso-support-v4-1.1-r2" level="project" />
   </component>
 </module>
 

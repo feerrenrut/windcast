@@ -8,9 +8,7 @@ import com.feer.windcast.WeatherData;
 import com.feer.windcast.WeatherStation;
 
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -51,26 +49,19 @@ public class WeatherDataCache
         return new FavouriteStationCache();
     }
 
-    public WeatherData GetWeatherDataFor(URL url)
+    public WeatherData GetWeatherDataFor(WeatherStation station)
     {
         WeatherData wd = null;
         try
         {
-            BufferedInputStream bis;
+            ObservationReader obs = new ObservationReader(station);
+            wd = obs.GetWeatherData();
 
-            URLConnection urlConnection = url.openConnection();
-            InputStream is = urlConnection.getInputStream();
-            bis = new BufferedInputStream(is);
-
-            wd = ObservationReader.ReadJsonStream(bis);
-
-        } catch (MalformedURLException e)
-        {
-            Log.e(TAG, e.getMessage());
-        } catch (IOException e)
+        } catch (Exception e)
         {
             Log.e(TAG, e.getMessage());
         }
+
         return wd;
     }
 
@@ -133,7 +124,7 @@ public class WeatherDataCache
         ArrayList<WeatherStation> stationsForState = new ArrayList<WeatherStation>();
         for(WeatherStation station : smStations)
         {
-            if(station.State.equals(state))
+            if(station.GetStateAbbreviated().equals(state))
             {
                 stationsForState.add(station);
             }

@@ -96,13 +96,13 @@ public class WindGraph
             windSpeeds.add(val);
             readingTimes.add(reading1.LocalTime);
             windDirections.add(reading1.WindBearing);
-        };
+        }
 
         Collections.reverse(windSpeeds);
         Collections.reverse(readingTimes);
         Collections.reverse(windDirections);
 
-        plot.setTitle("Wind Speed at " + wd.Station.Name);
+        plot.setTitle("Wind Speed at " + wd.Station.GetName());
 
         // Turn the above arrays into XYSeries':
         XYSeries series1 = new SimpleXYSeries(
