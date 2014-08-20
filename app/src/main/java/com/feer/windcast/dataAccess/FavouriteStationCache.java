@@ -97,8 +97,8 @@ public class FavouriteStationCache
         station.IsFavourite = false;
 
         SQLiteDatabase db = DBOpenHelper.Instance(mContext).getWritableDatabase();
-        String selection = COLUMN_NAME_STATION_NAME + " LIKE ?";//todo BUG? can you accidentally remove two favourite stations with similar names
-        String[] selectionArgs = { station.GetName() };
+        String selection = COLUMN_NAME_URL + " LIKE ?";
+        String[] selectionArgs = { station.GetURL().toString() };
         db.delete(DBContract.FavouriteStation.TABLE_NAME, selection, selectionArgs);
     }
 
