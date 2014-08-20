@@ -1,4 +1,4 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 19
@@ -7,7 +7,7 @@ android {
     defaultConfig {
         minSdkVersion 11
         targetSdkVersion 19
-        versionCode 5
+        versionCode 6
         versionName "1.0"
         testInstrumentationRunner "com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
     }
@@ -21,23 +21,29 @@ android {
         exclude 'LICENSE.txt'
     }
 
-    if(hasProperty("RELEASE_STORE_FILE")) {
 
         signingConfigs {
             release {
-                storeFile file(RELEASE_STORE_FILE)
-                storePassword RELEASE_STORE_PASSWORD
-                keyAlias RELEASE_KEY_ALIAS
-                keyPassword RELEASE_KEY_PASSWORD
+                if(project.hasProperty("RELEASE_STORE_FILE"))
+                {
+                    storeFile file(RELEASE_STORE_FILE)
+                    storePassword RELEASE_STORE_PASSWORD
+                    keyAlias RELEASE_KEY_ALIAS
+                    keyPassword RELEASE_KEY_PASSWORD
+                }
+                else
+                {
+                    println '\n\n**WARNING**\n\tGradle properties not set correctly for signed release. Please see readme.\n\n'
+                }
             }
         }
-    }
+
 
     buildTypes {
-        if(hasProperty("RELEASE_STORE_FILE")) {
-            release {
-                signingConfig signingConfigs.release
-            }
+        release {
+            signingConfig signingConfigs.release
+            runProguard false
+            zipAlign true
         }
 
         debug {
@@ -49,8 +55,8 @@ android {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:19.0.0'
-    compile 'com.android.support:gridlayout-v7:18.0.+'
-    compile 'com.android.support:support-v4:19.0.+'
+    compile 'com.android.support:gridlayout-v7:18.0.0'
+    compile 'com.android.support:support-v4:19.0.1'
     compile files('libs/androidplot-core-0.6.1-SNAPSHOT.jar')
 
     androidTestCompile('com.jakewharton.espresso:espresso:1.1-r3')
