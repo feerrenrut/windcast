@@ -139,9 +139,9 @@ public class WindGraphFragment extends Fragment
                 final TextView stationNameLabel = (TextView) act.findViewById(R.id.stationNameLabel);
 
                 final TextView readingTime = (TextView) act.findViewById(R.id.readingTimeLabel);
-                if(wd == null || result == false)
+                if(wd == null || !result)
                 {
-                    readingTime.setText("Weather data not available");
+                    readingTime.setText(act.getString(R.string.weather_data_not_available));
                     return;
                 }
 

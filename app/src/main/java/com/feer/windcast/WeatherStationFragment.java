@@ -1,6 +1,7 @@
 package com.feer.windcast;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.feer.windcast.dataAccess.BackgroundTaskManager;
 import com.feer.windcast.dataAccess.FavouriteStationCache;
@@ -49,6 +51,16 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
     private EditText mSearchInput;
     private FavouriteStationCache mFavs = null;
+    private TextView mEmptyView = null;
+
+    enum EmptyTextState
+    {
+        NoInternetAccess,
+        NoStationsAvailable,
+        LoadingData
+    }
+
+    private EmptyTextState mEmptyTextEnum = EmptyTextState.LoadingData;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -131,8 +143,10 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 handleFavChange);
 
         AbsListView listView = (AbsListView) view.findViewById(android.R.id.list);
-        listView.setEmptyView(view.findViewById(android.R.id.empty));
+        mEmptyView = (TextView) view.findViewById(android.R.id.empty); // default text is loading_station_list
+        listView.setEmptyView(mEmptyView);
         listView.setAdapter(mAdapter);
+        mEmptyTextEnum = EmptyTextState.LoadingData;
 
         new AsyncTask<Void, Void, ArrayList<WeatherStation>>()
         {
@@ -171,11 +185,14 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 {
                     Boolean favsNull = mFavs == null;
                     Boolean cacheStationsNull = cacheStations == null;
+                    mEmptyTextEnum = EmptyTextState.NoInternetAccess;
+
                     Log.i(TAG,
                             "Could not add new stations." +
                                     " mFavs is null: " + favsNull.toString() +
                                     " cacheStations is null: " + cacheStationsNull.toString());
                 }
+                SetEmptyTextViewContents();
             }
         }.execute();
 
@@ -193,6 +210,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
         mAdapter = null;
         mSearchInput = null;
+        mEmptyView = null;
     }
 
 
@@ -215,6 +233,32 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
         mCache = WeatherDataCache.GetWeatherDataCache();
         mFavs = mCache.CreateNewFavouriteStationAccessor();
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        SetEmptyTextViewContents();
+    }
+
+    private void SetEmptyTextViewContents() {
+        Activity act;
+        Resources res;
+        if(mEmptyView != null && (act = getActivity()) != null && (res = act.getResources()) != null) {
+
+            switch (mEmptyTextEnum) {
+                case NoInternetAccess:
+                    mEmptyView.setText(res.getText(R.string.no_internet_access));
+                    break;
+                case NoStationsAvailable:
+                    mEmptyView.setText(res.getText(R.string.no_stations_available));
+                    break;
+                case LoadingData:
+                    mEmptyView.setText(res.getText(R.string.loading_station_list));
+                    break;
+            }
+        }
     }
 
     @Override
