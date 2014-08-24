@@ -136,14 +136,17 @@ public class WindGraphFragment extends Fragment
                 // In this case we exit early.
                 if (act == null) return;
 
-                final TextView stationNameLabel = (TextView) act.findViewById(R.id.stationNameLabel);
-
                 final TextView readingTime = (TextView) act.findViewById(R.id.readingTimeLabel);
+                if(readingTime == null) return;
+
                 if(wd == null || !result)
                 {
                     readingTime.setText(act.getString(R.string.weather_data_not_available));
                     return;
                 }
+
+                final TextView stationNameLabel = (TextView) act.findViewById(R.id.stationNameLabel);
+                if(stationNameLabel == null) return;
 
                 stationNameLabel.setText(FormatStationName(wd.Station));
 

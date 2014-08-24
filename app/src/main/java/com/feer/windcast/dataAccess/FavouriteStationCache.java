@@ -26,13 +26,14 @@ public class FavouriteStationCache
      * can be made synchronously.
      * This must not be called from the UI thread!
      */
-    public void Initialise(Context context, BackgroundTaskManager taskManager)
+    public synchronized void Initialise(Context context, BackgroundTaskManager taskManager)
     {
         mContext = context;
         mTaskManager = taskManager;
         mFavUrls = GetFavouritesFromDB();
     }
 
+    synchronized
     public void AddFavouriteStation(final WeatherStation station)
     {
         mTaskManager.RunInBackground(
@@ -51,6 +52,7 @@ public class FavouriteStationCache
         }
     }
 
+    synchronized
     public void RemoveFavouriteStation(final WeatherStation station)
     {
         mTaskManager.RunInBackground(
@@ -69,6 +71,7 @@ public class FavouriteStationCache
         }
     }
 
+    synchronized
     public ArrayList<String> GetFavouriteURLs()
     {
         if(mFavUrls == null)

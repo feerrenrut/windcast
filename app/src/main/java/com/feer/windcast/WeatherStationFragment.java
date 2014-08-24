@@ -1,6 +1,7 @@
 package com.feer.windcast;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -154,7 +155,10 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             @Override
             protected ArrayList<WeatherStation> doInBackground(Void... params)
             {
-                mFavs.Initialise(getActivity(), mTaskManager);
+                Context con ;
+                if(getActivity() == null || (con = getActivity().getApplicationContext()) == null) return null;
+
+                mFavs.Initialise(con, mTaskManager);
                 if(mShowOnlyStations == StationsToShow.All || mShowOnlyStations == StationsToShow.Favourites)
                 {
                     return mCache.GetWeatherStationsFromAllStates();
@@ -274,14 +278,15 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
-        WeatherStation station = mAdapter.getItem(position);
-        Log.i(TAG, String.format("Selected station: %s", station.GetName()));
-        try
-        {
-            WeatherStationSelected(station);
-        } catch (Exception e)
-        {
-            Log.e(TAG, "Exception when selecting the station",e);
+        WeatherStationArrayAdapter adapter = null;
+        if ( (adapter = mAdapter) != null || (adapter = (WeatherStationArrayAdapter) parent.getAdapter()) != null) {
+            WeatherStation station = adapter.getItem(position);
+            Log.i(TAG, String.format("Selected station: %s", station.GetName()));
+            try {
+                WeatherStationSelected(station);
+            } catch (Exception e) {
+                Log.e(TAG, "Exception when selecting the station", e);
+            }
         }
     }
 
