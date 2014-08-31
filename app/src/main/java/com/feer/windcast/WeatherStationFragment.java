@@ -122,7 +122,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_weatherstation, container, false);
+        View view = inflater.inflate(R.layout.fragment_weatherstation_list, container, false);
 
         WeatherStationArrayAdapter.OnFavouriteChangedListener handleFavChange = new WeatherStationArrayAdapter.OnFavouriteChangedListener()
         {
@@ -278,7 +278,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
-        WeatherStationArrayAdapter adapter = null;
+        WeatherStationArrayAdapter adapter;
         if ( (adapter = mAdapter) != null || (adapter = (WeatherStationArrayAdapter) parent.getAdapter()) != null) {
             WeatherStation station = adapter.getItem(position);
             Log.i(TAG, String.format("Selected station: %s", station.GetName()));
