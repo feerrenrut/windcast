@@ -50,7 +50,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
             public void onDrawerClosed(View drawerView)
             {
                 super.onDrawerClosed(drawerView);
-                getActionBar().setTitle(mTitle);
+                getSupportActionBar().setTitle(mTitle);
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
@@ -58,15 +58,15 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                getActionBar().setTitle(mTitle);
+                getSupportActionBar().setTitle(mTitle);
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         mAustralianStates = getResources().getStringArray(R.array.AustralianStates);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
@@ -184,7 +184,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
     @Override
     public void setTitle(CharSequence title) {
         mTitle = title;
-        getActionBar().setTitle(mTitle);
+        getSupportActionBar().setTitle(mTitle);
     }
 
     private void ReplaceStationListFragment(WeatherStationFragment.StationsToShow filter, String title)
