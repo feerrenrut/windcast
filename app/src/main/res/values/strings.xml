@@ -18,6 +18,7 @@
     <string name="no_stations_available">No stations available.</string>
     <string name="weather_data_not_available">Weather data not available</string>
     <string name="bom_attribution_description">Some data on this app is sourced from the Bureau of Meteorology</string>
+    <string name="search_menu_title">Filter Stations</string>
 
     <string-array name="AustralianStates">
         <item>WA</item>
