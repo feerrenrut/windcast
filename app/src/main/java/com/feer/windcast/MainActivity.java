@@ -1,5 +1,6 @@
 package com.feer.windcast;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -9,6 +10,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -152,6 +154,11 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
+
+    private void LaunchAboutScreen() {
+        startActivity(new Intent(this, About.class));
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Pass the event to ActionBarDrawerToggle, if it returns
@@ -159,11 +166,21 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        // Handle your other action bar items...
+
+        switch (item.getItemId()) {
+            case R.id.about:
+                LaunchAboutScreen();
+                return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.options_menu, menu);
+        return true;
+    }
 
     @Override
     public void onWeatherStationSelected(WeatherStation station)

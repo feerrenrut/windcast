@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:theme="@android:style/Theme.NoTitleBar"
     android:orientation="vertical"
-    android:background="#ff5087b6"
+    android:background="@color/bom_attribution_background"
     tools:context=".SplashScreen">
 
 

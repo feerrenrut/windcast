@@ -214,7 +214,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.options_menu, menu);
+        inflater.inflate(R.menu.stations_list_menu, menu);
     }
 
     @Override
@@ -222,24 +222,29 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         switch (item.getItemId())
         {
             case R.id.search:
-                if(mSearchInput != null)
-                {
-                    switch (mSearchInput.getVisibility())
-                    {
-                        case View.GONE:
-                            mSearchInput.setVisibility(View.VISIBLE);
-                            break;
-                        case View.VISIBLE:
-                            mSearchInput.setText("");
-                            mSearchInput.setVisibility(View.GONE);
-                            mSearchInput.clearFocus();
-                            break;
-
-                    }
-                }
+                ToggleStationFilter();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    private void ToggleStationFilter() {
+        if(mSearchInput != null)
+        {
+            switch (mSearchInput.getVisibility())
+            {
+                case View.GONE:
+                    mSearchInput.setVisibility(View.VISIBLE);
+                    break;
+                case View.VISIBLE:
+                    mSearchInput.setText("");
+                    mSearchInput.setVisibility(View.GONE);
+                    mSearchInput.clearFocus();
+                    break;
+
+            }
+        }
     }
 
     @Override
