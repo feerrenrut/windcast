@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -22,6 +23,21 @@ public class About extends ActionBarActivity {
                 launchEmailSupportIntent();
             }
         });
+
+        ImageView bomImage = (ImageView) findViewById(R.id.bom_attrib_imageView);
+        bomImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchBOMWebsite();
+            }
+        });
+    }
+
+    private void launchBOMWebsite() {
+        //launch website
+        String urlString = "http://www.bom.gov.au/data-access/3rd-party-attribution.shtml";
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
+        startActivity(browserIntent);
     }
 
     private void launchEmailSupportIntent() {

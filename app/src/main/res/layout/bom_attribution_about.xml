@@ -6,7 +6,7 @@
     android:id="@+id/bom_attrib_imageView"
 
     android:layout_gravity="center|bottom"
-    android:src="@drawable/bom_attrib_load_portrait"
+    android:src="@drawable/bom_attrib_about_portrait"
     android:adjustViewBounds="true"
     android:layout_width="200dp"
     android:layout_height="wrap_content"
