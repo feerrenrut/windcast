@@ -10,8 +10,12 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -114,6 +118,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setHasOptionsMenu(true);
         if(savedInstanceState != null) readBundle(savedInstanceState);
         else if (getArguments() != null) readBundle(getArguments());
 
@@ -122,7 +127,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_weatherstation, container, false);
+        View view = inflater.inflate(R.layout.fragment_weatherstation_list, container, false);
 
         WeatherStationArrayAdapter.OnFavouriteChangedListener handleFavChange = new WeatherStationArrayAdapter.OnFavouriteChangedListener()
         {
@@ -208,6 +213,41 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.stations_list_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId())
+        {
+            case R.id.search:
+                ToggleStationFilter();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    private void ToggleStationFilter() {
+        if(mSearchInput != null)
+        {
+            switch (mSearchInput.getVisibility())
+            {
+                case View.GONE:
+                    mSearchInput.setVisibility(View.VISIBLE);
+                    break;
+                case View.VISIBLE:
+                    mSearchInput.setText("");
+                    mSearchInput.setVisibility(View.GONE);
+                    mSearchInput.clearFocus();
+                    break;
+
+            }
+        }
+    }
+
+    @Override
     public void onDestroyView()
     {
         super.onDestroyView();
@@ -278,7 +318,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
-        WeatherStationArrayAdapter adapter = null;
+        WeatherStationArrayAdapter adapter;
         if ( (adapter = mAdapter) != null || (adapter = (WeatherStationArrayAdapter) parent.getAdapter()) != null) {
             WeatherStation station = adapter.getItem(position);
             Log.i(TAG, String.format("Selected station: %s", station.GetName()));
@@ -293,6 +333,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     private void WeatherStationSelected(WeatherStation station) throws Exception
     {
         if (null != mListener) {
+            mSearchInput.clearFocus();
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
             mListener.onWeatherStationSelected(station);
@@ -347,27 +388,33 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     private void InitializeSearchBox(View view)
     {
         mSearchInput = (EditText)view.findViewById(R.id.weather_station_search_box);
-
+        mSearchInput.setFocusable(true);
         mSearchInput.addTextChangedListener(
-                new TextWatcher()
-                {
+                new TextWatcher() {
                     @Override
-                    public void onTextChanged(CharSequence charSequence, int i, int i2, int i3)
-                    {
+                    public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
                         mAdapter.getFilter().filter(charSequence);
                     }
 
                     @Override
-                    public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3)
-                    {
-                    }
-
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) { }
                     @Override
-                    public void afterTextChanged(Editable editable)
-                    {
+                    public void afterTextChanged(Editable editable) { }
+                }
+        );
+        mSearchInput.setOnFocusChangeListener(
+                new View.OnFocusChangeListener() {
+                    @Override
+                    public void onFocusChange(View v, boolean hasFocus) {
+                        if (v == mSearchInput && !hasFocus) {
+                            //close keyboard
+                            Context context = getActivity().getApplicationContext();
+                            ((InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(
+                                    InputMethodManager.SHOW_IMPLICIT, 0);
+                        }
                     }
                 }
-                                            );
+        );
     }
 
     /**

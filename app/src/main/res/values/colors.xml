@@ -1,3 +1,4 @@
 <resources>
     <color name="drawer_background">#FF222222</color>
+    <color name="bom_attribution_background">#FF5087B6</color>
 </resources>

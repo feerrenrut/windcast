@@ -4,8 +4,7 @@
     <string name="app_name">WindCast</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-
-    <string name="weather_station_search_text">Search weather stations...</string>
+    <string name="weather_station_search_text">Search weather stations…</string>
     <string name="wind_stations_in">Wind Stations in %s</string>
     <string name="states">States</string>
     <string name="no_readings">No readings!</string>
@@ -18,6 +17,9 @@
     <string name="no_internet_access">Unable to access the internet.</string>
     <string name="no_stations_available">No stations available.</string>
     <string name="weather_data_not_available">Weather data not available</string>
+    <string name="bom_attribution_description">Some data on this app is sourced from the Bureau of Meteorology</string>
+    <string name="search_menu_title">Filter Stations</string>
+    <string name="options_about">About</string>
 
     <string-array name="AustralianStates">
         <item>WA</item>
@@ -29,5 +31,9 @@
         <item>ACT</item>
         <item>NT</item>
     </string-array>
+
+    <string name="title_activity_about">About</string>
+    <string name="about_windcast">About WindCast</string>
+    <string name="app_created_by">Created by FeerSoft</string>
 
 </resources>
