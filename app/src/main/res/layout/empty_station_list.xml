@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:id="@android:id/empty"
+    android:text="@string/loading_station_list"
+
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    style="@android:style/TextAppearance.Medium"
+    android:textAlignment="center"
+    android:gravity="center_horizontal" />

@@ -26,13 +26,14 @@ public class FavouriteStationCache
      * can be made synchronously.
      * This must not be called from the UI thread!
      */
-    public void Initialise(Context context, BackgroundTaskManager taskManager)
+    public synchronized void Initialise(Context context, BackgroundTaskManager taskManager)
     {
         mContext = context;
         mTaskManager = taskManager;
         mFavUrls = GetFavouritesFromDB();
     }
 
+    synchronized
     public void AddFavouriteStation(final WeatherStation station)
     {
         mTaskManager.RunInBackground(
@@ -51,6 +52,7 @@ public class FavouriteStationCache
         }
     }
 
+    synchronized
     public void RemoveFavouriteStation(final WeatherStation station)
     {
         mTaskManager.RunInBackground(
@@ -69,6 +71,7 @@ public class FavouriteStationCache
         }
     }
 
+    synchronized
     public ArrayList<String> GetFavouriteURLs()
     {
         if(mFavUrls == null)
@@ -97,8 +100,8 @@ public class FavouriteStationCache
         station.IsFavourite = false;
 
         SQLiteDatabase db = DBOpenHelper.Instance(mContext).getWritableDatabase();
-        String selection = COLUMN_NAME_STATION_NAME + " LIKE ?";//todo BUG? can you accidentally remove two favourite stations with similar names
-        String[] selectionArgs = { station.GetName() };
+        String selection = COLUMN_NAME_URL + " LIKE ?";
+        String[] selectionArgs = { station.GetURL().toString() };
         db.delete(DBContract.FavouriteStation.TABLE_NAME, selection, selectionArgs);
     }
 

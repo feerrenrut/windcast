@@ -14,7 +14,10 @@
                   android:layout_width="fill_parent"
                   android:layout_height="wrap_content"
                   android:hint="@string/weather_station_search_text"
-                  android:inputType="textVisiblePassword"/>
+                  android:inputType="textNoSuggestions|textFilter"
+                  android:visibility="gone"
+                  android:imeOptions="actionDone"
+            />
 
         <ListView
             android:id="@android:id/list"
@@ -22,14 +25,7 @@
             android:layout_height="match_parent"
             tools:listitem="@layout/weather_station_list_item" />
 
-        <TextView
-            android:id="@android:id/empty"
-            android:text="No data!"
-
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
-
+        <include layout="@layout/empty_station_list" />
 
     </LinearLayout>
 

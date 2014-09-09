@@ -48,7 +48,7 @@ public class WindGraphFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_graph, container, false);
 
         if(savedInstanceState != null)
         {
@@ -136,14 +136,17 @@ public class WindGraphFragment extends Fragment
                 // In this case we exit early.
                 if (act == null) return;
 
-                final TextView stationNameLabel = (TextView) act.findViewById(R.id.stationNameLabel);
-
                 final TextView readingTime = (TextView) act.findViewById(R.id.readingTimeLabel);
-                if(wd == null || result == false)
+                if(readingTime == null) return;
+
+                if(wd == null || !result)
                 {
-                    readingTime.setText("Weather data not available");
+                    readingTime.setText(act.getString(R.string.weather_data_not_available));
                     return;
                 }
+
+                final TextView stationNameLabel = (TextView) act.findViewById(R.id.stationNameLabel);
+                if(stationNameLabel == null) return;
 
                 stationNameLabel.setText(FormatStationName(wd.Station));
 
