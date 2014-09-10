@@ -28,6 +28,12 @@ import com.feer.windcast.dataAccess.WeatherDataCache;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static com.feer.windcast.EmptyDataError.*;
+import static com.feer.windcast.EmptyDataError.EmptyTextState.LoadingData;
+import static com.feer.windcast.EmptyDataError.EmptyTextState.NoFavourites;
+import static com.feer.windcast.EmptyDataError.EmptyTextState.NoInternetAccess;
+import static com.feer.windcast.EmptyDataError.EmptyTextState.NoResultsAfterFilter;
+
 /**
  * A fragment representing a list of Items.
  * <p />
@@ -58,14 +64,13 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     private FavouriteStationCache mFavs = null;
     private TextView mEmptyView = null;
 
-    enum EmptyTextState
-    {
-        NoInternetAccess,
-        NoStationsAvailable,
-        LoadingData
-    }
 
-    private EmptyTextState mEmptyTextEnum = EmptyTextState.LoadingData;
+    private EmptyDataError mEmptyTextEnum = new EmptyDataError(new OnEmptyListReasonChanged() {
+        @Override
+        public void onEmptyListReasonChanged(EmptyTextState newReason) {
+            WeatherStationFragment.this.SetEmptyTextViewContents(newReason);
+        }
+    });
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -152,7 +157,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         mEmptyView = (TextView) view.findViewById(android.R.id.empty); // default text is loading_station_list
         listView.setEmptyView(mEmptyView);
         listView.setAdapter(mAdapter);
-        mEmptyTextEnum = EmptyTextState.LoadingData;
+        mEmptyTextEnum.AddEmptyListReason(LoadingData);
 
         new AsyncTask<Void, Void, ArrayList<WeatherStation>>()
         {
@@ -194,16 +199,16 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 {
                     Boolean favsNull = mFavs == null;
                     Boolean cacheStationsNull = cacheStations == null;
-                    mEmptyTextEnum = EmptyTextState.NoInternetAccess;
+                    mEmptyTextEnum.AddEmptyListReason( NoInternetAccess );
 
                     Log.i(TAG,
                             "Could not add new stations." +
                                     " mFavs is null: " + favsNull.toString() +
                                     " cacheStations is null: " + cacheStationsNull.toString());
                 }
-                SetEmptyTextViewContents();
+                mEmptyTextEnum.RemoveEmptyListReason(LoadingData);
             }
-        }.execute();
+        }.execute(); //todo make this a task based system, start the task during splash screen.
 
         // Set OnItemClickListener so we can be notified on item clicks
         listView.setOnItemClickListener(this);
@@ -282,16 +287,14 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        SetEmptyTextViewContents();
     }
 
-    private void SetEmptyTextViewContents() {
+    private void SetEmptyTextViewContents(EmptyTextState reason) {
         Activity act;
         Resources res;
         if(mEmptyView != null && (act = getActivity()) != null && (res = act.getResources()) != null) {
 
-            switch (mEmptyTextEnum) {
+            switch (reason) {
                 case NoInternetAccess:
                     mEmptyView.setText(res.getText(R.string.no_internet_access));
                     break;
@@ -301,6 +304,11 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 case LoadingData:
                     mEmptyView.setText(res.getText(R.string.loading_station_list));
                     break;
+                case NoResultsAfterFilter:
+                    mEmptyView.setText(R.string.filter_results_no_stations_found);
+                    break;
+                case NoFavourites:
+                    mEmptyView.setText(R.string.no_favourites);
             }
         }
     }
@@ -356,11 +364,14 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     {
         ArrayList<WeatherStation> onlyFavs = new ArrayList<WeatherStation>();
 
+        mEmptyTextEnum.AddEmptyListReason(NoFavourites);
+
         for(WeatherStation station : fullListOfStations)
         {
             if(station.IsFavourite)
             {
                 onlyFavs.add(station);
+                mEmptyTextEnum.RemoveEmptyListReason(NoFavourites);
             }
         }
         return onlyFavs;
@@ -394,6 +405,14 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                     @Override
                     public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
                         mAdapter.getFilter().filter(charSequence);
+                        if(charSequence.length() > 0)
+                        {
+                            mEmptyTextEnum.AddEmptyListReason(NoResultsAfterFilter);
+                        }
+                        else
+                        {
+                            mEmptyTextEnum.RemoveEmptyListReason(NoResultsAfterFilter);
+                        }
                     }
 
                     @Override
