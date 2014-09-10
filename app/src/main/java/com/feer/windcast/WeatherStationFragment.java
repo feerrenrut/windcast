@@ -208,7 +208,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 }
                 mEmptyTextEnum.RemoveEmptyListReason(LoadingData);
             }
-        }.execute();
+        }.execute(); //todo make this a task based system, start the task during splash screen.
 
         // Set OnItemClickListener so we can be notified on item clicks
         listView.setOnItemClickListener(this);
