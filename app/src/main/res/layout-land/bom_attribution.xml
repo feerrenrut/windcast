@@ -9,5 +9,5 @@
     android:src="@drawable/bom_attrib_load_landscape"
     android:adjustViewBounds="true"
     android:layout_width="wrap_content"
-    android:layout_height="75dp"
+    android:layout_height="wrap_content"
     android:contentDescription="@string/bom_attribution_description" />

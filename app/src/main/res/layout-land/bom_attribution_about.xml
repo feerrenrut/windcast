@@ -8,6 +8,6 @@
     android:layout_gravity="center|bottom"
     android:src="@drawable/bom_attrib_about_landscape"
     android:adjustViewBounds="true"
-    android:layout_width="500dp"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:contentDescription="@string/bom_attribution_description" />
