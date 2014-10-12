@@ -15,12 +15,14 @@ import static com.feer.windcast.testUtils.AdapterMatchers.adapterHasCount;
 import static com.feer.windcast.testUtils.ItemHintMatchers.withItemHint;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
+import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
@@ -68,12 +70,29 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         assertEquals(expectedTitle, act.getActionBar().getTitle().toString());
     }
 
-    public void test_searchBoxOnScreen()
+    public void test_noAction_searchBoxNotShown()
     {
         launchActivity();
-        ViewInteraction searchBox = onView(withId(R.id.weather_station_search_box));
-        searchBox.check(matches(isDisplayed()));
-        searchBox.check(matches(withItemHint(R.string.weather_station_search_text)));
+        onView(withId(R.id.weather_station_search_box))
+            .check(matches( not(isDisplayed()) ));
+    }
+
+    public void test_noAction_searchIconShown()
+    {
+        launchActivity();
+        onView(withId(R.id.search))
+            .check(matches( isDisplayed() ));
+    }
+
+    public void test_clickSearchOption_searchBoxShown()
+    {
+        launchActivity();
+        onView(withId(R.id.search)).perform(click());
+        onView(withId(R.id.weather_station_search_box))
+        .check(matches(
+                allOf(
+                    isDisplayed(),
+                    withItemHint(R.string.weather_station_search_text))));
     }
 
     public void test_enteringTextIntoSearchBox_FiltersStations()
@@ -82,6 +101,8 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
                 .thenReturn(mFakeStations.GetAllStations());
 
         launchActivity();
+
+        onView(withId(R.id.search)).perform(click());
 
         onView(withId(R.id.weather_station_search_box))
                 .perform(typeText("Station3\n")); // '\n' is interpreted as an enter press
