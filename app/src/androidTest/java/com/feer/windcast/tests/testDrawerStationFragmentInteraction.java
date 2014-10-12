@@ -195,6 +195,8 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         when(mCache.GetWeatherStationsFrom(anyString())).thenReturn(mFakeStations.GetAllStations());
         launchActivity();
 
+        onView(withId(R.id.search)).perform(click());
+
         onView(withId(R.id.weather_station_search_box))
                 .perform(typeText("Station3"));
         onView(withId(android.R.id.list))
