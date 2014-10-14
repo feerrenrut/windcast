@@ -33,6 +33,7 @@ import static com.feer.windcast.EmptyDataError.EmptyTextState.LoadingData;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoFavourites;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoInternetAccess;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoResultsAfterFilter;
+import static com.feer.windcast.EmptyDataError.EmptyTextState.NoStationsAvailable;
 
 /**
  * A fragment representing a list of Items.
@@ -190,9 +191,17 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                     if (mShowOnlyStations == StationsToShow.Favourites)
                     {
                         useStations = FilterToOnlyFavs(useStations);
+                        if(useStations.isEmpty())
+                        {
+                            mEmptyTextEnum.AddEmptyListReason(NoFavourites);
+                        }
                     }
-                    SetStationList(useStations);
+                    else if (useStations.isEmpty())
+                    {
+                        mEmptyTextEnum.AddEmptyListReason(NoStationsAvailable);
+                    }
 
+                    SetStationList(useStations);
                     Log.i(TAG, "Finished adding new stations.");
                 }
                 else
@@ -364,14 +373,11 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     {
         ArrayList<WeatherStation> onlyFavs = new ArrayList<WeatherStation>();
 
-        mEmptyTextEnum.AddEmptyListReason(NoFavourites);
-
         for(WeatherStation station : fullListOfStations)
         {
             if(station.IsFavourite)
             {
                 onlyFavs.add(station);
-                mEmptyTextEnum.RemoveEmptyListReason(NoFavourites);
             }
         }
         return onlyFavs;

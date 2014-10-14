@@ -15,6 +15,7 @@ import static com.feer.windcast.testUtils.AdapterMatchers.adapterHasCount;
 import static com.feer.windcast.testUtils.ItemHintMatchers.withItemHint;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
+import static com.google.android.apps.common.testing.ui.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
@@ -74,14 +75,14 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
     {
         launchActivity();
         onView(withId(R.id.weather_station_search_box))
-            .check(matches( not(isDisplayed()) ));
+            .check(matches(not(isDisplayed())));
     }
 
     public void test_noAction_searchIconShown()
     {
         launchActivity();
         onView(withId(R.id.search))
-            .check(matches( isDisplayed() ));
+            .check(matches(isDisplayed()));
     }
 
     public void test_clickSearchOption_searchBoxShown()
@@ -144,6 +145,16 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         onView(withId(android.R.id.list)).check(matches(not(isDisplayed())));
         onView(withId(android.R.id.empty)).check(matches(isDisplayed()));
 
-        //todo: Show something GOOD when there are no items
+        onView(withId(android.R.id.empty)).check(matches(withText(R.string.no_stations_available)));
+    }
+
+    public void test_clickAbout_launchesAboutActivity()
+    {
+        launchActivity();
+
+        openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
+        onView(withText(R.string.options_about)).perform(click());
+        onView(withText(R.string.about_windcast)).check(matches(isDisplayed()));
+
     }
 }
