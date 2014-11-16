@@ -1,5 +1,6 @@
 package com.feer.windcast;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -29,7 +30,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
     public static final String WINDCAST_USER_PREFS = "WindcastUserPrefs";
     public static final String PREFS_NAVIGATION_DRAWER_OPENED = "navigation drawer opened";
     private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
+    private SaveFirstOpenInSettingsActionBarDrawerToggle mDrawerToggle;
     private String[] mAustralianStates;
     private ListView mDrawerStatesList;
     private LinearLayout mDrawerContents;
@@ -46,27 +47,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         mDrawerStatesList = (ListView) findViewById(R.id.drawer_states_list);
         mTitle = super.getTitle();
 
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
-
-            /** Called when a drawer has settled in a completely closed state. */
-            @Override
-            public void onDrawerClosed(View drawerView)
-            {
-                super.onDrawerClosed(drawerView);
-                getSupportActionBar().setTitle(mTitle);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-
-            /** Called when a drawer has settled in a completely open state. */
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                getSupportActionBar().setTitle(mTitle);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-        };
-
+        mDrawerToggle = new SaveFirstOpenInSettingsActionBarDrawerToggle();
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -144,16 +125,9 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         }
 
         SharedPreferences sp = getApplicationContext().getSharedPreferences(WINDCAST_USER_PREFS, 0);
-        boolean hasDrawerBeenOpened = sp.getBoolean(PREFS_NAVIGATION_DRAWER_OPENED, false);
-        // we will not get a value  at first start, so true will be returned
-
-        // if it was the first app start
+        final boolean hasDrawerBeenOpened = sp.getBoolean(PREFS_NAVIGATION_DRAWER_OPENED, false);
         if(!hasDrawerBeenOpened) {
             mDrawerLayout.openDrawer(mDrawerContents);
-            SharedPreferences.Editor e = sp.edit();
-
-            e.putBoolean(PREFS_NAVIGATION_DRAWER_OPENED, true);
-            e.commit();
         }
     }
 
@@ -247,6 +221,40 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
             ReplaceStationListFragment(
                     WeatherStationFragment.StationsToShow.valueOf(itemText),
                     String.format(getString(R.string.wind_stations_in), itemText));
+        }
+    }
+
+    private class SaveFirstOpenInSettingsActionBarDrawerToggle extends ActionBarDrawerToggle {
+
+        public SaveFirstOpenInSettingsActionBarDrawerToggle() {
+            super(MainActivity.this, MainActivity.this.mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close);
+        }
+
+        /** Called when a drawer has settled in a completely closed state. */
+        @Override
+        public void onDrawerClosed(View drawerView)
+        {
+            super.onDrawerClosed(drawerView);
+            getSupportActionBar().setTitle(mTitle);
+            invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+        }
+
+        /** Called when a drawer has settled in a completely open state. */
+        @Override
+        public void onDrawerOpened(View drawerView) {
+            super.onDrawerOpened(drawerView);
+            getSupportActionBar().setTitle(mTitle);
+            invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+
+            Context applicationContext = getApplicationContext();
+            if(applicationContext == null) return;
+
+            SharedPreferences sp = applicationContext.getSharedPreferences(WINDCAST_USER_PREFS, 0);
+
+            SharedPreferences.Editor e = sp.edit();
+
+            e.putBoolean(PREFS_NAVIGATION_DRAWER_OPENED, true);
+            e.commit();
         }
     }
 }

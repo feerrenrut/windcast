@@ -18,6 +18,8 @@ import static com.feer.windcast.testUtils.AdapterMatchers.adapterHasCount;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
+import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.swipeLeft;
+import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.swipeRight;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.closeDrawer;
@@ -94,6 +96,11 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         SharedPreferences.Editor editor =  mSettings.edit();
         editor.putBoolean(MainActivity.PREFS_NAVIGATION_DRAWER_OPENED, true);
         editor.commit();
+    }
+
+    private boolean GetPreference_HasDrawerBeenOpened()
+    {
+        return mSettings.getBoolean(MainActivity.PREFS_NAVIGATION_DRAWER_OPENED, false);
     }
 
     public void test_Drawer_openClose()
@@ -343,7 +350,23 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
 
         onView(withId(R.id.drawer_states))
                 .check(matches(not(isDisplayed())));
+    }
 
-        onView(withId(drawerID)).check(matches(isClosed()));
+    public void test_manuallyOpeningDrawer_setsPreference()
+    {
+        ClearPreferences();
+        launchActivity();
+
+        onView(withId(drawerID)).check(matches(isOpen()));
+        closeDrawer(drawerID);
+        assertFalse("Drawer not manually opened, preference should not yet exist", GetPreference_HasDrawerBeenOpened());
+
+        // this seems like a hack, calling open drawer alone does not result in the onDrawerOpen
+        // callback being called. However swipeRight does not wait for the drawer to open!
+        swipeRight();
+        openDrawer(drawerID);
+
+        onView(withId(drawerID)).check(matches(isOpen()));
+        assertTrue("Drawer has been manually opened, preference should now exist", GetPreference_HasDrawerBeenOpened());
     }
 }
