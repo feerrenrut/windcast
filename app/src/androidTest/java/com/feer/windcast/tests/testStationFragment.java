@@ -1,15 +1,19 @@
 package com.feer.windcast.tests;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.TextView;
 
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.WeatherStation;
+import com.feer.windcast.dataAccess.FavouriteStationCache;
 import com.feer.windcast.dataAccess.WeatherDataCache;
 import com.feer.windcast.testUtils.FakeWeatherStationData;
-import com.google.android.apps.common.testing.ui.espresso.ViewInteraction;
+
+import java.util.ArrayList;
 
 import static com.feer.windcast.testUtils.AdapterMatchers.adapterHasCount;
 import static com.feer.windcast.testUtils.ItemHintMatchers.withItemHint;
@@ -18,7 +22,10 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
+import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.doesNotExist;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
+import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.closeDrawer;
+import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.openDrawer;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
@@ -38,6 +45,8 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 {
     private FakeWeatherStationData mFakeStations;
     private WeatherDataCache mCache;
+    private final int drawerID = R.id.drawer_layout;
+    private SharedPreferences mSettings;
 
     // Activity is not created until get activity is called
     private void launchActivity()
@@ -58,9 +67,29 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 
         // set up weather data cache before starting the activity.
         mCache = mock(WeatherDataCache.class);
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.EmptyStationList());
+        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
         when(mCache.CreateNewFavouriteStationAccessor()).thenCallRealMethod();
         WeatherDataCache.SetsWeatherDataCache(mCache);
+
+        mSettings = this.getInstrumentation().getTargetContext().getSharedPreferences(MainActivity.WINDCAST_USER_PREFS, 1);
+
+        ClearPreferences();
+        AddNavigationDrawerAlreadyOpenedPreference();
+    }
+
+    private void ClearPreferences()
+    {
+        SharedPreferences.Editor editor =  mSettings.edit();
+        editor.clear();
+        editor.commit();
+    }
+
+    private void AddNavigationDrawerAlreadyOpenedPreference()
+    {
+
+        SharedPreferences.Editor editor =  mSettings.edit();
+        editor.putBoolean(MainActivity.PREFS_NAVIGATION_DRAWER_OPENED, true);
+        editor.commit();
     }
 
     public void test_initialTitleBar()
@@ -140,6 +169,7 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 
     public void test_withNoStations_CreatingActivity_ShowsNoItems()
     {
+        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.EmptyStationList());
         launchActivity();
 
         onView(withId(android.R.id.list)).check(matches(not(isDisplayed())));
@@ -155,6 +185,61 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
         onView(withText(R.string.options_about)).perform(click());
         onView(withText(R.string.about_windcast)).check(matches(isDisplayed()));
+    }
 
+    public void test_withNoFavourites_OnFavouriteView_SearchUnavailable()
+    {
+        launchActivity();
+
+        openDrawer(R.id.drawer_layout);
+        onView(withText(R.string.favourites)).perform(click());
+
+        onView(withId(R.id.search)).check(doesNotExist());
+    }
+
+    public void test_withFavourites_OnFavouriteView_SearchAvailable()
+    {
+        FavouriteStationCache favouriteStationCache;
+        favouriteStationCache = mock(FavouriteStationCache.class);
+        when(mCache.CreateNewFavouriteStationAccessor()).thenReturn(favouriteStationCache);
+        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+
+        final int STATION_INDEX = 4;
+        WeatherStation oldFav = mFakeStations.GetAllStations().get(STATION_INDEX);
+        oldFav.IsFavourite = true;
+        ArrayList<String> favUrls = new ArrayList<String>();
+        favUrls.add(oldFav.GetURL().toString());
+        when(favouriteStationCache.GetFavouriteURLs()).thenReturn(favUrls);
+
+        launchActivity();
+
+        openDrawer(R.id.drawer_layout);
+        onView(withText(R.string.favourites)).perform(click());
+
+        onView(withId(R.id.search)).check(matches(isDisplayed()));
+    }
+
+    public void test_withFavourites_OnFavouriteViewAfterRotate_SearchAvailable()
+    {
+        FavouriteStationCache favouriteStationCache;
+        favouriteStationCache = mock(FavouriteStationCache.class);
+        when(mCache.CreateNewFavouriteStationAccessor()).thenReturn(favouriteStationCache);
+        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+
+        final int STATION_INDEX = 4;
+        WeatherStation oldFav = mFakeStations.GetAllStations().get(STATION_INDEX);
+        oldFav.IsFavourite = true;
+        ArrayList<String> favUrls = new ArrayList<String>();
+        favUrls.add(oldFav.GetURL().toString());
+        when(favouriteStationCache.GetFavouriteURLs()).thenReturn(favUrls);
+
+        launchActivity();
+
+        openDrawer(R.id.drawer_layout);
+        onView(withText(R.string.favourites)).perform(click());
+
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        onView(withId(R.id.search)).check(matches(isDisplayed()));
     }
 }

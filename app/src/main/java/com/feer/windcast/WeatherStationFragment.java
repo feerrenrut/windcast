@@ -28,6 +28,7 @@ import com.feer.windcast.dataAccess.WeatherDataCache;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static android.support.v4.app.ActivityCompat.invalidateOptionsMenu;
 import static com.feer.windcast.EmptyDataError.*;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.LoadingData;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoFavourites;
@@ -63,6 +64,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
     private EditText mSearchInput;
     private FavouriteStationCache mFavs = null;
+    private boolean mStationsExist = false;
     private TextView mEmptyView = null;
 
 
@@ -216,6 +218,10 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                                     " cacheStations is null: " + cacheStationsNull.toString());
                 }
                 mEmptyTextEnum.RemoveEmptyListReason(LoadingData);
+                Activity act = getActivity();
+                if(act != null) {
+                    invalidateOptionsMenu(act);
+                }
             }
         }.execute(); //todo make this a task based system, start the task during splash screen.
 
@@ -229,6 +235,10 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.stations_list_menu, menu);
+        if( !mStationsExist)
+        {
+            menu.removeItem(R.id.search);
+        }
     }
 
     @Override
@@ -395,6 +405,8 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             // the adapter will not change!
             if (mSearchInput != null) mSearchInput.setText("");
             mAdapter.notifyDataSetChanged();
+
+            mStationsExist = !listStations.isEmpty();
         }
     }
 

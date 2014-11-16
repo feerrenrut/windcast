@@ -1,6 +1,7 @@
 package com.feer.windcast;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -25,6 +26,8 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
     private static final String TAG = "MainActivity";
     private static final String STATIONS_FRAG_TAG = "stationsFrag";
     private static final String GRAPH_FRAG_TAG = "graphFrag";
+    public static final String WINDCAST_USER_PREFS = "WindcastUserPrefs";
+    public static final String PREFS_NAVIGATION_DRAWER_OPENED = "navigation drawer opened";
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] mAustralianStates;
@@ -139,6 +142,19 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         {
             Log.i(TAG, "Pre-existing GRAPH_FRAG_TAG, not recreating weather station fragment");
         }
+
+        SharedPreferences sp = getApplicationContext().getSharedPreferences(WINDCAST_USER_PREFS, 0);
+        boolean hasDrawerBeenOpened = sp.getBoolean(PREFS_NAVIGATION_DRAWER_OPENED, false);
+        // we will not get a value  at first start, so true will be returned
+
+        // if it was the first app start
+        if(!hasDrawerBeenOpened) {
+            mDrawerLayout.openDrawer(mDrawerContents);
+            SharedPreferences.Editor e = sp.edit();
+
+            e.putBoolean(PREFS_NAVIGATION_DRAWER_OPENED, true);
+            e.commit();
+        }
     }
 
     @Override
@@ -153,7 +169,6 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
-
 
     private void LaunchAboutScreen() {
         startActivity(new Intent(this, About.class));

@@ -1,6 +1,7 @@
 package com.feer.windcast.tests;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.feer.windcast.MainActivity;
@@ -21,6 +22,8 @@ import static com.google.android.apps.common.testing.ui.espresso.action.ViewActi
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
 import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.closeDrawer;
 import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.openDrawer;
+import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerMatchers.isClosed;
+import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerMatchers.isOpen;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withChild;
@@ -42,6 +45,7 @@ import static org.mockito.Mockito.when;
  */
 public class testDrawerStationFragmentInteraction extends ActivityInstrumentationTestCase2<MainActivity>
 {
+
     public testDrawerStationFragmentInteraction()
     {
         super(MainActivity.class);
@@ -50,6 +54,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
     private FakeWeatherStationData mFakeStations;
     private WeatherDataCache mCache;
     private final int drawerID = R.id.drawer_layout;
+    private SharedPreferences mSettings;
 
     // Activity is not created until get activity is called
     private void launchActivity()
@@ -69,6 +74,26 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         when(mCache.GetWeatherStationsFrom(anyString())).thenReturn(mFakeStations.EmptyStationList());
         when(mCache.CreateNewFavouriteStationAccessor()).thenCallRealMethod();
         WeatherDataCache.SetsWeatherDataCache(mCache);
+
+        mSettings = this.getInstrumentation().getTargetContext().getSharedPreferences(MainActivity.WINDCAST_USER_PREFS, 1);
+
+        ClearPreferences();
+        AddNavigationDrawerAlreadyOpenedPreference();
+    }
+
+    private void ClearPreferences()
+    {
+        SharedPreferences.Editor editor =  mSettings.edit();
+        editor.clear();
+        editor.commit();
+    }
+
+    private void AddNavigationDrawerAlreadyOpenedPreference()
+    {
+
+        SharedPreferences.Editor editor =  mSettings.edit();
+        editor.putBoolean(MainActivity.PREFS_NAVIGATION_DRAWER_OPENED, true);
+        editor.commit();
     }
 
     public void test_Drawer_openClose()
@@ -143,11 +168,11 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         launchActivity();
 
         openDrawer(drawerID);
+        onView(withId(R.id.drawer_states)).check(matches(isCompletelyDisplayed()));
         onView(withId(R.id.drawer_states)).perform(click());
 
         onView(withText("WA")).perform(click());
-        onView(withId(R.id.drawer_states))
-                .check(matches(not(isDisplayed())));
+        onView(withId(drawerID)).check(matches(isClosed()));
     }
 
     public void test_selectWA_titleShowsSelection()
@@ -297,5 +322,28 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         assertTrue(
                 "Station clicked, it should now no longer be a favourite!",
                 oldFav.IsFavourite == false);
+    }
+
+    public void test_onStartDrawerOpen()
+    {
+        ClearPreferences();
+        launchActivity();
+
+        onView(withId(R.id.drawer_states))
+                .check(matches(isDisplayed()));
+
+        onView(withId(drawerID)).check(matches(isOpen()));
+    }
+
+    public void test_afterManualDrawerOpen_onStartDrawerNotOpen()
+    {
+        ClearPreferences();
+        AddNavigationDrawerAlreadyOpenedPreference();
+        launchActivity();
+
+        onView(withId(R.id.drawer_states))
+                .check(matches(not(isDisplayed())));
+
+        onView(withId(drawerID)).check(matches(isClosed()));
     }
 }
