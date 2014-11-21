@@ -119,7 +119,9 @@ public class ObservationReader
                 // read wind info
                 } else if (name.equals("wind_spd_kmh") ) {
                     ob.WindSpeed_KMH = reader.nextInt();
-                }else if (name.equals("wind_dir") ) {
+                } else if (name.equals("wind_spd_kt") ) {
+                    ob.WindSpeed_KN = reader.nextInt();
+                } else if (name.equals("wind_dir") ) {
                     ob.CardinalWindDirection = reader.nextString().toLowerCase(Locale.US);
                     ob.WindBearing = ConvertCardinalCharsToBearing(ob.CardinalWindDirection);
                 }else if (name.equals("gust_kmh") ) {

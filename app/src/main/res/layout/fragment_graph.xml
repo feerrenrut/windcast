@@ -43,7 +43,7 @@
         android:layout_height="fill_parent"
         android:visibility="invisible"
 
-        androidPlot.rangeLabel="Speed km/h"
+        androidPlot.rangeLabel=""
 
         androidPlot.titleWidget.labelPaint.textSize="@dimen/title_font_size"
         androidPlot.domainLabelWidget.labelPaint.textSize="@dimen/domain_label_font_size"

@@ -1,0 +1,22 @@
+<resources>
+        <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_wind_speed_units">Wind speed units</string>
+    <string name="pref_kmh_wind_speed_unit_summary">Use kilometres per hour</string>
+    <string name="pref_knots_wind_speed_unit_summary">Use knots</string>
+
+    <string-array name="pref_wind_speed_unit_titles">
+        <item>kmh</item>
+        <item>knots</item>
+    </string-array>
+    <string-array name="pref_wind_speed_unit_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+
+
+</resources>

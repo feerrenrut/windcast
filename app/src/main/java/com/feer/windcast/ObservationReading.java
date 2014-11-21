@@ -36,6 +36,10 @@ public class ObservationReading
      */
     Integer WindSpeed_KMH;
 
+    /* The speed of the wind in knots
+    */
+    Integer WindSpeed_KN;
+
     /* The wind gust speed in KiloMeters per Hour
      */
     Integer WindGustSpeed_KMH;

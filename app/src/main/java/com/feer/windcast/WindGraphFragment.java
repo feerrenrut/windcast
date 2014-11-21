@@ -1,8 +1,10 @@
 package com.feer.windcast;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,6 +30,7 @@ public class WindGraphFragment extends Fragment
     private static final String PARAM_KEY_STATION_NAME = "param_weatherStation_NAME";
     private static final String PARAM_KEY_STATION_STATE = "param_weatherStation_STATE";
 
+    private boolean mUseKMH = true;
 
     /*This is required so the fragment can be instantiated when restoring its activity's state*/
     public WindGraphFragment() {
@@ -92,6 +95,11 @@ public class WindGraphFragment extends Fragment
     public void onResume()
     {
         super.onResume();
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        final String unitTypePrefValue = preferences.getString(SettingsActivity.PREF_KEY_WIND_SPEED_UNIT, "0");
+        mUseKMH = SettingsActivity.WindSpeedUnitPref.GetUnitTypeFromValue(Integer.parseInt(unitTypePrefValue)) == SettingsActivity.WindSpeedUnitPref.UnitType.kmh;
+
         populateUI();
     }
 
@@ -170,7 +178,18 @@ public class WindGraphFragment extends Fragment
 
                         if(!reading.CardinalWindDirection.equals("calm") && reading.WindSpeed_KMH > 0)
                         {
-                            speedLabel.setText(reading.WindSpeed_KMH + " Km/H from " + getDirectionWordsFromChars(reading.CardinalWindDirection));
+                            StringBuilder sb = new StringBuilder();
+                            if(mUseKMH)
+                            {
+                                sb.append(reading.WindSpeed_KMH).append(" Km/H from ");
+                            }
+                            else // knots
+                            {
+                                sb.append(reading.WindSpeed_KN).append(" kn from ");
+                            }
+
+                            sb.append(getDirectionWordsFromChars(reading.CardinalWindDirection));
+                            speedLabel.setText( sb.toString());
                         }
                         else
                         {
@@ -183,7 +202,7 @@ public class WindGraphFragment extends Fragment
                     readingTime.setText(act.getString(R.string.no_readings));
                 }
 
-                WindGraph.SetupGraph(wd, plot, act);
+                WindGraph.SetupGraph(wd, plot, act, mUseKMH? SettingsActivity.WindSpeedUnitPref.UnitType.kmh : SettingsActivity.WindSpeedUnitPref.UnitType.knots);
                 plot.setVisibility(View.VISIBLE);
             }
         }.execute();

@@ -160,9 +160,16 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
             case R.id.about:
                 LaunchAboutScreen();
                 return true;
+            case R.id.settings:
+                LaunchSettingsScreen();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void LaunchSettingsScreen() {
+        startActivity(new Intent(this, SettingsActivity.class));
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 
 import com.androidplot.ui.AnchorPosition;
 import com.androidplot.ui.PositionMetrics;
@@ -81,7 +82,7 @@ public class WindGraph
         plot.getGraphWidget().getBackgroundPaint().setColor(offWhite); // sets the colour of the part of the graph where the axis labels are
     }
 
-    public static void SetupGraph(WeatherData wd, XYPlot plot, Activity act)
+    public static void SetupGraph(WeatherData wd, XYPlot plot, Activity act, final SettingsActivity.WindSpeedUnitPref.UnitType unitType)
     {
         int numObs = wd.ObservationData.size();
         ArrayList<Integer> windSpeeds = new ArrayList<Integer>(numObs);
@@ -90,8 +91,17 @@ public class WindGraph
 
         for(ObservationReading reading1 : wd.ObservationData)
         {
-            Integer val = reading1.WindSpeed_KMH != null ?
-                    reading1.WindSpeed_KMH : 0;
+            Integer val;
+
+            if(unitType == SettingsActivity.WindSpeedUnitPref.UnitType.kmh) {
+                val = reading1.WindSpeed_KMH != null ?
+                        reading1.WindSpeed_KMH : 0;
+            }
+            else
+            {
+                val = reading1.WindSpeed_KN != null ?
+                        reading1.WindSpeed_KN : 0;
+            }
 
             windSpeeds.add(val);
             readingTimes.add(reading1.LocalTime);
@@ -103,6 +113,8 @@ public class WindGraph
         Collections.reverse(windDirections);
 
         plot.setTitle("Wind Speed at " + wd.Station.GetName());
+
+        plot.getRangeLabelWidget().setText(unitType.toString());
 
         // Turn the above arrays into XYSeries':
         XYSeries series1 = new SimpleXYSeries(
@@ -126,7 +138,7 @@ public class WindGraph
             private int domainTick = 0;
 
             @Override
-            public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos)
+            public StringBuffer format(Object obj, @NonNull StringBuffer toAppendTo, @NonNull FieldPosition pos)
             {
                 domainTick++;
 
@@ -145,7 +157,7 @@ public class WindGraph
             }
 
             @Override
-            public Object parseObject(String source, ParsePosition pos) {
+            public Object parseObject(String source, @NonNull ParsePosition pos) {
                 return null;
             }
         });
