@@ -20,6 +20,7 @@ public class FavouriteStationCache
     private Context mContext = null;
     private BackgroundTaskManager mTaskManager = null;
     private ArrayList<String> mFavUrls = null; // only populated once GetFavouritesFromDB is called
+    private boolean mInitialised = false;
 
     /**
      * Initialises the FavouriteStationCache so calls to all other functions
@@ -31,54 +32,63 @@ public class FavouriteStationCache
         mContext = context;
         mTaskManager = taskManager;
         mFavUrls = GetFavouritesFromDB();
+        mInitialised = true;
     }
 
     synchronized
     public void AddFavouriteStation(final WeatherStation station)
     {
-        mTaskManager.RunInBackground(
-                new BackgroundTask<Void>() {
-                    @Override
-                    public Void DoInBackground() {
-                        AddFavouriteStationToDB(station);
-                        return null;
-                    }
-                }
-        );
+        CheckInitialisation();
 
-        if(mFavUrls != null && !mFavUrls.contains(station.GetURL().toString()))
+        if(!mFavUrls.contains(station.GetURL().toString())) // do add the same station twice!
         {
             mFavUrls.add(station.GetURL().toString());
+
+            mTaskManager.RunInBackground(
+                    new BackgroundTask<Void>() {
+                        @Override
+                        public Void DoInBackground() {
+                            AddFavouriteStationToDB(station);
+                            return null;
+                        }
+                    }
+            );
         }
     }
 
     synchronized
     public void RemoveFavouriteStation(final WeatherStation station)
     {
-        mTaskManager.RunInBackground(
-                new BackgroundTask<Void>() {
-                    @Override
-                    public Void DoInBackground() {
-                        RemoveFavouriteStationFromDB(station);
-                        return null;
-                    }
-                }
-        );
+        CheckInitialisation();
 
-        if(mFavUrls != null && mFavUrls.contains(station.GetURL().toString()))
+        if(mFavUrls.contains(station.GetURL().toString())) // only remove if it is there
         {
             mFavUrls.remove(station.GetURL().toString());
+
+            mTaskManager.RunInBackground(
+                    new BackgroundTask<Void>() {
+                        @Override
+                        public Void DoInBackground() {
+                            RemoveFavouriteStationFromDB(station);
+                            return null;
+                        }
+                    }
+            );
         }
     }
 
     synchronized
     public ArrayList<String> GetFavouriteURLs()
     {
-        if(mFavUrls == null)
-        {
-            throw new IllegalStateException("GetFavouriteURLs() called before Initialise() was called or complete!!");
-        }
+        CheckInitialisation();
         return mFavUrls;
+    }
+
+    private void CheckInitialisation() {
+        if(!mInitialised)
+        {
+            throw new IllegalStateException("Accessing Favourites cache before Initialise() was called or complete!!");
+        }
     }
 
     private synchronized void AddFavouriteStationToDB(WeatherStation station)
@@ -100,7 +110,7 @@ public class FavouriteStationCache
         station.IsFavourite = false;
 
         SQLiteDatabase db = DBOpenHelper.Instance(mContext).getWritableDatabase();
-        String selection = COLUMN_NAME_URL + " LIKE ?";
+        String selection = COLUMN_NAME_URL + " = ?";
         String[] selectionArgs = { station.GetURL().toString() };
         db.delete(DBContract.FavouriteStation.TABLE_NAME, selection, selectionArgs);
     }
