@@ -56,7 +56,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
      * Views.
      */
     private WeatherStationArrayAdapter mAdapter;
-    private  StationsToShow mShowOnlyStations = StationsToShow.All;
+    private  StationsToShow mShowOnlyStations = null; //set to favs if some exist else all
 
 
     private BackgroundTaskManager mTaskManager  = new BackgroundTaskManager();
@@ -96,9 +96,8 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         WA
     }
 
-    public static WeatherStationFragment NewWeatherStation(StationsToShow showstations)
+    public static WeatherStationFragment newInstance(StationsToShow showstations)
     {
-
         Bundle bundle = new Bundle();
         WeatherStationFragment.writeBundle(bundle, showstations);
 
@@ -109,8 +108,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
     private void readBundle(Bundle savedInstanceState)
     {
-        Log.v(TAG, "Reading bundle");
-
         int enumAsInt = savedInstanceState.getInt(
                 PARAM_STATIONS_TO_SHOW, StationsToShow.All.ordinal());
 
@@ -118,7 +115,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     }
     private static void writeBundle(Bundle saveInstanceState, StationsToShow showStations)
     {
-        Log.v(TAG, "writing bundle");
         saveInstanceState.putInt(PARAM_STATIONS_TO_SHOW, showStations.ordinal());
     }
 
@@ -135,6 +131,8 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        if(savedInstanceState != null) readBundle(savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_weatherstation_list, container, false);
 
         WeatherStationArrayAdapter.OnFavouriteChangedListener handleFavChange = new WeatherStationArrayAdapter.OnFavouriteChangedListener()
@@ -161,69 +159,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         listView.setEmptyView(mEmptyView);
         listView.setAdapter(mAdapter);
         mEmptyTextEnum.AddEmptyListReason(LoadingData);
-
-        new AsyncTask<Void, Void, ArrayList<WeatherStation>>()
-        {
-
-            @Override
-            protected ArrayList<WeatherStation> doInBackground(Void... params)
-            {
-                Context con ;
-                if(getActivity() == null || (con = getActivity().getApplicationContext()) == null) return null;
-
-                mFavs.Initialise(con, mTaskManager);
-                if(mShowOnlyStations == StationsToShow.All || mShowOnlyStations == StationsToShow.Favourites)
-                {
-                    return mCache.GetWeatherStationsFromAllStates();
-                }
-                else
-                {
-                    return mCache.GetWeatherStationsFrom(mShowOnlyStations.toString());
-                }
-            }
-
-            @Override
-            protected void onPostExecute(final ArrayList<WeatherStation> cacheStations)
-            {
-                if(mFavs != null && cacheStations != null)
-                {
-                    ArrayList<String> favs = mFavs.GetFavouriteURLs();
-                    ArrayList<WeatherStation> useStations = cacheStations;
-                    SetFavStations(useStations, favs);
-                    if (mShowOnlyStations == StationsToShow.Favourites)
-                    {
-                        useStations = FilterToOnlyFavs(useStations);
-                        if(useStations.isEmpty())
-                        {
-                            mEmptyTextEnum.AddEmptyListReason(NoFavourites);
-                        }
-                    }
-                    else if (useStations.isEmpty())
-                    {
-                        mEmptyTextEnum.AddEmptyListReason(NoStationsAvailable);
-                    }
-
-                    SetStationList(useStations);
-                    Log.i(TAG, "Finished adding new stations.");
-                }
-                else
-                {
-                    Boolean favsNull = mFavs == null;
-                    Boolean cacheStationsNull = cacheStations == null;
-                    mEmptyTextEnum.AddEmptyListReason( NoInternetAccess );
-
-                    Log.i(TAG,
-                            "Could not add new stations." +
-                                    " mFavs is null: " + favsNull.toString() +
-                                    " cacheStations is null: " + cacheStationsNull.toString());
-                }
-                mEmptyTextEnum.RemoveEmptyListReason(LoadingData);
-                Activity act = getActivity();
-                if(act != null) {
-                    invalidateOptionsMenu(act);
-                }
-            }
-        }.execute(); //todo make this a task based system, start the task during splash screen.
 
         // Set OnItemClickListener so we can be notified on item clicks
         listView.setOnItemClickListener(this);
@@ -275,7 +210,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onDestroyView()
     {
         super.onDestroyView();
-
         mAdapter = null;
         mSearchInput = null;
         mEmptyView = null;
@@ -306,6 +240,79 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        if(savedInstanceState != null) readBundle(savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        new AsyncTask<Void, Void, ArrayList<WeatherStation>>()
+        {
+
+            @Override
+            protected ArrayList<WeatherStation> doInBackground(Void... params)
+            {
+                Context con ;
+                if(getActivity() == null || (con = getActivity().getApplicationContext()) == null) return null;
+
+                mFavs.Initialise(con, mTaskManager);
+                if(mShowOnlyStations == null || mShowOnlyStations == StationsToShow.All || mShowOnlyStations == StationsToShow.Favourites)
+                {
+                    return mCache.GetWeatherStationsFromAllStates();
+                }
+                else
+                {
+                    return mCache.GetWeatherStationsFrom(mShowOnlyStations.toString());
+                }
+            }
+
+            @Override
+            protected void onPostExecute(final ArrayList<WeatherStation> cacheStations)
+            {
+                Activity act = getActivity();
+                if(act == null) return;
+
+                if(mShowOnlyStations == null) {
+                    mShowOnlyStations = (mFavs == null || mFavs.GetFavouriteURLs().isEmpty() ) ? StationsToShow.All : StationsToShow.Favourites;
+                }
+
+                if(mFavs != null && cacheStations != null)
+                {
+                    ArrayList<String> favs = mFavs.GetFavouriteURLs();
+                    ArrayList<WeatherStation> useStations = cacheStations;
+                    SetFavStations(useStations, favs);
+                    if (mShowOnlyStations == StationsToShow.Favourites)
+                    {
+                        useStations = FilterToOnlyFavs(useStations);
+                        if(useStations.isEmpty())
+                        {
+                            mEmptyTextEnum.AddEmptyListReason(NoFavourites);
+                        }
+                    }
+                    else if (useStations.isEmpty())
+                    {
+                        mEmptyTextEnum.AddEmptyListReason(NoStationsAvailable);
+                    }
+
+                    SetStationList(useStations);
+                    Log.i(TAG, "Finished adding new stations.");
+                }
+                else
+                {
+                    Boolean favsNull = mFavs == null;
+                    Boolean cacheStationsNull = cacheStations == null;
+                    mEmptyTextEnum.AddEmptyListReason( NoInternetAccess );
+
+                    Log.i(TAG,
+                            "Could not add new stations." +
+                                    " mFavs is null: " + favsNull.toString() +
+                                    " cacheStations is null: " + cacheStationsNull.toString());
+                }
+                mEmptyTextEnum.RemoveEmptyListReason(LoadingData);
+                invalidateOptionsMenu(act);
+            }
+        }.execute(); //todo make this a task based system, start the task during splash screen.
     }
 
     private void SetEmptyTextViewContents(EmptyTextState reason) {
@@ -336,7 +343,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onDetach() {
         super.onDetach();
         mListener = null;
-
         mTaskManager.WaitForTasksToComplete();
         mFavs = null;
     }

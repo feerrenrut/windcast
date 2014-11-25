@@ -2,11 +2,13 @@ package com.feer.windcast.tests;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.WeatherStation;
+import com.feer.windcast.WindCastNavigationDrawer;
 import com.feer.windcast.dataAccess.FavouriteStationCache;
 import com.feer.windcast.dataAccess.WeatherDataCache;
 import com.feer.windcast.testUtils.FakeWeatherStationData;
@@ -77,7 +79,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         when(mCache.CreateNewFavouriteStationAccessor()).thenCallRealMethod();
         WeatherDataCache.SetsWeatherDataCache(mCache);
 
-        mSettings = this.getInstrumentation().getTargetContext().getSharedPreferences(MainActivity.WINDCAST_USER_PREFS, 1);
+        mSettings = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
 
         ClearPreferences();
         AddNavigationDrawerAlreadyOpenedPreference();
@@ -94,13 +96,13 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
     {
 
         SharedPreferences.Editor editor =  mSettings.edit();
-        editor.putBoolean(MainActivity.PREFS_NAVIGATION_DRAWER_OPENED, true);
+        editor.putBoolean(WindCastNavigationDrawer.PREFS_NAVIGATION_DRAWER_OPENED, true);
         editor.commit();
     }
 
     private boolean GetPreference_HasDrawerBeenOpened()
     {
-        return mSettings.getBoolean(MainActivity.PREFS_NAVIGATION_DRAWER_OPENED, false);
+        return mSettings.getBoolean(WindCastNavigationDrawer.PREFS_NAVIGATION_DRAWER_OPENED, false);
     }
 
     public void test_Drawer_openClose()

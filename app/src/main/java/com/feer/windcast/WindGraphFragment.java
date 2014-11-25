@@ -112,7 +112,7 @@ public class WindGraphFragment extends Fragment
     {
         final Activity act = getActivity();
         final XYPlot  plot = (XYPlot) act.findViewById(R.id.mySimpleXYPlot);
-        WindGraph.FormatGraph(plot, act);
+        WindGraph.FormatGraph(plot);
 
         final TextView stationNameLabel = (TextView) act.findViewById(R.id.stationNameLabel);
         stationNameLabel.setText(FormatStationName(mStation));
@@ -144,68 +144,68 @@ public class WindGraphFragment extends Fragment
                 // In this case we exit early.
                 if (act == null) return;
 
-                final TextView readingTime = (TextView) act.findViewById(R.id.readingTimeLabel);
-                if(readingTime == null) return;
+                final TextView errorText = (TextView) act.findViewById(R.id.readingTimeLabel);
 
                 if(wd == null || !result)
                 {
-                    readingTime.setText(act.getString(R.string.weather_data_not_available));
+                    errorText.setText(act.getString(R.string.weather_data_not_available));
                     return;
                 }
 
-                final TextView stationNameLabel = (TextView) act.findViewById(R.id.stationNameLabel);
-                if(stationNameLabel == null) return;
+                // set station name
+                ((TextView) act.findViewById(R.id.stationNameLabel))
+                        .setText(FormatStationName(wd.Station));
 
-                stationNameLabel.setText(FormatStationName(wd.Station));
-
-                if(wd.ObservationData != null && !wd.ObservationData.isEmpty())
-                {
-                    ObservationReading reading = wd.ObservationData.get(0);
-
-                    DateFormat localDate = android.text.format.DateFormat
-                            .getDateFormat(act.getApplicationContext());
-
-                    DateFormat localTime = android.text.format.DateFormat
-                            .getTimeFormat(act.getApplicationContext());
-
-                    readingTime.setText(
-                            localTime.format(reading.LocalTime) + ' ' + localDate.format(reading.LocalTime)
-                            + "\n"                                                    );
-
-                    if(reading.WindBearing != null && reading.CardinalWindDirection != null && reading.WindSpeed_KMH != null)
-                    {
-                        final TextView speedLabel = (TextView)act.findViewById(R.id.latestReadingLabel);
-
-                        if(!reading.CardinalWindDirection.equals("calm") && reading.WindSpeed_KMH > 0)
-                        {
-                            StringBuilder sb = new StringBuilder();
-                            if(mUseKMH)
-                            {
-                                sb.append(reading.WindSpeed_KMH).append(" Km/H from ");
-                            }
-                            else // knots
-                            {
-                                sb.append(reading.WindSpeed_KN).append(" kn from ");
-                            }
-
-                            sb.append(getDirectionWordsFromChars(reading.CardinalWindDirection));
-                            speedLabel.setText( sb.toString());
-                        }
-                        else
-                        {
-                            speedLabel.setText("Calm conditions");
-                        }
-                    }
-                }
-                else
-                {
-                    readingTime.setText(act.getString(R.string.no_readings));
+                if (wd.ObservationData == null || wd.ObservationData.isEmpty()) {
+                    errorText.setText(act.getString(R.string.no_readings));
+                    return;
+                } else {
+                    PopulateWeatherStationSummary(act, wd);
                 }
 
                 WindGraph.SetupGraph(wd, plot, act, mUseKMH? SettingsActivity.WindSpeedUnitPref.UnitType.kmh : SettingsActivity.WindSpeedUnitPref.UnitType.knots);
                 plot.setVisibility(View.VISIBLE);
             }
         }.execute();
+    }
+
+    private void PopulateWeatherStationSummary(Activity act, WeatherData wd) {
+        ObservationReading reading = wd.ObservationData.get(0);
+
+        DateFormat localDate = android.text.format.DateFormat
+                .getDateFormat(act);
+
+        DateFormat localTime = android.text.format.DateFormat
+                .getTimeFormat(act);
+
+        ((TextView) act.findViewById(R.id.readingTimeLabel)).setText(
+                localTime.format(reading.LocalTime) + ' ' + localDate.format(reading.LocalTime)
+                        + "\n");
+
+        if(reading.WindBearing != null && reading.CardinalWindDirection != null && reading.WindSpeed_KMH != null)
+        {
+            final TextView speedLabel = (TextView)act.findViewById(R.id.latestReadingLabel);
+
+            if(!reading.CardinalWindDirection.equals("calm") && reading.WindSpeed_KMH > 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                if(mUseKMH)
+                {
+                    sb.append(reading.WindSpeed_KMH).append(" Km/H from ");
+                }
+                else // knots
+                {
+                    sb.append(reading.WindSpeed_KN).append(" kn from ");
+                }
+
+                sb.append(getDirectionWordsFromChars(reading.CardinalWindDirection));
+                speedLabel.setText( sb.toString());
+            }
+            else
+            {
+                speedLabel.setText("Calm conditions");
+            }
+        }
     }
 
     private static String getDirectionWordsFromChars(String cardinalChars)

@@ -41,7 +41,7 @@ public class WindGraph
 {
     private static final int MAX_READINGS_TO_SHOW = 10;
 
-    public static void FormatGraph(XYPlot plot, Activity act)
+    public static void FormatGraph(XYPlot plot)
     {
         // reduce the number of range labels
         plot.setTicksPerRangeLabel(3);
@@ -84,6 +84,7 @@ public class WindGraph
 
     public static void SetupGraph(WeatherData wd, XYPlot plot, Activity act, final SettingsActivity.WindSpeedUnitPref.UnitType unitType)
     {
+        plot.clear();
         int numObs = wd.ObservationData.size();
         ArrayList<Integer> windSpeeds = new ArrayList<Integer>(numObs);
         final ArrayList<Date> readingTimes = new ArrayList<Date>(numObs);

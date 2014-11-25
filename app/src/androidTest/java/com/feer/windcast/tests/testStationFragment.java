@@ -3,12 +3,14 @@ package com.feer.windcast.tests;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.preference.PreferenceManager;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.TextView;
 
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.WeatherStation;
+import com.feer.windcast.WindCastNavigationDrawer;
 import com.feer.windcast.dataAccess.FavouriteStationCache;
 import com.feer.windcast.dataAccess.WeatherDataCache;
 import com.feer.windcast.testUtils.FakeWeatherStationData;
@@ -71,7 +73,7 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
         when(mCache.CreateNewFavouriteStationAccessor()).thenCallRealMethod();
         WeatherDataCache.SetsWeatherDataCache(mCache);
 
-        mSettings = this.getInstrumentation().getTargetContext().getSharedPreferences(MainActivity.WINDCAST_USER_PREFS, 1);
+        mSettings = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
 
         ClearPreferences();
         AddNavigationDrawerAlreadyOpenedPreference();
@@ -88,7 +90,7 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
     {
 
         SharedPreferences.Editor editor =  mSettings.edit();
-        editor.putBoolean(MainActivity.PREFS_NAVIGATION_DRAWER_OPENED, true);
+        editor.putBoolean(WindCastNavigationDrawer.PREFS_NAVIGATION_DRAWER_OPENED, true);
         editor.commit();
     }
 

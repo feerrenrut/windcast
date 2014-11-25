@@ -1,133 +1,67 @@
 package com.feer.windcast;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 
 public class MainActivity extends ActionBarActivity implements WeatherStationFragment.OnWeatherStationFragmentInteractionListener
 {
 
     private static final String TAG = "MainActivity";
     private static final String STATIONS_FRAG_TAG = "stationsFrag";
-    private static final String GRAPH_FRAG_TAG = "graphFrag";
-    public static final String WINDCAST_USER_PREFS = "WindcastUserPrefs";
-    public static final String PREFS_NAVIGATION_DRAWER_OPENED = "navigation drawer opened";
-    private DrawerLayout mDrawerLayout;
-    private SaveFirstOpenInSettingsActionBarDrawerToggle mDrawerToggle;
-    private String[] mAustralianStates;
-    private ListView mDrawerStatesList;
-    private LinearLayout mDrawerContents;
     private CharSequence mTitle;
+
+    private WindCastNavigationDrawer mDrawerToggle;
+    private WeatherStationFragment mWeatherStationFrag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerContents = (LinearLayout) findViewById(R.id.drawer_contents);
-
-        mDrawerStatesList = (ListView) findViewById(R.id.drawer_states_list);
         mTitle = super.getTitle();
-
-        mDrawerToggle = new SaveFirstOpenInSettingsActionBarDrawerToggle();
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        mAustralianStates = getResources().getStringArray(R.array.AustralianStates);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mAustralianStates
-        );
-
-        mDrawerStatesList.setAdapter(adapter);
-        mDrawerStatesList.setOnItemClickListener(new DrawerItemClickListener());
-
-        class ReplaceStationsOnClick implements View.OnClickListener
-        {
-            final WeatherStationFragment.StationsToShow mStationsToShow;
-            final String mNewTitle;
-
-            ReplaceStationsOnClick(WeatherStationFragment.StationsToShow showStations, String newTitle)
-            {
-                mStationsToShow = showStations;
-                mNewTitle = newTitle;
-            }
-
+        mDrawerToggle = new WindCastNavigationDrawer(this, new WindCastNavigationDrawer.NavigationDrawerInteraction() {
             @Override
-            public void onClick(View v)
-            {
-                v.setSelected(true);
+            public void OnAllStatesClicked() {
                 ReplaceStationListFragment(
-                        mStationsToShow,
-                        mNewTitle);
+                        WeatherStationFragment.StationsToShow.All,
+                        getResources().getString(R.string.app_name)
+                );
             }
-        }
 
-        ReplaceStationsOnClick favsClicked = new ReplaceStationsOnClick(
-                WeatherStationFragment.StationsToShow.Favourites,
-                getResources().getString(R.string.favourite_stations));
-        findViewById(R.id.drawer_favs_layout).setOnClickListener(favsClicked);
-
-        ReplaceStationsOnClick allClicked = new ReplaceStationsOnClick(
-                WeatherStationFragment.StationsToShow.All,
-                getResources().getString(R.string.app_name));
-        findViewById(R.id.drawer_all_layout).setOnClickListener(allClicked);
-
-        final ImageView statesImage = (ImageView) findViewById(R.id.drawer_states_image);
-        View.OnClickListener toggleStatesArray = new View.OnClickListener()
-        {
             @Override
-            public void onClick(View v)
-            {
-                if(mDrawerStatesList.getVisibility() == View.VISIBLE) {
-                    mDrawerStatesList.setVisibility(View.INVISIBLE);
-                    statesImage.setImageResource(R.drawable.down_arrow);
-                }
-                else {
-                    mDrawerStatesList.setVisibility(View.VISIBLE);
-                    statesImage.setImageResource(R.drawable.up_arrow);
-                }
+            public void OnFavouriteStationsClicked() {
+                ReplaceStationListFragment(
+                        WeatherStationFragment.StationsToShow.Favourites,
+                        getResources().getString(R.string.favourite_stations)
+                );
             }
-        };
 
-        findViewById(R.id.drawer_states_layout).setOnClickListener(toggleStatesArray);
-        mDrawerStatesList.setVisibility(View.INVISIBLE);
+            @Override
+            public void OnStateClicked(WeatherStationFragment.StationsToShow stateClicked) {
+                ReplaceStationListFragment(
+                        stateClicked,
+                        getResources().getString(R.string.wind_stations_in, stateClicked.toString())
+                );
+            }
+        });
 
-        if(getSupportFragmentManager().findFragmentByTag(STATIONS_FRAG_TAG) == null)
-        {
-            Log.i(TAG, "no pre-existing GRAPH_FRAG_TAG, recreating weather station fragment");
-            WeatherStationFragment stationsFragment = new WeatherStationFragment();
+        mWeatherStationFrag = (WeatherStationFragment)getSupportFragmentManager().findFragmentByTag(STATIONS_FRAG_TAG);
+
+        if(mWeatherStationFrag == null) {
+            Log.v(TAG, "Recreating weather station fragment");
+            mWeatherStationFrag = new WeatherStationFragment();
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.content_frame, stationsFragment, STATIONS_FRAG_TAG).commit();
-        }
-        else
-        {
-            Log.i(TAG, "Pre-existing GRAPH_FRAG_TAG, not recreating weather station fragment");
-        }
-
-        SharedPreferences sp = getApplicationContext().getSharedPreferences(WINDCAST_USER_PREFS, 0);
-        final boolean hasDrawerBeenOpened = sp.getBoolean(PREFS_NAVIGATION_DRAWER_OPENED, false);
-        if(!hasDrawerBeenOpened) {
-            mDrawerLayout.openDrawer(mDrawerContents);
+                    .replace(R.id.content_frame, mWeatherStationFrag, STATIONS_FRAG_TAG).commit();
         }
     }
 
@@ -144,10 +78,6 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    private void LaunchAboutScreen() {
-        startActivity(new Intent(this, About.class));
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Pass the event to ActionBarDrawerToggle, if it returns
@@ -158,18 +88,14 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
 
         switch (item.getItemId()) {
             case R.id.about:
-                LaunchAboutScreen();
+                startActivity(new Intent(this, About.class));
                 return true;
             case R.id.settings:
-                LaunchSettingsScreen();
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void LaunchSettingsScreen() {
-        startActivity(new Intent(this, SettingsActivity.class));
     }
 
     @Override
@@ -181,11 +107,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
     @Override
     public void onWeatherStationSelected(WeatherStation station)
     {
-        //Todo this should probably launch a new activity.
-        FragmentTransaction trans = getSupportFragmentManager().beginTransaction();
-        trans.replace(R.id.content_frame, WindGraphFragment.newInstance(station), GRAPH_FRAG_TAG);
-        trans.addToBackStack(null);
-        trans.commit();
+        startActivity(ShowGraphActivity.getShowGraphForStationIntent(this, station));
     }
 
     @Override
@@ -196,73 +118,15 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
 
     private void ReplaceStationListFragment(WeatherStationFragment.StationsToShow filter, String title)
     {
-        mDrawerLayout.closeDrawer(mDrawerContents);
-        FragmentManager fm = getSupportFragmentManager();
-        int numBackStacks = fm.getBackStackEntryCount();
-        Log.i(TAG, String.format("Number of transitions in back stack: %s", numBackStacks));
+        Log.i(TAG, "Replace station list fragment: " + filter.toString());
 
-        Fragment oldStationsFrag = fm.findFragmentByTag(STATIONS_FRAG_TAG);
-        if(oldStationsFrag != null)
-        {
-            Log.i(TAG, "Found old stations fragment. Removing last transition. Expect that the number of transitions in the back stack was 1.");
-            fm.popBackStack();
-        }
+        mWeatherStationFrag = WeatherStationFragment.newInstance(filter);
 
-        WeatherStationFragment stationsFragment = WeatherStationFragment.NewWeatherStation(filter);
-
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.content_frame, stationsFragment, STATIONS_FRAG_TAG).commit();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.content_frame, mWeatherStationFrag, STATIONS_FRAG_TAG).commit();
         setTitle(title);
     }
 
-    private class DrawerItemClickListener implements ListView.OnItemClickListener
-    {
-        @Override
-        public void onItemClick(AdapterView parent, View view, int position, long id)
-        {
-            String itemText = mAustralianStates[position];
-            Log.i(TAG, String.format("Selecting drawer item: %s", itemText));
 
-            mDrawerStatesList.setItemChecked(position, true);
-
-            ReplaceStationListFragment(
-                    WeatherStationFragment.StationsToShow.valueOf(itemText),
-                    String.format(getString(R.string.wind_stations_in), itemText));
-        }
-    }
-
-    private class SaveFirstOpenInSettingsActionBarDrawerToggle extends ActionBarDrawerToggle {
-
-        public SaveFirstOpenInSettingsActionBarDrawerToggle() {
-            super(MainActivity.this, MainActivity.this.mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close);
-        }
-
-        /** Called when a drawer has settled in a completely closed state. */
-        @Override
-        public void onDrawerClosed(View drawerView)
-        {
-            super.onDrawerClosed(drawerView);
-            getSupportActionBar().setTitle(mTitle);
-            invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-        }
-
-        /** Called when a drawer has settled in a completely open state. */
-        @Override
-        public void onDrawerOpened(View drawerView) {
-            super.onDrawerOpened(drawerView);
-            getSupportActionBar().setTitle(mTitle);
-            invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-
-            Context applicationContext = getApplicationContext();
-            if(applicationContext == null) return;
-
-            SharedPreferences sp = applicationContext.getSharedPreferences(WINDCAST_USER_PREFS, 0);
-
-            SharedPreferences.Editor e = sp.edit();
-
-            e.putBoolean(PREFS_NAVIGATION_DRAWER_OPENED, true);
-            e.commit();
-        }
-    }
 }
 
