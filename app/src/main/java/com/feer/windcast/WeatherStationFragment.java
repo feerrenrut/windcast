@@ -115,7 +115,10 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     }
     private static void writeBundle(Bundle saveInstanceState, StationsToShow showStations)
     {
-        saveInstanceState.putInt(PARAM_STATIONS_TO_SHOW, showStations.ordinal());
+        if(showStations != null)
+        {
+            saveInstanceState.putInt(PARAM_STATIONS_TO_SHOW, showStations.ordinal());
+        }
     }
 
     @Override
