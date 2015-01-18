@@ -13,7 +13,7 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled  false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
@@ -40,13 +40,13 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            runProguard false
-            zipAlign true
+            minifyEnabled  false
+            zipAlignEnabled true
         }
 
         debug {
-            runProguard false
-            zipAlign true
+            minifyEnabled  false
+            zipAlignEnabled true
         }
     }
 }

@@ -209,12 +209,14 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
 
         launchActivity();
 
-        final String STATE_TO_CLICK = "WA";
+        openDrawer(drawerID);
+        onView(withText("All")).perform(click());
 
         onView(withId(android.R.id.list))
                 .check(matches(
                     adapterHasCount(equalTo(FakeWeatherStationData.MAX_NUM_OF_ALL_STATIONS))));
 
+        final String STATE_TO_CLICK = "WA";
         openDrawer(drawerID);
         onView(withId(R.id.drawer_states)).perform(click());
         onView(withText(STATE_TO_CLICK)).perform(click());
