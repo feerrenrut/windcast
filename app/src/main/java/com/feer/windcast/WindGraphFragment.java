@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.androidplot.xy.XYPlot;
 import com.feer.windcast.WeatherStation.WeatherStationBuilder;
+import com.feer.windcast.dataAccess.LoadedWeatherCache;
 import com.feer.windcast.dataAccess.WeatherDataCache;
 
 import java.net.MalformedURLException;
@@ -130,9 +131,8 @@ public class WindGraphFragment extends Fragment
                     return false;
                 }
 
-                WeatherDataCache cache = WeatherDataCache.GetWeatherDataCache();
                 Log.i("WindCast", "Getting data from: " + mStation.GetURL().toString());
-                wd = cache.GetWeatherDataFor(mStation);
+                wd = WeatherDataCache.GetWeatherDataFor(mStation);
                 return true;
             }
 

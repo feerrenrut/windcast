@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.feer.windcast.dataAccess.BackgroundTaskManager;
 import com.feer.windcast.dataAccess.FavouriteStationCache;
+import com.feer.windcast.dataAccess.LoadedWeatherCache;
 import com.feer.windcast.dataAccess.WeatherDataCache;
 
 import java.util.ArrayList;
@@ -38,10 +39,6 @@ import static com.feer.windcast.EmptyDataError.EmptyTextState.NoStationsAvailabl
 
 /**
  * A fragment representing a list of Items.
- * <p />
- * Large screen devices (such as tablets) are supported by replacing the ListView
- * with a GridView.
- * <p />
  * Activities containing this fragment MUST implement the callbacks
  * interface.
  */
@@ -52,15 +49,13 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     private OnWeatherStationFragmentInteractionListener mListener;
 
     /**
-     * The Adapter which will be used to populate the ListView/GridView with
+     * The Adapter which will be used to populate the ListView with
      * Views.
      */
     private WeatherStationArrayAdapter mAdapter;
     private  StationsToShow mShowOnlyStations = null; //set to favs if some exist else all
 
-
-    private BackgroundTaskManager mTaskManager  = new BackgroundTaskManager();
-    WeatherDataCache mCache;
+    private BackgroundTaskManager mTaskManager  = null;
 
     private EditText mSearchInput;
     private FavouriteStationCache mFavs = null;
@@ -80,6 +75,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
      * fragment (e.g. upon screen orientation changes).
      */
     public WeatherStationFragment() {
+        mTaskManager = BackgroundTaskManager.GetTaskManager();
     }
 
     public static enum StationsToShow
@@ -236,8 +232,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 + " must implement OnWeatherStationFragmentInteractionListener");
         }
 
-        mCache = WeatherDataCache.GetWeatherDataCache();
-        mFavs = mCache.CreateNewFavouriteStationAccessor();
+        mFavs = WeatherDataCache.CreateNewFavouriteStationAccessor();
     }
 
     @Override
@@ -250,23 +245,31 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onResume() {
         super.onResume();
 
-        new AsyncTask<Void, Void, ArrayList<WeatherStation>>()
-        {
+        abstract class FillStation extends AsyncTask<Void, Void, ArrayList<WeatherStation>> implements WeatherDataCache.NotifyWhenCacheFilled{}
 
+        WeatherDataCache.OnCacheFilled( new FillStation()
+        {
+            @Override
+            public void OnCacheFilled(LoadedWeatherCache fullCache) {
+                weatherCache = fullCache;
+                execute();
+            }
+
+            public LoadedWeatherCache weatherCache = null;
             @Override
             protected ArrayList<WeatherStation> doInBackground(Void... params)
             {
                 Context con ;
-                if(getActivity() == null || (con = getActivity().getApplicationContext()) == null) return null;
+                if(getActivity() == null || (con = getActivity().getApplicationContext()) == null || weatherCache == null) return null;
 
                 mFavs.Initialise(con, mTaskManager);
                 if(mShowOnlyStations == null || mShowOnlyStations == StationsToShow.All || mShowOnlyStations == StationsToShow.Favourites)
                 {
-                    return mCache.GetWeatherStationsFromAllStates();
+                    return weatherCache.GetWeatherStationsFromAllStates();
                 }
                 else
                 {
-                    return mCache.GetWeatherStationsFrom(mShowOnlyStations.toString());
+                    return weatherCache.GetWeatherStationsFrom(mShowOnlyStations.toString());
                 }
             }
 
@@ -315,7 +318,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 mEmptyTextEnum.RemoveEmptyListReason(LoadingData);
                 invalidateOptionsMenu(act);
             }
-        }.execute(); //todo make this a task based system, start the task during splash screen.
+        });
     }
 
     private void SetEmptyTextViewContents(EmptyTextState reason) {
