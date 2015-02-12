@@ -232,7 +232,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 + " must implement OnWeatherStationFragmentInteractionListener");
         }
 
-        mFavs = WeatherDataCache.CreateNewFavouriteStationAccessor();
+        mFavs = WeatherDataCache.GetCache().CreateNewFavouriteStationAccessor();
     }
 
     @Override
@@ -247,7 +247,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
         abstract class FillStation extends AsyncTask<Void, Void, ArrayList<WeatherStation>> implements WeatherDataCache.NotifyWhenCacheFilled{}
 
-        WeatherDataCache.OnCacheFilled( new FillStation()
+        WeatherDataCache.GetCache().OnCacheFilled( new FillStation()
         {
             @Override
             public void OnCacheFilled(LoadedWeatherCache fullCache) {

@@ -18,13 +18,11 @@ class InternalCache implements LoadedWeatherCache {
     protected InternalCache()
     {}
 
-    private ArrayList<WeatherStation> mStations;
+    private final ArrayList<WeatherStation> mStations = new ArrayList<WeatherStation>();
+    private final ArrayList<String> mStatesLoaded = new ArrayList<String>();
+    
     @Override
     public ArrayList<WeatherStation> GetWeatherStationsFrom(String state) {
-        if (GetWeatherStationsFromAllStates() == null) {
-            return null;
-        }
-
         ArrayList<WeatherStation> stationsForState = new ArrayList<WeatherStation>();
         for (WeatherStation station : mStations) {
             if (station.GetStateAbbreviated().equals(state)) {
@@ -36,34 +34,22 @@ class InternalCache implements LoadedWeatherCache {
 
     @Override
     public ArrayList<WeatherStation> GetWeatherStationsFromAllStates() {
-        if (mStations == null) {
-            InitialiseInternalStationList();
-        }
-
         return mStations;
     }
-
-    protected void InitialiseInternalStationList() {
-        mStations = new ArrayList<WeatherStation>();
-        for(AllStationsURLForState stationLink : mAllStationsInState_UrlList)
-        {
-            try
-            {
-                URL url = new URL(stationLink.mUrlString);
-                mStations.addAll(StationListReader.GetWeatherStationsFromURL(url, stationLink.mState));
-            } catch (Exception e)
-            {
-                Log.e(WeatherDataCache.TAG, "Couldn't create URL " + e.toString());
-                mStations = null;
-            }
-        }
-        if(mStations != null )
-        {
-            Collections.sort(mStations);
-        }
+    
+    public void AddStationsForState(ArrayList<WeatherStation> stations, String state)
+    {
+        mStations.addAll(stations);
+        mStatesLoaded.add(state);
+        Collections.sort(mStations);
+    }
+    
+    public boolean StationsForAllStatesAdded()
+    {
+        return mStatesLoaded.size() == mAllStationsInState_UrlList.length;
     }
 
-    private static class AllStationsURLForState
+    static class AllStationsURLForState
     {
         public AllStationsURLForState(String urlString, String state)
         {mUrlString = urlString; mState = state;}
@@ -72,7 +58,7 @@ class InternalCache implements LoadedWeatherCache {
         public String mState;
     }
 
-    private static final AllStationsURLForState[] mAllStationsInState_UrlList =
+    static final AllStationsURLForState[] mAllStationsInState_UrlList =
             {
                     new AllStationsURLForState("http://www.bom.gov.au/wa/observations/waall.shtml", "WA"),
                     new AllStationsURLForState("http://www.bom.gov.au/nsw/observations/nswall.shtml", "NSW"), //Strangely some the stations for ACT (inc. Canberra) are on this page!
@@ -89,80 +75,68 @@ class InternalCache implements LoadedWeatherCache {
  */
 public class WeatherDataCache
 {
-    private WeatherDataCache()
-    { }
-
     public interface NotifyWhenCacheFilled
     {
         void OnCacheFilled(LoadedWeatherCache fullCache);
     }
 
-    final private static ArrayList<NotifyWhenCacheFilled> sNotifyUs = new ArrayList<NotifyWhenCacheFilled>();
-    private static InternalCache sWeatherDataCache = null;
-    private static boolean sCacheFilled = false;
+    final private ArrayList<NotifyWhenCacheFilled> mNotifyUs = new ArrayList<NotifyWhenCacheFilled>();
     protected static final String TAG = "WeatherDataCache";
 
-    public static void OnCacheFilled(NotifyWhenCacheFilled notify)
+    /* when this is null, loading of the cache has not yet started.
+    * Has to be package local for tests.
+     */
+    InternalCache mWeatherDataCache = null;
+    private static WeatherDataCache sInstance = null;
+    
+    private WeatherDataCache()
+    { }
+    
+    public static WeatherDataCache GetCache()
+    {
+        if(sInstance == null)
+        {
+            SetWeatherDataCache(new WeatherDataCache());
+        }
+        
+        return sInstance;
+    }
+    
+    public static void SetWeatherDataCache(WeatherDataCache instance)
+    {
+        sInstance = instance;
+    }
+    
+    private InternalCache GetInternalCache()
+    {
+        return mWeatherDataCache;
+    }
+
+
+    public void OnCacheFilled(NotifyWhenCacheFilled notify)
     {
         if(isCacheFilled())
         {
-            notify.OnCacheFilled(sWeatherDataCache);
+            notify.OnCacheFilled(GetInternalCache());
         }
         else
         {
-            sNotifyUs.add(notify);
-            if(sWeatherDataCache == null)
+            mNotifyUs.add(notify);
+            if(GetInternalCache() == null)
             {
                 triggerFillCache();
             }
         }
     }
 
-    private static void triggerFillCache()
-    {
-        sWeatherDataCache = new InternalCache();
+    private boolean isCacheFilled() {return GetInternalCache() != null && GetInternalCache().StationsForAllStatesAdded();}
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-
-                sWeatherDataCache.InitialiseInternalStationList();
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                sCacheFilled = true;
-
-                for(NotifyWhenCacheFilled notify : sNotifyUs)
-                {
-                    notify.OnCacheFilled(sWeatherDataCache);
-                }
-                sNotifyUs.clear();
-            }
-        }.execute();
-    }
-
-    public static boolean isCacheFilled() {return sCacheFilled;}
-
-    public static LoadedWeatherCache GetLoadedWeatherCache()
-    {
-        if(isCacheFilled())
-        {
-            return sWeatherDataCache;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    public static FavouriteStationCache CreateNewFavouriteStationAccessor()
+    public FavouriteStationCache CreateNewFavouriteStationAccessor()
     {
         return new FavouriteStationCache();
     }
 
-    public static WeatherData GetWeatherDataFor(WeatherStation station)
+    public WeatherData GetWeatherDataFor(WeatherStation station)
     {
         WeatherData wd = null;
         try
@@ -176,5 +150,51 @@ public class WeatherDataCache
         }
 
         return wd;
+    }
+
+    private void triggerFillCache()
+    {
+        mWeatherDataCache = new InternalCache();
+
+        for(final InternalCache.AllStationsURLForState stationLink : InternalCache.mAllStationsInState_UrlList)
+        {
+            new AsyncTask<Void, Void, ArrayList<WeatherStation>>() {
+                @Override
+                protected ArrayList<WeatherStation> doInBackground(Void... params) {
+                    ArrayList<WeatherStation> stations = new ArrayList<WeatherStation>();
+                    try
+                    {
+                        URL url = new URL(stationLink.mUrlString);
+                        stations.addAll(StationListReader.GetWeatherStationsFromURL(url, stationLink.mState));
+                    } catch (Exception e)
+                    {
+                        Log.e(WeatherDataCache.TAG, "Couldn't create URL " + e.toString());
+                        stations = null;
+                    }
+                    return stations;
+                }
+
+                @Override
+                protected void onPostExecute(ArrayList<WeatherStation> weatherStations) {
+                    if(weatherStations != null)
+                    {
+                        mWeatherDataCache.AddStationsForState(weatherStations, stationLink.mState);
+                    }
+                    
+                    if(mWeatherDataCache.StationsForAllStatesAdded())
+                    {
+                        NotifyOfCacheFilled();
+                    }
+                }
+            }.execute();
+        }
+    }
+
+    private void NotifyOfCacheFilled() {
+        for(NotifyWhenCacheFilled notify : mNotifyUs)
+        {
+            notify.OnCacheFilled(GetInternalCache());
+        }
+        mNotifyUs.clear();
     }
 }

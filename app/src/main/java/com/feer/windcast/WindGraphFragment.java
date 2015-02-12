@@ -132,7 +132,7 @@ public class WindGraphFragment extends Fragment
                 }
 
                 Log.i("WindCast", "Getting data from: " + mStation.GetURL().toString());
-                wd = WeatherDataCache.GetWeatherDataFor(mStation);
+                wd = WeatherDataCache.GetCache().GetWeatherDataFor(mStation);
                 return true;
             }
 

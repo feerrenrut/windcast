@@ -21,7 +21,7 @@ public class SplashScreen extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-        WeatherDataCache.OnCacheFilled(new WeatherDataCache.NotifyWhenCacheFilled() {
+        WeatherDataCache.GetCache().OnCacheFilled(new WeatherDataCache.NotifyWhenCacheFilled() {
             @Override
             public void OnCacheFilled(LoadedWeatherCache fullCache) {
                 return;

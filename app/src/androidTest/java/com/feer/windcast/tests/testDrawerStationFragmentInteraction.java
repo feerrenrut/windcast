@@ -1,17 +1,15 @@
 package com.feer.windcast.tests;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.WeatherStation;
-import com.feer.windcast.WindCastNavigationDrawer;
 import com.feer.windcast.dataAccess.FavouriteStationCache;
-import com.feer.windcast.dataAccess.WeatherDataCache;
 import com.feer.windcast.testUtils.FakeWeatherStationData;
+import com.feer.windcast.testUtils.WindCastMocks;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -20,7 +18,6 @@ import static com.feer.windcast.testUtils.AdapterMatchers.adapterHasCount;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.swipeLeft;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.swipeRight;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
@@ -55,10 +52,8 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         super(MainActivity.class);
     }
 
-    private FakeWeatherStationData mFakeStations;
-    private WeatherDataCache mCache;
+    private WindCastMocks mMocks;
     private final int drawerID = R.id.drawer_layout;
-    private SharedPreferences mSettings;
 
     // Activity is not created until get activity is called
     private void launchActivity()
@@ -70,40 +65,13 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
     protected void setUp() throws Exception
     {
         super.setUp();
-        mFakeStations = new FakeWeatherStationData("test Station");
-
-        // set up weather data cache before starting the activity.
-        mCache = mock(WeatherDataCache.class);
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.EmptyStationList());
-        when(mCache.GetWeatherStationsFrom(anyString())).thenReturn(mFakeStations.EmptyStationList());
-        when(mCache.CreateNewFavouriteStationAccessor()).thenCallRealMethod();
-        WeatherDataCache.SetsWeatherDataCache(mCache);
-
-        mSettings = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
-
-        ClearPreferences();
-        AddNavigationDrawerAlreadyOpenedPreference();
+        
+        mMocks = new WindCastMocks(
+                PreferenceManager.getDefaultSharedPreferences(
+                        this.getInstrumentation().getTargetContext()));
+        mMocks.SetInternalCache_ReturnEmptyStationLists();
     }
 
-    private void ClearPreferences()
-    {
-        SharedPreferences.Editor editor =  mSettings.edit();
-        editor.clear();
-        editor.commit();
-    }
-
-    private void AddNavigationDrawerAlreadyOpenedPreference()
-    {
-
-        SharedPreferences.Editor editor =  mSettings.edit();
-        editor.putBoolean(WindCastNavigationDrawer.PREFS_NAVIGATION_DRAWER_OPENED, true);
-        editor.commit();
-    }
-
-    private boolean GetPreference_HasDrawerBeenOpened()
-    {
-        return mSettings.getBoolean(WindCastNavigationDrawer.PREFS_NAVIGATION_DRAWER_OPENED, false);
-    }
 
     public void test_Drawer_openClose()
     {
@@ -121,8 +89,9 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
     public void test_drawerOpen_ExpandStates_hasExpectedContents()
     {
         launchActivity();
+        
         openDrawer(drawerID);
-
+        
         onView(withId(R.id.drawer_states))
                 .perform(click())
                 .check(matches(withText(R.string.states)));
@@ -204,8 +173,10 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
 
     public void test_selectWA_showsWAStations()
     {
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
-        when(mCache.GetWeatherStationsFrom(anyString())).thenReturn(mFakeStations.GetSingleStation(0));
+        when(mMocks.mInternalCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mMocks.mFakeStations.GetAllStations());
+        when(mMocks.mInternalCache.GetWeatherStationsFrom(anyString()))
+                .thenReturn(mMocks.mFakeStations.GetSingleStation(0));
 
         launchActivity();
 
@@ -221,20 +192,23 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         onView(withId(R.id.drawer_states)).perform(click());
         onView(withText(STATE_TO_CLICK)).perform(click());
 
-        verify(mCache, times(1)).GetWeatherStationsFrom(STATE_TO_CLICK);
+        verify(mMocks.mInternalCache, times(1)).GetWeatherStationsFrom(STATE_TO_CLICK);
         onView(withId(android.R.id.list)).check(matches(adapterHasCount(equalTo(1))));
     }
 
     public void test_withFilter_selectState_FilterCleared()
     {
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
-        when(mCache.GetWeatherStationsFrom(anyString())).thenReturn(mFakeStations.GetAllStations());
+        when(mMocks.mInternalCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mMocks.mFakeStations.GetAllStations());
+        when(mMocks.mInternalCache.GetWeatherStationsFrom(anyString()))
+                .thenReturn(mMocks.mFakeStations.GetAllStations());
+        //mMocks.SetInternalCache_ReturnAFavStation(mock(FavouriteStationCache.class));
         launchActivity();
 
         onView(withId(R.id.search)).perform(click());
 
         onView(withId(R.id.weather_station_search_box))
-                .perform(typeText("Station3"));
+                .perform(typeText("Station4"));
         onView(withId(android.R.id.list))
                 .check(matches(adapterHasCount(equalTo(1))));
 
@@ -254,12 +228,14 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
     {
         FavouriteStationCache mFavs;
         mFavs = mock(FavouriteStationCache.class);
-        when(mCache.CreateNewFavouriteStationAccessor()).thenReturn(mFavs);
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+        when(mMocks.mDataCache.CreateNewFavouriteStationAccessor())
+                .thenReturn(mFavs);
+        when(mMocks.mInternalCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mMocks.mFakeStations.GetAllStations());
 
 
         final ArrayList<String> favStationURLsList = new ArrayList<String>();
-        ArrayList<WeatherStation> allStationList = mFakeStations.GetAllStations();
+        ArrayList<WeatherStation> allStationList = mMocks.mFakeStations.GetAllStations();
         WeatherStation copy = allStationList.get(5);
         favStationURLsList.add(copy.GetURL().toString());
         copy = allStationList.get(2);
@@ -285,14 +261,16 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
     {
         FavouriteStationCache mFavs;
         mFavs = mock(FavouriteStationCache.class);
-        when(mCache.CreateNewFavouriteStationAccessor()).thenReturn(mFavs);
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+        when(mMocks.mDataCache.CreateNewFavouriteStationAccessor())
+                .thenReturn(mFavs);
+        when(mMocks.mInternalCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mMocks.mFakeStations.GetAllStations());
 
         when(mFavs.GetFavouriteURLs()).thenReturn(new ArrayList<String>());
 
         launchActivity();
 
-        WeatherStation newFav = mFakeStations.GetAllStations().get(4);
+        WeatherStation newFav = mMocks.mFakeStations.GetAllStations().get(4);
         assertTrue(
                 "Station not yet clicked, it should not be a favourite!",
                 newFav.IsFavourite == false);
@@ -312,11 +290,13 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
     {
         FavouriteStationCache mFavs;
         mFavs = mock(FavouriteStationCache.class);
-        when(mCache.CreateNewFavouriteStationAccessor()).thenReturn(mFavs);
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+        when(mMocks.mDataCache.CreateNewFavouriteStationAccessor())
+                .thenReturn(mFavs);
+        when(mMocks.mInternalCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mMocks.mFakeStations.GetAllStations());
 
         final int STATION_INDEX = 4;
-        WeatherStation oldFav = mFakeStations.GetAllStations().get(STATION_INDEX);
+        WeatherStation oldFav = mMocks.mFakeStations.GetAllStations().get(STATION_INDEX);
         oldFav.IsFavourite = true;
         ArrayList<String> favUrls = new ArrayList<String>();
         favUrls.add(oldFav.GetURL().toString());
@@ -337,7 +317,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
 
     public void test_onStartDrawerOpen()
     {
-        ClearPreferences();
+        mMocks.ClearPreferences();
         launchActivity();
 
         onView(withId(R.id.drawer_states))
@@ -348,8 +328,8 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
 
     public void test_afterManualDrawerOpen_onStartDrawerNotOpen()
     {
-        ClearPreferences();
-        AddNavigationDrawerAlreadyOpenedPreference();
+        mMocks.ClearPreferences();
+        mMocks.AddNavigationDrawerAlreadyOpenedPreference();
         launchActivity();
 
         onView(withId(R.id.drawer_states))
@@ -358,12 +338,14 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
 
     public void test_manuallyOpeningDrawer_setsPreference()
     {
-        ClearPreferences();
+        mMocks.ClearPreferences();
         launchActivity();
 
         onView(withId(drawerID)).check(matches(isOpen()));
         closeDrawer(drawerID);
-        assertFalse("Drawer not manually opened, preference should not yet exist", GetPreference_HasDrawerBeenOpened());
+        assertFalse(
+                "Drawer not manually opened, preference should not yet exist",
+                mMocks.GetPreference_HasDrawerBeenOpened());
 
         // this seems like a hack, calling open drawer alone does not result in the onDrawerOpen
         // callback being called. However swipeRight does not wait for the drawer to open!
@@ -371,6 +353,8 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         openDrawer(drawerID);
 
         onView(withId(drawerID)).check(matches(isOpen()));
-        assertTrue("Drawer has been manually opened, preference should now exist", GetPreference_HasDrawerBeenOpened());
+        assertTrue(
+                "Drawer has been manually opened, preference should now exist",
+                mMocks.GetPreference_HasDrawerBeenOpened());
     }
 }

@@ -14,6 +14,7 @@ import com.feer.windcast.WindCastNavigationDrawer;
 import com.feer.windcast.dataAccess.FavouriteStationCache;
 import com.feer.windcast.dataAccess.WeatherDataCache;
 import com.feer.windcast.testUtils.FakeWeatherStationData;
+import com.feer.windcast.testUtils.WindCastMocks;
 
 import java.util.ArrayList;
 
@@ -45,10 +46,8 @@ import static org.mockito.Mockito.when;
  */
 public class testStationFragment extends ActivityInstrumentationTestCase2<MainActivity>
 {
-    private FakeWeatherStationData mFakeStations;
-    private WeatherDataCache mCache;
+    private WindCastMocks mMocks;
     private final int drawerID = R.id.drawer_layout;
-    private SharedPreferences mSettings;
 
     // Activity is not created until get activity is called
     private void launchActivity()
@@ -65,33 +64,15 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
     protected void setUp() throws Exception
     {
         super.setUp();
-        mFakeStations = new FakeWeatherStationData("test Station");
 
-        // set up weather data cache before starting the activity.
-        mCache = mock(WeatherDataCache.class);
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
-        when(mCache.CreateNewFavouriteStationAccessor()).thenCallRealMethod();
-        WeatherDataCache.SetsWeatherDataCache(mCache);
+        mMocks = new WindCastMocks(
+                PreferenceManager.getDefaultSharedPreferences(
+                        this.getInstrumentation().getTargetContext()));
 
-        mSettings = PreferenceManager.getDefaultSharedPreferences(this.getInstrumentation().getTargetContext());
-
-        ClearPreferences();
-        AddNavigationDrawerAlreadyOpenedPreference();
-    }
-
-    private void ClearPreferences()
-    {
-        SharedPreferences.Editor editor =  mSettings.edit();
-        editor.clear();
-        editor.commit();
-    }
-
-    private void AddNavigationDrawerAlreadyOpenedPreference()
-    {
-
-        SharedPreferences.Editor editor =  mSettings.edit();
-        editor.putBoolean(WindCastNavigationDrawer.PREFS_NAVIGATION_DRAWER_OPENED, true);
-        editor.commit();
+        when(mMocks.mInternalCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mMocks.mFakeStations.GetAllStations());
+        when(mMocks.mDataCache.CreateNewFavouriteStationAccessor())
+                .thenCallRealMethod();
     }
 
     public void test_initialTitleBar()
@@ -129,8 +110,8 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 
     public void test_enteringTextIntoSearchBox_FiltersStations()
     {
-        when(mCache.GetWeatherStationsFromAllStates())
-                .thenReturn(mFakeStations.GetAllStations());
+        when(mMocks.mInternalCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mMocks.mFakeStations.GetAllStations());
 
         launchActivity();
 
@@ -151,7 +132,8 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
     public void test_withASingleStation_CreatingActivity_ShowsOneItem()
     {
         // set up weather data cache before starting the activity.
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetSingleStation(0));
+        when(mMocks.mInternalCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mMocks.mFakeStations.GetSingleStation(0));
 
         launchActivity();
 
@@ -171,7 +153,9 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 
     public void test_withNoStations_CreatingActivity_ShowsNoItems()
     {
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.EmptyStationList());
+        when(mMocks.mInternalCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mMocks.mFakeStations.EmptyStationList());
+        
         launchActivity();
 
         onView(withId(android.R.id.list)).check(matches(not(isDisplayed())));
@@ -201,17 +185,11 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
 
     public void test_withFavourites_OnFavouriteView_SearchAvailable()
     {
-        FavouriteStationCache favouriteStationCache;
-        favouriteStationCache = mock(FavouriteStationCache.class);
-        when(mCache.CreateNewFavouriteStationAccessor()).thenReturn(favouriteStationCache);
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+        when(mMocks.mInternalCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mMocks.mFakeStations.GetAllStations());
 
-        final int STATION_INDEX = 4;
-        WeatherStation oldFav = mFakeStations.GetAllStations().get(STATION_INDEX);
-        oldFav.IsFavourite = true;
-        ArrayList<String> favUrls = new ArrayList<String>();
-        favUrls.add(oldFav.GetURL().toString());
-        when(favouriteStationCache.GetFavouriteURLs()).thenReturn(favUrls);
+        mMocks.SetInternalCache_ReturnAFavStation(
+                mock(FavouriteStationCache.class));
 
         launchActivity();
 
@@ -225,11 +203,13 @@ public class testStationFragment extends ActivityInstrumentationTestCase2<MainAc
     {
         FavouriteStationCache favouriteStationCache;
         favouriteStationCache = mock(FavouriteStationCache.class);
-        when(mCache.CreateNewFavouriteStationAccessor()).thenReturn(favouriteStationCache);
-        when(mCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.GetAllStations());
+        when(mMocks.mDataCache.CreateNewFavouriteStationAccessor())
+                .thenReturn(favouriteStationCache);
+        when(mMocks.mInternalCache.GetWeatherStationsFromAllStates())
+                .thenReturn(mMocks.mFakeStations.GetAllStations());
 
         final int STATION_INDEX = 4;
-        WeatherStation oldFav = mFakeStations.GetAllStations().get(STATION_INDEX);
+        WeatherStation oldFav = mMocks.mFakeStations.GetAllStations().get(STATION_INDEX);
         oldFav.IsFavourite = true;
         ArrayList<String> favUrls = new ArrayList<String>();
         favUrls.add(oldFav.GetURL().toString());
