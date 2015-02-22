@@ -1,9 +1,10 @@
 package com.feer.windcast.testUtils;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.feer.windcast.WeatherStation;
 import com.feer.windcast.WindCastNavigationDrawer;
+import com.feer.windcast.dataAccess.BackgroundTaskManager;
 import com.feer.windcast.dataAccess.FavouriteStationCache;
 import com.feer.windcast.dataAccess.LoadedWeatherCache;
 import com.feer.windcast.dataAccess.WeatherDataCache;
@@ -12,11 +13,9 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.util.ArrayList;
-
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.isA;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -25,45 +24,41 @@ import static org.mockito.Mockito.when;
 public class WindCastMocks {
 
 
-    public FakeWeatherStationData mFakeStations;
-    public LoadedWeatherCache mInternalCache;
-    public WeatherDataCache mDataCache;
-    public SharedPreferences mSettings;
+    public final FakeWeatherStationData Fakes;
+    public final LoadedWeatherCache LoadedCache;
+    public final WeatherDataCache DataCache;
+    public final SharedPreferences Settings;
+    public final FavouriteStationCache FavouritesCache;
     
     public WindCastMocks(SharedPreferences settings) throws Exception {
-        mFakeStations = new FakeWeatherStationData("test Station");
+        Fakes = new FakeWeatherStationData("test Station", "fav Station");
 
         // set up weather data cache before starting the activity.
-        mInternalCache = mock(LoadedWeatherCache.class);
-        mDataCache = mock(WeatherDataCache.class);
-        when(mDataCache.CreateNewFavouriteStationAccessor()).thenCallRealMethod();
-        Mockito.doAnswer(createCallCacheFilledAnswer(mInternalCache))
-                .when(mDataCache).OnCacheFilled(isA(WeatherDataCache.NotifyWhenCacheFilled.class));
-        WeatherDataCache.SetWeatherDataCache(mDataCache);
+        LoadedCache = StrictMock.create(LoadedWeatherCache.class);
+        DataCache = StrictMock.create(WeatherDataCache.class);
+        FavouritesCache = StrictMock.create(FavouriteStationCache.class);
+
+        WeatherDataCache.SetWeatherDataCache(DataCache); //set weather data cache singleton
         
+        Mockito.doAnswer(createCallCacheFilledAnswer(LoadedCache)) // set call back for waiting for
+                .when(DataCache).OnCacheFilled(                    // loaded data
+                isA(WeatherDataCache.NotifyWhenCacheFilled.class));
         
-        mSettings = settings;
+        Mockito.doNothing().when(FavouritesCache).Initialise(
+                any(Context.class), any(BackgroundTaskManager.class));
+                
+        Settings = settings;
         ClearPreferences();
         AddNavigationDrawerAlreadyOpenedPreference();
     }
     
-    public void SetInternalCache_ReturnAFavStation(FavouriteStationCache mockFavCache)
+    /// must be called after setting up each of the mock method returns
+    /// or use the alternate (and less preferred) do(..).when(..)
+    public void VerifyNoUnstubbedCallsOnMocks()
     {
-        final int STATION_INDEX = 4;
-        WeatherStation oldFav = mFakeStations.GetAllStations().get(STATION_INDEX);
-        oldFav.IsFavourite = true;
-        ArrayList<String> favUrls = new ArrayList<String>();
-        favUrls.add(oldFav.GetURL().toString());
-        when(mockFavCache.GetFavouriteURLs()).thenReturn(favUrls);
-        
-        when(mDataCache.CreateNewFavouriteStationAccessor())
-                .thenReturn(mockFavCache);
-    }
-    
-    public void SetInternalCache_ReturnEmptyStationLists()
-    {
-        when(mInternalCache.GetWeatherStationsFromAllStates()).thenReturn(mFakeStations.EmptyStationList());
-        when(mInternalCache.GetWeatherStationsFrom(anyString())).thenReturn(mFakeStations.EmptyStationList());
+        StrictMock.verifyNoUnstubbedInteractions(LoadedCache);
+        StrictMock.verifyNoUnstubbedInteractions(DataCache);
+        StrictMock.verifyNoUnstubbedInteractions(FavouritesCache);
     }
    
     private Answer<Void> createCallCacheFilledAnswer(final LoadedWeatherCache cache)
@@ -80,7 +75,7 @@ public class WindCastMocks {
     
     public void ClearPreferences()
     {
-        SharedPreferences.Editor editor =  mSettings.edit();
+        SharedPreferences.Editor editor =  Settings.edit();
         editor.clear();
         editor.commit();
     }
@@ -88,14 +83,27 @@ public class WindCastMocks {
     public void AddNavigationDrawerAlreadyOpenedPreference()
     {
 
-        SharedPreferences.Editor editor =  mSettings.edit();
+        SharedPreferences.Editor editor =  Settings.edit();
         editor.putBoolean(WindCastNavigationDrawer.PREFS_NAVIGATION_DRAWER_OPENED, true);
         editor.commit();
     }
 
     public boolean GetPreference_HasDrawerBeenOpened()
     {
-        return mSettings.getBoolean(WindCastNavigationDrawer.PREFS_NAVIGATION_DRAWER_OPENED, false);
+        return Settings.getBoolean(WindCastNavigationDrawer.PREFS_NAVIGATION_DRAWER_OPENED, false);
+    }
+    
+    public void JustUseMocksWithFakeData()
+    {
+        when(DataCache.CreateNewFavouriteStationAccessor())
+                .thenReturn(FavouritesCache);
+        when(FavouritesCache.GetFavouriteURLs())
+                .thenReturn(Fakes.FavURLs());
+        when(LoadedCache.GetWeatherStationsFrom( anyString()))
+                .thenReturn(Fakes.Stations());
+        when(LoadedCache.GetWeatherStationsFromAllStates())
+                .thenReturn(Fakes.Stations());
+        VerifyNoUnstubbedCallsOnMocks();
     }
     
 }

@@ -295,6 +295,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                         {
                             mEmptyTextEnum.AddEmptyListReason(NoFavourites);
                         }
+                        getActivity().setTitle(R.string.favourite_stations);
                     }
                     else if (useStations.isEmpty())
                     {
