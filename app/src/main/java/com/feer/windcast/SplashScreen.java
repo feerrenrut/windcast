@@ -20,19 +20,14 @@ public class SplashScreen extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
-
-        WeatherDataCache.GetCache().OnCacheFilled(new WeatherDataCache.NotifyWhenCacheFilled() {
-            @Override
-            public void OnCacheFilled(LoadedWeatherCache fullCache) {
-                return;
-            }
-        });
+        
+        WeatherStationsService.startAction_UpdateWeatherStations(this);
 
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    Thread.sleep(3000l);
+                    Thread.sleep(1000l);
                 } catch (InterruptedException e) {
                     Log.e(TAG, "Error while sleeping with splash screen: " + e.toString());
                 }
