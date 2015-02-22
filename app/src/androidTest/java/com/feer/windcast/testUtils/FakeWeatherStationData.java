@@ -1,5 +1,7 @@
 package com.feer.windcast.testUtils;
 
+import android.util.Log;
+
 import com.feer.windcast.WeatherStation;
 
 import java.net.MalformedURLException;
@@ -15,48 +17,92 @@ import static java.lang.String.format;
  */
 public class FakeWeatherStationData
 {
-    private ArrayList<WeatherStation> mStations;
-    public static final int MAX_NUM_OF_ALL_STATIONS = 11;
+    private final ArrayList<WeatherStation> mStations;
+    private final ArrayList<WeatherStation> mFavouriteStations;
+    private final String mStationNameBase;
+    private final String mFavouriteNameBase;
 
-    public FakeWeatherStationData(String stationNameBase) throws Exception
-    {
+    public FakeWeatherStationData(String stationNameBase, String favouriteNameBase) throws Exception
+    { 
         checkNotNull(stationNameBase);
-        final String urlFormat = "http://WindCastTestData.com/%d.json";
+        checkNotNull(favouriteNameBase);
+        mStationNameBase=stationNameBase;
+        mFavouriteNameBase=favouriteNameBase;
+        mStations = new ArrayList<WeatherStation>();
+        mFavouriteStations = new ArrayList<WeatherStation>();
+    }
+    
+    private void CreateMoreStations(int numToAdd, boolean areFavs, ArrayList<WeatherStation> stationList)  {
+        final String urlFormat = "http://WindCastTestData.com/%s%d.json";
         final String nameFormat = "%s%d";
 
-        final int numToAdd = MAX_NUM_OF_ALL_STATIONS;
-        mStations = new ArrayList<WeatherStation>(numToAdd);
+
+        final String nameBase = areFavs ? mFavouriteNameBase : mStationNameBase;
+        final String urlStationType = areFavs ? "fav" : "station";
+
+        final int firstNewStationIndex = stationList.size();
+        final int lastNewStationIndex = firstNewStationIndex + numToAdd;
         try
         {
-            for(int stationIndex = 0; stationIndex < numToAdd; ++stationIndex)
+            for(int stationIndex = firstNewStationIndex; stationIndex < lastNewStationIndex; ++stationIndex)
             {
                 WeatherStation.WeatherStationBuilder builder = new WeatherStation.WeatherStationBuilder();
-                builder.WithName(format(nameFormat, stationNameBase, stationIndex));
-                builder.WithURL(new URL(format(urlFormat, stationIndex)));
+                builder.WithName(format(nameFormat, nameBase, stationIndex));
+                builder.WithURL(new URL(format(urlFormat, urlStationType, stationIndex)));
                 builder.WithState(WA);
+                builder.IsFavourite(areFavs);
 
-                mStations.add(builder.Build());
+                stationList.add(builder.Build());
             }
         } catch (MalformedURLException e)
         {
-            throw new Exception("Unable to create fake weatherStation Data.", e);
+            Log.e("FakeWeatherStationData", "Unable to create fake weatherStation Data.", e);
+        } 
+    }
+    
+    private void EnsureStationExists(int index)
+    {
+        final int necessarySize = index +1;
+        if(necessarySize > mStations.size())
+        {
+            CreateMoreStations(necessarySize - mStations.size(), false, mStations);
         }
     }
-
-    public ArrayList<WeatherStation> GetSingleStation(int index)
+    
+    private void EnsureFavouriteStationExists(int index)
     {
-        ArrayList<WeatherStation> stations = new ArrayList<WeatherStation>(1);
-        stations.add(mStations.get(index));
-        return stations;
+        final int necessarySize = index +1;
+        if(necessarySize > mFavouriteStations.size())
+        {
+            CreateMoreStations(necessarySize - mFavouriteStations.size(), true, mFavouriteStations);
+        }
     }
-
-    public ArrayList<WeatherStation> EmptyStationList()
+    
+    public FakeWeatherStationData HasStations(int numberOfStations)
     {
-        return new ArrayList<WeatherStation>();
+        EnsureStationExists(numberOfStations-1);
+        return this;
     }
-
-    public ArrayList<WeatherStation> GetAllStations()
+    public FakeWeatherStationData HasFavourites(int numberOfStations)
     {
-        return mStations;
+        EnsureFavouriteStationExists(numberOfStations-1);
+        return this;
+    }
+    
+    public ArrayList<WeatherStation> Stations()
+    {
+        ArrayList<WeatherStation> s = new ArrayList<WeatherStation>(mStations);
+        s.addAll(mFavouriteStations);
+        return s;
+    }
+    
+    public ArrayList<String> FavURLs()
+    {
+        ArrayList<String> s = new ArrayList<String>();
+        for(WeatherStation station : mFavouriteStations)
+        {
+            s.add(station.GetURL().toString());
+        }
+        return s;
     }
 }

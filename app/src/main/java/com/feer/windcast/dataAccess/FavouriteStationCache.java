@@ -6,11 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.feer.windcast.WeatherStation;
+import com.feer.windcast.dataAccess.DBContract.DBContract2;
 
 import java.util.ArrayList;
 
-import static com.feer.windcast.dataAccess.DBContract.FavouriteStation.COLUMN_NAME_STATION_NAME;
-import static com.feer.windcast.dataAccess.DBContract.FavouriteStation.COLUMN_NAME_URL;
 
 /**
  * A class to interact with the Favourite Station table
@@ -97,11 +96,12 @@ public class FavouriteStationCache
 
         SQLiteDatabase db = DBOpenHelper.Instance(mContext).getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NAME_STATION_NAME, station.GetName());
-        values.put(COLUMN_NAME_URL, station.GetURL().toString());
+        values.put(DBContract2.FavouriteStation.COLUMN_NAME_STATION_NAME, station.GetName());
+        values.put(DBContract2.FavouriteStation.COLUMN_NAME_URL, station.GetURL().toString());
         db.insert(
-                DBContract.FavouriteStation.TABLE_NAME,
-                "null", values
+                DBContract2.FavouriteStation.TABLE_NAME,
+                "null",
+                values
                  );
     }
 
@@ -110,24 +110,31 @@ public class FavouriteStationCache
         station.IsFavourite = false;
 
         SQLiteDatabase db = DBOpenHelper.Instance(mContext).getWritableDatabase();
-        String selection = COLUMN_NAME_URL + " = ?";
+        String selection = DBContract2.FavouriteStation.COLUMN_NAME_URL + " = ?";
         String[] selectionArgs = { station.GetURL().toString() };
-        db.delete(DBContract.FavouriteStation.TABLE_NAME, selection, selectionArgs);
+        db.delete(DBContract2.FavouriteStation.TABLE_NAME, selection, selectionArgs);
     }
 
     private synchronized ArrayList<String> GetFavouritesFromDB()
     {
         SQLiteDatabase db = DBOpenHelper.Instance(mContext).getReadableDatabase();
         Cursor c = db.query(
-                DBContract.FavouriteStation.TABLE_NAME,
-                new String[]{COLUMN_NAME_URL},
-                null, null, null, null, null
+                DBContract2.FavouriteStation.TABLE_NAME,
+                new String[]{DBContract2.FavouriteStation.COLUMN_NAME_URL},
+                null, // selection
+                null, // selection args
+                null, // group by
+                null, // having
+                null  // order by
                            );
         ArrayList<String> favs = new ArrayList<String>();
 
         while(c.moveToNext())
         {
-            favs.add(c.getString(c.getColumnIndexOrThrow(COLUMN_NAME_URL)));
+            favs.add(
+                    c.getString(
+                            c.getColumnIndexOrThrow(
+                                    DBContract2.FavouriteStation.COLUMN_NAME_URL)));
         }
         return favs;
     }

@@ -1,5 +1,6 @@
 package com.feer.windcast.dataAccess;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.feer.windcast.ObservationReader;
@@ -7,42 +8,128 @@ import com.feer.windcast.StationListReader;
 import com.feer.windcast.WeatherData;
 import com.feer.windcast.WeatherStation;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 
+
+class InternalCache implements LoadedWeatherCache {
+
+    protected InternalCache()
+    {}
+
+    private final ArrayList<WeatherStation> mStations = new ArrayList<WeatherStation>();
+    private final ArrayList<String> mStatesLoaded = new ArrayList<String>();
+    
+    @Override
+    public ArrayList<WeatherStation> GetWeatherStationsFrom(String state) {
+        ArrayList<WeatherStation> stationsForState = new ArrayList<WeatherStation>();
+        for (WeatherStation station : mStations) {
+            if (station.GetStateAbbreviated().equals(state)) {
+                stationsForState.add(station);
+            }
+        }
+        return stationsForState;
+    }
+
+    @Override
+    public ArrayList<WeatherStation> GetWeatherStationsFromAllStates() {
+        return mStations;
+    }
+    
+    public void AddStationsForState(ArrayList<WeatherStation> stations, String state)
+    {
+        mStations.addAll(stations);
+        mStatesLoaded.add(state);
+        Collections.sort(mStations);
+    }
+    
+    public boolean StationsForAllStatesAdded()
+    {
+        return mStatesLoaded.size() == mAllStationsInState_UrlList.length;
+    }
+
+    static class AllStationsURLForState
+    {
+        public AllStationsURLForState(String urlString, String state)
+        {mUrlString = urlString; mState = state;}
+
+        public String mUrlString;
+        public String mState;
+    }
+
+    static final AllStationsURLForState[] mAllStationsInState_UrlList =
+            {
+                    new AllStationsURLForState("http://www.bom.gov.au/wa/observations/waall.shtml", "WA"),
+                    new AllStationsURLForState("http://www.bom.gov.au/nsw/observations/nswall.shtml", "NSW"), //Strangely some the stations for ACT (inc. Canberra) are on this page!
+                    new AllStationsURLForState("http://www.bom.gov.au/vic/observations/vicall.shtml", "VIC"),
+                    new AllStationsURLForState("http://www.bom.gov.au/qld/observations/qldall.shtml", "QLD"),
+                    new AllStationsURLForState("http://www.bom.gov.au/sa/observations/saall.shtml", "SA"),
+                    new AllStationsURLForState("http://www.bom.gov.au/tas/observations/tasall.shtml", "TAS"),
+                    new AllStationsURLForState("http://www.bom.gov.au/act/observations/canberra.shtml", "ACT"),
+                    new AllStationsURLForState("http://www.bom.gov.au/nt/observations/ntall.shtml", "NT")
+            };
+}
 /**
  *
  */
 public class WeatherDataCache
 {
-    private WeatherDataCache()
+    public interface NotifyWhenCacheFilled
     {
+        void OnCacheFilled(LoadedWeatherCache fullCache);
     }
 
-    private static WeatherDataCache sWeatherDataCache = null;
+    final private ArrayList<NotifyWhenCacheFilled> mNotifyUs = new ArrayList<NotifyWhenCacheFilled>();
+    protected static final String TAG = "WeatherDataCache";
 
-    public static WeatherDataCache GetWeatherDataCache()
-    {
-        if(sWeatherDataCache == null)
-        {
-            sWeatherDataCache = new WeatherDataCache();
-        }
-        return sWeatherDataCache;
-    }
-
-    /*
-    *Used in tests... unfortunate
+    /* when this is null, loading of the cache has not yet started.
+    * Has to be package local for tests.
      */
-    public static void SetsWeatherDataCache(WeatherDataCache cache)
+    InternalCache mWeatherDataCache = null;
+    private static WeatherDataCache sInstance = null;
+    
+    private WeatherDataCache()
+    { }
+    
+    public static WeatherDataCache GetCache()
     {
-        sWeatherDataCache = cache;
+        if(sInstance == null)
+        {
+            SetWeatherDataCache(new WeatherDataCache());
+        }
+        
+        return sInstance;
+    }
+    
+    public static void SetWeatherDataCache(WeatherDataCache instance)
+    {
+        sInstance = instance;
+    }
+    
+    private InternalCache GetInternalCache()
+    {
+        return mWeatherDataCache;
     }
 
-    private static final String TAG = "WeatherDataCache";
+
+    public void OnCacheFilled(NotifyWhenCacheFilled notify)
+    {
+        if(isCacheFilled())
+        {
+            notify.OnCacheFilled(GetInternalCache());
+        }
+        else
+        {
+            mNotifyUs.add(notify);
+            if(GetInternalCache() == null)
+            {
+                triggerFillCache();
+            }
+        }
+    }
+
+    private boolean isCacheFilled() {return GetInternalCache() != null && GetInternalCache().StationsForAllStatesAdded();}
 
     public FavouriteStationCache CreateNewFavouriteStationAccessor()
     {
@@ -65,70 +152,49 @@ public class WeatherDataCache
         return wd;
     }
 
-    private static ArrayList<WeatherStation> smStations;
-
-    private static class AllStationsURLForState
+    private void triggerFillCache()
     {
-        public AllStationsURLForState(String urlString, String state)
-        {mUrlString = urlString; mState = state;}
+        mWeatherDataCache = new InternalCache();
 
-        public String mUrlString;
-        public String mState;
-    }
-
-    private static final AllStationsURLForState[] mAllStationsInState_UrlList =
-    {
-            new AllStationsURLForState("http://www.bom.gov.au/wa/observations/waall.shtml", "WA"),
-            new AllStationsURLForState("http://www.bom.gov.au/nsw/observations/nswall.shtml", "NSW"), //Strangely some the stations for ACT (inc. Canberra) are on this page!
-            new AllStationsURLForState("http://www.bom.gov.au/vic/observations/vicall.shtml", "VIC"),
-            new AllStationsURLForState("http://www.bom.gov.au/qld/observations/qldall.shtml", "QLD"),
-            new AllStationsURLForState("http://www.bom.gov.au/sa/observations/saall.shtml", "SA"),
-            new AllStationsURLForState("http://www.bom.gov.au/tas/observations/tasall.shtml", "TAS"),
-            new AllStationsURLForState("http://www.bom.gov.au/act/observations/canberra.shtml", "ACT"),
-            new AllStationsURLForState("http://www.bom.gov.au/nt/observations/ntall.shtml", "NT")
-    };
-
-    public ArrayList<WeatherStation> GetWeatherStationsFromAllStates()
-    {
-        if(smStations == null)
+        for(final InternalCache.AllStationsURLForState stationLink : InternalCache.mAllStationsInState_UrlList)
         {
-            smStations = new ArrayList<WeatherStation>();
-            for(AllStationsURLForState stationLink : mAllStationsInState_UrlList)
-            {
-                try
-                {
-                    URL url = new URL(stationLink.mUrlString);
-                    smStations.addAll(StationListReader.GetWeatherStationsFromURL(url, stationLink.mState));
-                } catch (Exception e)
-                {
-                    Log.e(TAG, "Couldn't create URL "+e.toString());
-                    smStations = null;
+            new AsyncTask<Void, Void, ArrayList<WeatherStation>>() {
+                @Override
+                protected ArrayList<WeatherStation> doInBackground(Void... params) {
+                    ArrayList<WeatherStation> stations = new ArrayList<WeatherStation>();
+                    try
+                    {
+                        URL url = new URL(stationLink.mUrlString);
+                        stations.addAll(StationListReader.GetWeatherStationsFromURL(url, stationLink.mState));
+                    } catch (Exception e)
+                    {
+                        Log.e(WeatherDataCache.TAG, "Couldn't create URL " + e.toString());
+                        stations = null;
+                    }
+                    return stations;
                 }
-            }
-            if(smStations != null )
-            {
-                Collections.sort(smStations);
-            }
-        }
 
-        return smStations;
+                @Override
+                protected void onPostExecute(ArrayList<WeatherStation> weatherStations) {
+                    if(weatherStations != null)
+                    {
+                        mWeatherDataCache.AddStationsForState(weatherStations, stationLink.mState);
+                    }
+                    
+                    if(mWeatherDataCache.StationsForAllStatesAdded())
+                    {
+                        NotifyOfCacheFilled();
+                    }
+                }
+            }.execute();
+        }
     }
 
-    public ArrayList<WeatherStation> GetWeatherStationsFrom(String state)
-    {
-        if( GetWeatherStationsFromAllStates() == null)
+    private void NotifyOfCacheFilled() {
+        for(NotifyWhenCacheFilled notify : mNotifyUs)
         {
-            return null;
+            notify.OnCacheFilled(GetInternalCache());
         }
-
-        ArrayList<WeatherStation> stationsForState = new ArrayList<WeatherStation>();
-        for(WeatherStation station : smStations)
-        {
-            if(station.GetStateAbbreviated().equals(state))
-            {
-                stationsForState.add(station);
-            }
-        }
-        return stationsForState;
+        mNotifyUs.clear();
     }
 }

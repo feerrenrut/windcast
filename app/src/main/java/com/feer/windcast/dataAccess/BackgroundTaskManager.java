@@ -9,12 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 
-abstract class BackgroundTask<ResultType>
-{
-    public abstract ResultType DoInBackground();
-    public void OnPostExecute(ResultType result)
-    {}
-}
 /**
  *
  */
@@ -23,12 +17,25 @@ public class BackgroundTaskManager
     private final ArrayList<BackgroundAsyncTask> mTasks;
     private final BackGroundTaskRemover mRemover;
 
-    public BackgroundTaskManager()
+    private BackgroundTaskManager()
     {
         mTasks = new ArrayList<BackgroundAsyncTask>();
         mRemover = new BackGroundTaskRemover();
     }
 
+
+    public static BackgroundTaskManager taskManager = null;
+    public static BackgroundTaskManager GetTaskManager()
+    {
+        if(taskManager == null)
+        {
+            taskManager = new BackgroundTaskManager();
+        }
+        return taskManager;
+    }
+
+
+    synchronized
     public void RunInBackground(BackgroundTask task)
     {
         BackgroundAsyncTask t = new BackgroundAsyncTask(mRemover, task);
@@ -36,6 +43,7 @@ public class BackgroundTaskManager
         t.execute();
     }
 
+    synchronized
     public void WaitForTasksToComplete()
     {
         for(AsyncTask t : mTasks)

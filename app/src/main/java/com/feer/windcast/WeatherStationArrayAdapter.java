@@ -56,7 +56,6 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherStation>
         }
 
         imageView.setOnClickListener(new OnStarClicked(station, mFavChangedListener));
-        mFavChangedListener.OnFavouriteChanged(station); // set the initial state
 
         textView.setText(station.toString());
         return convertView;
