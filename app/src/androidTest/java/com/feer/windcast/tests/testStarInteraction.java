@@ -60,7 +60,7 @@ public class testStarInteraction extends ActivityInstrumentationTestCase2<MainAc
                 .thenReturn(Mocks.Fakes.Stations());
     }
 
-    public void test_ClickBlackStar_CallsAddFav() throws MalformedURLException
+    public void test_ClickGrayStar_CallsAddFav() throws MalformedURLException
     {
         final int EXPECTED_NUM_STATIONS = 11;
         Mocks.Fakes.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(0);
@@ -81,7 +81,7 @@ public class testStarInteraction extends ActivityInstrumentationTestCase2<MainAc
 
         onView(allOf(
                         withParent(withChild(withText(newFav.toString()))),
-                        withId(R.id.image)))
+                        withId(R.id.is_favourite_checkbox)))
                 .perform(click());
 
         verify(Mocks.FavouritesCache).AddFavouriteStation(newFav);
@@ -90,7 +90,7 @@ public class testStarInteraction extends ActivityInstrumentationTestCase2<MainAc
                 newFav.IsFavourite == true);
     }
 
-    public void test_ClickYellowStar_CallsRemoveFav() throws MalformedURLException
+    public void test_ClickBlueStar_CallsRemoveFav() throws MalformedURLException
     {
         final int EXPECTED_NUM_STATIONS = 11;
         Mocks.Fakes.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(EXPECTED_NUM_STATIONS);
@@ -124,7 +124,7 @@ public class testStarInteraction extends ActivityInstrumentationTestCase2<MainAc
 
         onView(allOf(
                         withParent(withChild(withText(oldFav.toString()))),
-                        withId(R.id.image)))
+                        withId(R.id.is_favourite_checkbox)))
                 .perform(click());
 
         verify(Mocks.FavouritesCache).RemoveFavouriteStation(oldFav);

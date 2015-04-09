@@ -4,7 +4,11 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,13 +28,13 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherStation>
     private final int mLayoutResourceID;
     private final OnFavouriteChangedListener mFavChangedListener;
 
-    public WeatherStationArrayAdapter(Context context, int layoutResourceID, ArrayList<WeatherStation> objects, OnFavouriteChangedListener favChangedListner )
+    public WeatherStationArrayAdapter(Context context, int layoutResourceID, ArrayList<WeatherStation> objects, OnFavouriteChangedListener favChangedListner)
     {
         super(context, layoutResourceID, objects);
 
         mContext = context;
         mLayoutResourceID = layoutResourceID;
-        mFavChangedListener = favChangedListner;
+        mFavChangedListener = favChangedListner; 
     }
 
     @Override
@@ -43,26 +47,21 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherStation>
         {
             convertView = inflater.inflate(mLayoutResourceID, parent, false);
         }
-        ImageView imageView = (ImageView) convertView.findViewById(R.id.image);
-        TextView textView = (TextView) convertView.findViewById(R.id.text);
 
         WeatherStation station = super.getItem(position);
+                
+        CheckBox checkbox = (CheckBox) convertView.findViewById(R.id.is_favourite_checkbox);
+        checkbox.setChecked(station.IsFavourite);
+        checkbox.setOnCheckedChangeListener(new OnStarClicked(station, mFavChangedListener));
 
-        if(station.IsFavourite) {
-            imageView.setImageResource(R.drawable.star_solid);
-        }
-        else{
-            imageView.setImageResource(R.drawable.star_outline);
-        }
-
-        imageView.setOnClickListener(new OnStarClicked(station, mFavChangedListener));
-
+        TextView textView = (TextView) convertView.findViewById(R.id.station_name);
         textView.setText(station.toString());
+        
         return convertView;
     }
 
 
-    private class OnStarClicked implements View.OnClickListener
+    private class OnStarClicked implements CheckBox.OnCheckedChangeListener
     {
         private final WeatherStation mStation;
         private final OnFavouriteChangedListener mFavChangedListener;
@@ -74,19 +73,8 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherStation>
         }
 
         @Override
-        public void onClick(View v)
-        {
-            ImageView imageView = (ImageView) v;
-            mStation.IsFavourite = !mStation.IsFavourite;
-
-            if(mStation.IsFavourite)
-            {
-                imageView.setImageResource(R.drawable.star_solid);
-            }
-            else
-            {
-                imageView.setImageResource(R.drawable.star_outline);
-            }
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            mStation.IsFavourite = isChecked;
             mFavChangedListener.OnFavouriteChanged(mStation);
         }
     }

@@ -9,7 +9,7 @@
     <string name="pref_knots_wind_speed_unit_summary">Use knots</string>
 
     <string-array name="pref_wind_speed_unit_titles">
-        <item>kmh</item>
+        <item>km/h</item>
         <item>knots</item>
     </string-array>
     <string-array name="pref_wind_speed_unit_values">

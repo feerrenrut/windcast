@@ -87,6 +87,9 @@ public class testSearchBox extends ActivityInstrumentationTestCase2<MainActivity
 
     // perhaps this test should work like the others and just rely on 
     // test_clickSearchOption_searchBoxShown. If it fails regularly try this to make it more robust.
+    //
+    // Failure log:
+    // * failed on nexus 4 API 19 on 9/04/15 failure due to ui change
     public void test_enteringTextIntoSearchBox_FiltersStations()
     {
         Mocks.Fakes.HasStations(11).HasFavourites(0);
@@ -116,7 +119,7 @@ public class testSearchBox extends ActivityInstrumentationTestCase2<MainActivity
 
         onData(instanceOf(WeatherStation.class))
                 .inAdapterView(withId(android.R.id.list))
-                .atPosition(0).onChildView(isAssignableFrom(TextView.class))
+                .atPosition(0).onChildView(withId(R.id.station_name))
                 .check(matches(withText(expected.toString())));
     }
 }
