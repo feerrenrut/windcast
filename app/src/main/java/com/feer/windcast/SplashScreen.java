@@ -6,11 +6,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.feer.windcast.dataAccess.BackgroundTask;
-import com.feer.windcast.dataAccess.BackgroundTaskManager;
-import com.feer.windcast.dataAccess.LoadedWeatherCache;
-import com.feer.windcast.dataAccess.WeatherDataCache;
-
 
 public class SplashScreen extends Activity {
 

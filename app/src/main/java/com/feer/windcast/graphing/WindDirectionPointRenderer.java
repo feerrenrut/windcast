@@ -21,12 +21,14 @@ import java.util.ArrayList;
 public class WindDirectionPointRenderer<FormatterType extends LineAndPointFormatter> extends LineAndPointRenderer<FormatterType> {
 
     private static final String TAG = "WindDirectionPointRenderer";
-    private Bitmap mWindArrow = null;
+    final private Bitmap mWindArrow;
+    final private Bitmap mCalmIcon;
     private ArrayList<Float> mWindDirections;
 
-    public WindDirectionPointRenderer(XYPlot plot, Bitmap windArrow) {
+    public WindDirectionPointRenderer(XYPlot plot, Bitmap windArrow, Bitmap calmIcon) {
         super(plot);
         mWindArrow = windArrow;
+        mCalmIcon = calmIcon;
     }
 
     @Override
@@ -59,10 +61,10 @@ public class WindDirectionPointRenderer<FormatterType extends LineAndPointFormat
         {
             Number y = series.getY(i);
             Number x = series.getX(i);
-            Float directionForPoint = mWindDirections.get(i);
+            
+            Float directionForPoint =  mWindDirections.get(i);
 
-            //TODO Some times there is NO direction for wind.. (ie if the speed is very low. We should use a different icon!
-            if (y != null && x != null && directionForPoint != null)
+            if (y != null && x != null)
             {
                 p = ValPixConverter.valToPix(
                         x, y, plotArea,
@@ -79,18 +81,14 @@ public class WindDirectionPointRenderer<FormatterType extends LineAndPointFormat
 
                 if (formatter.getVertexPaint() != null && !offScreen)
                 {
-                    Matrix arrowMatrix = calculateMatrix(p, arrowImageWidth, arrowImageHeight, directionForPoint);
+                    Matrix arrowMatrix = calculateMatrix(p, arrowImageWidth, arrowImageHeight, (directionForPoint != null) ? directionForPoint : 0.0f);
 
                     canvas.drawBitmap(
-                            mWindArrow,
+                            (directionForPoint != null) ? mWindArrow : mCalmIcon,
                             arrowMatrix,
                             new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG)
                                      );
                 }
-            }
-            else if(directionForPoint == null)
-            {
-                Log.e(TAG, "Unable to draw point "+ i + " because the direction was null!");
             }
             else
             {

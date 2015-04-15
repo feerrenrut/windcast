@@ -14,7 +14,6 @@ import android.widget.TextView;
 
 import com.androidplot.xy.XYPlot;
 import com.feer.windcast.WeatherStation.WeatherStationBuilder;
-import com.feer.windcast.dataAccess.LoadedWeatherCache;
 import com.feer.windcast.dataAccess.WeatherDataCache;
 
 import java.net.MalformedURLException;
@@ -182,27 +181,25 @@ public class WindGraphFragment extends Fragment
                 localTime.format(reading.LocalTime) + ' ' + localDate.format(reading.LocalTime)
                         + "\n");
 
-        if(reading.WindBearing != null && reading.CardinalWindDirection != null && reading.WindSpeed_KMH != null)
-        {
+        if(reading.WindSpeed_KMH != null) {
             final TextView speedLabel = (TextView)act.findViewById(R.id.latestReadingLabel);
 
-            if(!reading.CardinalWindDirection.equals("calm") && reading.WindSpeed_KMH > 0)
-            {
+            if(reading.WindSpeed_KMH > 0) {
                 StringBuilder sb = new StringBuilder();
-                if(mUseKMH)
-                {
-                    sb.append(reading.WindSpeed_KMH).append(" Km/H from ");
+                
+                if(mUseKMH) {
+                    sb.append(reading.WindSpeed_KMH).append(" km/h");
                 }
-                else // knots
-                {
-                    sb.append(reading.WindSpeed_KN).append(" kn from ");
+                else{ // knots
+                    sb.append(reading.WindSpeed_KN).append(" kn");
                 }
-
-                sb.append(getDirectionWordsFromChars(reading.CardinalWindDirection));
-                speedLabel.setText( sb.toString());
+                
+                if(reading.CardinalWindDirection != null && !reading.CardinalWindDirection.equals("calm")) {
+                    sb.append(" from ").append(getDirectionWordsFromChars(reading.CardinalWindDirection));
+                    speedLabel.setText(sb.toString());
+                }
             }
-            else
-            {
+            else {
                 speedLabel.setText("Calm conditions");
             }
         }

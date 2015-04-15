@@ -55,11 +55,41 @@
         android:layout_marginLeft="8dp"
 
         android:src="@drawable/wind_dir_arrow"
-        android:clickable="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
 
         android:visibility="gone"/>
+
+
+    
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:id="@+id/error_icon"
+        android:layout_marginRight="4dp"
+        android:layout_marginLeft="8dp"
+
+        android:src="@drawable/warning_icon"
+
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+
+        android:visibility="gone"
+        />
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/error_text"
+        
+        android:text="No Info"
+        android:textColor="@android:color/darker_gray"
+        android:layout_toLeftOf="@id/error_icon"
+        android:layout_toStartOf="@id/error_icon"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        />
 
 </RelativeLayout>

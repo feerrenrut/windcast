@@ -9,15 +9,12 @@ import com.feer.windcast.R;
 import com.feer.windcast.WeatherStation;
 import com.feer.windcast.testUtils.WindCastMocks;
 
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
-import org.mockito.MockSettings;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import static com.feer.windcast.testUtils.AdapterMatchers.adapterHasCount;
-import static com.google.android.apps.common.testing.testrunner.util.Checks.checkNotNull;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
 import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
@@ -30,20 +27,14 @@ import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerM
 import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerMatchers.isOpen;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withChild;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withParent;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsNot.not;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.isNotNull;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -217,6 +208,8 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         onView(withId(android.R.id.list)).check(matches(adapterHasCount(equalTo(1))));
     }
 
+    // Test stats:
+    // Legitimate bugs found: 1
     public void test_withFilter_selectState_FilterCleared()
     {
         Mocks.Fakes.HasStations(11).HasFavourites(0);

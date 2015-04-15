@@ -115,7 +115,7 @@ public class WindGraph
 
         plot.setTitle("Wind Speed at " + wd.Station.GetName());
 
-        plot.getRangeLabelWidget().setText(unitType.toString());
+        plot.getRangeLabelWidget().setText( unitType == SettingsActivity.WindSpeedUnitPref.UnitType.kmh ? "km/h" : "kn");
 
         // Turn the above arrays into XYSeries':
         XYSeries series1 = new SimpleXYSeries(
@@ -164,13 +164,14 @@ public class WindGraph
         });
         Resources res = act.getResources();
         final Bitmap windArrow = BitmapFactory.decodeResource(res, R.drawable.wind_dir_arrow);
+        final Bitmap calmIcon = BitmapFactory.decodeResource(res, R.drawable.calm);
 
         LineAndPointFormatter formatter = new LineAndPointFormatter()
         {
             @Override
             public SeriesRenderer getRendererInstance(XYPlot xyPlot)
             {
-                return new WindDirectionPointRenderer<LineAndPointFormatter>(xyPlot, windArrow);
+                return new WindDirectionPointRenderer<LineAndPointFormatter>(xyPlot, windArrow, calmIcon);
             }
 
             @Override

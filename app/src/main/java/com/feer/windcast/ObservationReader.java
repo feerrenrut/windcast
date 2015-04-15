@@ -159,11 +159,12 @@ public class ObservationReader
     {
         Float bearing = null;
         final int len = dirs.length();
-        if(len < 1 || dirs.equals("-"))
+
+        if (len < 1 || dirs.equals("-") || dirs.equals("calm"))
         {
             return null;
         }
-
+        else
         if(len == 1) {
             if(dirs.equals("n"))
                 bearing = 0.0f;
@@ -203,13 +204,9 @@ public class ObservationReader
             else if(dirs.equals("nnw"))
                 bearing = 337.5f;
         }
-        else if (dirs.equals("calm"))
-        {
-            bearing = 0.f;
-        }
         if(bearing == null)
         {
-            throw new IllegalArgumentException("Unknown cardinal direction: " + dirs);
+            throw new IllegalArgumentException("Unknown cardinal direction: '" + dirs + "'");
         }
         return bearing;
     }
