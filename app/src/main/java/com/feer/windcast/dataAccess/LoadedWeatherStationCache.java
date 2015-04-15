@@ -4,7 +4,7 @@ import com.feer.windcast.WeatherStation;
 
 import java.util.ArrayList;
 
-public interface LoadedWeatherCache
+public interface LoadedWeatherStationCache
 {
     public ArrayList<WeatherStation> GetWeatherStationsFrom(String state);
     public ArrayList<WeatherStation> GetWeatherStationsFromAllStates();

@@ -6,6 +6,7 @@ import android.widget.TextView;
 
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
+import com.feer.windcast.WeatherData;
 import com.feer.windcast.WeatherStation;
 import com.feer.windcast.testUtils.WindCastMocks;
 
@@ -90,6 +91,7 @@ public class testSearchBox extends ActivityInstrumentationTestCase2<MainActivity
     //
     // Failure log:
     // * failed on nexus 4 API 19 on 9/04/15 failure due to ui change
+    // * failed on nexus 4 API 19 on 12/04/15 failure due to ui change
     public void test_enteringTextIntoSearchBox_FiltersStations()
     {
         Mocks.Fakes.HasStations(11).HasFavourites(0);
@@ -117,7 +119,7 @@ public class testSearchBox extends ActivityInstrumentationTestCase2<MainActivity
         onView(withId(android.R.id.list))
                .check(matches(adapterHasCount(equalTo(1))));
 
-        onData(instanceOf(WeatherStation.class))
+        onData(instanceOf(WeatherData.class))
                 .inAdapterView(withId(android.R.id.list))
                 .atPosition(0).onChildView(withId(R.id.station_name))
                 .check(matches(withText(expected.toString())));

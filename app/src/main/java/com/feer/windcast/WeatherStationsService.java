@@ -4,7 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 
-import com.feer.windcast.dataAccess.LoadedWeatherCache;
+import com.feer.windcast.dataAccess.LoadedWeatherStationCache;
 import com.feer.windcast.dataAccess.WeatherDataCache;
 
 /**
@@ -53,12 +53,12 @@ public class WeatherStationsService extends IntentService {
         
         if(mCache == null)
         {
-            mCache = WeatherDataCache.GetCache();
+            mCache = WeatherDataCache.GetInstance();
         }
         
-        mCache.OnCacheFilled(new WeatherDataCache.NotifyWhenCacheFilled() {
+        mCache.OnStationCacheFilled(new WeatherDataCache.NotifyWhenStationCacheFilled() {
             @Override
-            public void OnCacheFilled(LoadedWeatherCache fullCache) {
+            public void OnCacheFilled(LoadedWeatherStationCache fullCache) {
                 return;
             }
         });
