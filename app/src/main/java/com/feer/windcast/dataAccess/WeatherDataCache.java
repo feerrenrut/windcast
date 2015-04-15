@@ -19,14 +19,14 @@ class InternalStationCache implements LoadedWeatherStationCache {
     protected InternalStationCache()
     {}
 
-    private final ArrayList<WeatherStation> mStations = new ArrayList<WeatherStation>();
+    private final ArrayList<WeatherData> mStations = new ArrayList<WeatherData>();
     private final ArrayList<String> mStatesLoaded = new ArrayList<String>();
     
     @Override
-    public ArrayList<WeatherStation> GetWeatherStationsFrom(String state) {
-        ArrayList<WeatherStation> stationsForState = new ArrayList<WeatherStation>();
-        for (WeatherStation station : mStations) {
-            if (station.GetStateAbbreviated().equals(state)) {
+    public ArrayList<WeatherData> GetWeatherStationsFrom(String state) {
+        ArrayList<WeatherData> stationsForState = new ArrayList<WeatherData>();
+        for (WeatherData station : mStations) {
+            if (station.Station.GetStateAbbreviated().equals(state)) {
                 stationsForState.add(station);
             }
         }
@@ -34,11 +34,11 @@ class InternalStationCache implements LoadedWeatherStationCache {
     }
 
     @Override
-    public ArrayList<WeatherStation> GetWeatherStationsFromAllStates() {
+    public ArrayList<WeatherData> GetWeatherStationsFromAllStates() {
         return mStations;
     }
     
-    public void AddStationsForState(ArrayList<WeatherStation> stations, String state)
+    public void AddStationsForState(ArrayList<WeatherData> stations, String state)
     {
         mStations.addAll(stations);
         mStatesLoaded.add(state);
@@ -80,11 +80,6 @@ public class WeatherDataCache
     {
         void OnCacheFilled(LoadedWeatherStationCache fullCache);
     }
-    
-    public interface NotifyWhenLatestObservationAvailable
-    {
-        void Notify(ObservationReading latestReading);
-    }
 
     final private ArrayList<NotifyWhenStationCacheFilled> mNotifyUs = new ArrayList<NotifyWhenStationCacheFilled>();
     protected static final String TAG = "WeatherDataCache";
@@ -103,7 +98,6 @@ public class WeatherDataCache
         {
             SetWeatherDataCache(new WeatherDataCache());
         }
-        
         return sInstance;
     }
     
@@ -131,12 +125,6 @@ public class WeatherDataCache
                 TriggerFillStationCache();
             }
         }
-    }
-    
-    public void GetLatestObservation(WeatherStation station, NotifyWhenLatestObservationAvailable notify)
-    {
-        
-        
     }
 
     private boolean IsStationCacheFilled() {return GetInternalStationCache() != null && GetInternalStationCache().StationsForAllStatesAdded();}
@@ -170,10 +158,10 @@ public class WeatherDataCache
 
         for(final InternalStationCache.AllStationsURLForState stationLink : InternalStationCache.mAllStationsInState_UrlList)
         {
-            new AsyncTask<Void, Void, ArrayList<WeatherStation>>() {
+            new AsyncTask<Void, Void, ArrayList<WeatherData>>() {
                 @Override
-                protected ArrayList<WeatherStation> doInBackground(Void... params) {
-                    ArrayList<WeatherStation> stations = new ArrayList<WeatherStation>();
+                protected ArrayList<WeatherData> doInBackground(Void... params) {
+                    ArrayList<WeatherData> stations = new ArrayList<WeatherData>();
                     try
                     {
                         URL url = new URL(stationLink.mUrlString);
@@ -187,7 +175,7 @@ public class WeatherDataCache
                 }
 
                 @Override
-                protected void onPostExecute(ArrayList<WeatherStation> weatherStations) {
+                protected void onPostExecute(ArrayList<WeatherData> weatherStations) {
                     if(weatherStations != null)
                     {
                         mInternalStationCache.AddStationsForState(weatherStations, stationLink.mState);

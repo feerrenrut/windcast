@@ -57,7 +57,7 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
         }
 
         final WeatherData stationData = super.getItem(position);
-                
+
         CheckBox checkbox = (CheckBox) convertView.findViewById(R.id.is_favourite_checkbox);
         
         checkbox.setOnCheckedChangeListener(null); // we may be reusing the view, we do not want to call the listener on the next line

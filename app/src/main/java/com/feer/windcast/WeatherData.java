@@ -8,10 +8,10 @@ import java.util.Locale;
  */
 public class WeatherData implements Comparable
 {
-    WeatherStation Station;
+    public WeatherStation Station;
 
     /* The observation data for this location */
-    List<ObservationReading> ObservationData;
+    public List<ObservationReading> ObservationData;
 
     @Override
     public String toString()

@@ -254,7 +254,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onResume() {
         super.onResume();
 
-        abstract class FillStation extends AsyncTask<Void, Void, ArrayList<WeatherStation>> implements WeatherDataCache.NotifyWhenStationCacheFilled {}
+        abstract class FillStation extends AsyncTask<Void, Void, ArrayList<WeatherData>> implements WeatherDataCache.NotifyWhenStationCacheFilled {}
 
         WeatherDataCache.GetInstance().OnStationCacheFilled(new FillStation() {
             @Override
@@ -266,7 +266,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             public LoadedWeatherStationCache weatherCache = null;
 
             @Override
-            protected ArrayList<WeatherStation> doInBackground(Void... params) {
+            protected ArrayList<WeatherData> doInBackground(Void... params) {
                 Context con;
                 if (getActivity() == null || (con = getActivity().getApplicationContext()) == null || weatherCache == null)
                     return null;
@@ -280,7 +280,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             }
 
             @Override
-            protected void onPostExecute(final ArrayList<WeatherStation> cacheStations) {
+            protected void onPostExecute(final ArrayList<WeatherData> cacheStations) {
                 Activity act = getActivity();
                 if (act == null) return;
 
@@ -290,8 +290,9 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
                 if (mFavs != null && cacheStations != null) {
                     ArrayList<String> favs = mFavs.GetFavouriteURLs();
-                    ArrayList<WeatherStation> useStations = cacheStations;
+                    ArrayList<WeatherData> useStations = cacheStations;
                     SetFavStations(useStations, favs);
+                    
                     if (mShowOnlyStations == StationsToShow.Favourites) {
                         useStations = FilterToOnlyFavs(useStations);
                         if (useStations.isEmpty()) {
@@ -302,8 +303,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                         mEmptyTextEnum.AddEmptyListReason(NoStationsAvailable);
                     }
 
-                    ArrayList<WeatherData> stationData = GetLatestReadings(useStations);
-                    SetStationList(stationData);
+                    SetStationList(useStations);
                     Log.i(TAG, "Finished adding new stations.");
                 } else {
                     Boolean favsNull = mFavs == null;
@@ -319,18 +319,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 invalidateOptionsMenu(act);
             }
         });
-    }
-
-    private ArrayList<WeatherData> GetLatestReadings(ArrayList<WeatherStation> stationList) {
-        ArrayList<WeatherData> stationDataList = new ArrayList<WeatherData>(stationList.size());
-        
-        for(final WeatherStation station : stationList)
-        {
-            final WeatherData stationData = new WeatherData();
-            stationData.Station = station;
-            stationDataList.add(stationData);
-        }
-        return stationDataList;
     }
 
     private void SetEmptyTextViewContents(EmptyTextState reason) {
@@ -395,26 +383,21 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         }
     }
 
-    private void SetFavStations(final Collection<WeatherStation> fullListOfStations, final Collection<String> favStations)
+    private void SetFavStations(final Collection<WeatherData> fullListOfStations, final Collection<String> favStations)
     {
-        for(WeatherStation station : fullListOfStations)
+        for(WeatherData station : fullListOfStations)
         {
-            station.IsFavourite = (favStations.contains(station.GetURL().toString()));
-            
-            if(station.IsFavourite)
-            {
-                
-            }
+            station.Station.IsFavourite = (favStations.contains(station.Station.GetURL().toString()));
         }
     }
 
-    private ArrayList<WeatherStation> FilterToOnlyFavs(final ArrayList<WeatherStation> fullListOfStations)
+    private ArrayList<WeatherData> FilterToOnlyFavs(final ArrayList<WeatherData> fullListOfStations)
     {
-        ArrayList<WeatherStation> onlyFavs = new ArrayList<WeatherStation>();
+        ArrayList<WeatherData> onlyFavs = new ArrayList<WeatherData>();
 
-        for(WeatherStation station : fullListOfStations)
+        for(WeatherData station : fullListOfStations)
         {
-            if(station.IsFavourite)
+            if(station.Station.IsFavourite)
             {
                 onlyFavs.add(station);
             }

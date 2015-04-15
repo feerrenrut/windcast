@@ -18,7 +18,7 @@ import static com.feer.windcast.WeatherStation.*;
 public class StationListReader
 {
     static final String TAG = "StationListReader";
-    public static ArrayList<WeatherStation> GetWeatherStationsFromURL(URL fromUrl, String state) throws Exception
+    public static ArrayList<WeatherData> GetWeatherStationsFromURL(URL fromUrl, String state) throws Exception
     {
         BufferedReader buf;
         try
@@ -32,7 +32,7 @@ public class StationListReader
             throw new Exception("Cant get content", e);
         }
 
-        ArrayList<WeatherStation> weatherStations = new ArrayList<WeatherStation>();
+        ArrayList<WeatherData> weatherStations = new ArrayList<WeatherData>();
 
         /* because we have to escape the slashes and quotes in the regex this is hard to read.
 
@@ -58,12 +58,15 @@ public class StationListReader
             Matcher m = p.matcher(str);
             while(m.find())
             {
-                weatherStations.add(
-                        new WeatherStation.WeatherStationBuilder()
+                WeatherData d = new WeatherData();
+                d.Station = new WeatherStation.WeatherStationBuilder()
                         .WithState(States.valueOf(state))
                         .WithURL(new URL("http://www.bom.gov.au" + StationListReader.ConvertToJSONURL(m.group(1))))
                         .WithName(m.group(2))
-                        .Build());
+                        .Build();
+                
+                
+                weatherStations.add(d);
             }
         }
 
