@@ -118,7 +118,7 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
         }
 
         public void SetPreviewData(WeatherData weatherData) {
-            if(weatherData.Station.IsFavourite && weatherData.ObservationData != null && weatherData.ObservationData.isEmpty() == false)
+            if(weatherData.ObservationData != null && weatherData.ObservationData.isEmpty() == false)
             {
                 ObservationReading latestReading = weatherData.ObservationData.get(0);
                 Integer speed = mUseKMH ? latestReading.Wind_Observation.WindSpeed_KMH : latestReading.Wind_Observation.WindSpeed_KN;
@@ -129,7 +129,7 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
                     windSpeed.setVisibility(View.VISIBLE);
                     direction.setVisibility(View.INVISIBLE);
                     if (latestReading.Wind_Observation.WindBearing != null) {
-                        // arrow image points right, rotate by 90 to point down when wind comes 
+                        // arrow image points right, rotate by 90 to point down when wind comes
                         // FROM north with bearing 0, see ObservationReading.WindBearing
                         float arrowRotation = 90.f + latestReading.Wind_Observation.WindBearing;
                         direction.setRotation(arrowRotation);
