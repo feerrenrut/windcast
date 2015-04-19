@@ -5,6 +5,7 @@ import android.test.ActivityInstrumentationTestCase2;
 
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
+import com.feer.windcast.WeatherData;
 import com.feer.windcast.WeatherStation;
 import com.feer.windcast.testUtils.WindCastMocks;
 
@@ -74,7 +75,7 @@ public class testStarInteraction extends ActivityInstrumentationTestCase2<MainAc
         
         launchActivity();
 
-        WeatherStation newFav = Mocks.Fakes.Stations().get(4);
+        WeatherStation newFav = Mocks.Fakes.Stations().get(4).Station;
         assertTrue(
                 "Station not yet clicked, it should not be a favourite!",
                 newFav.IsFavourite == false);
@@ -108,11 +109,11 @@ public class testStarInteraction extends ActivityInstrumentationTestCase2<MainAc
                 .RemoveFavouriteStation(any(WeatherStation.class));
         
         WeatherStation oldFav = null;
-        for(WeatherStation station : Mocks.Fakes.Stations())
+        for(WeatherData data : Mocks.Fakes.Stations())
         {
-            if(station.IsFavourite)
+            if(data.Station.IsFavourite)
             {
-                oldFav = station;
+                oldFav = data.Station;
                 break;
             }
         }

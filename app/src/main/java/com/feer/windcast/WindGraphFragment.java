@@ -181,21 +181,21 @@ public class WindGraphFragment extends Fragment
                 localTime.format(reading.LocalTime) + ' ' + localDate.format(reading.LocalTime)
                         + "\n");
 
-        if(reading.WindSpeed_KMH != null) {
+        if(reading.Wind_Observation.WindSpeed_KMH != null) {
             final TextView speedLabel = (TextView)act.findViewById(R.id.latestReadingLabel);
 
-            if(reading.WindSpeed_KMH > 0) {
+            if(reading.Wind_Observation.WindSpeed_KMH > 0) {
                 StringBuilder sb = new StringBuilder();
                 
                 if(mUseKMH) {
-                    sb.append(reading.WindSpeed_KMH).append(" km/h");
+                    sb.append(reading.Wind_Observation.WindSpeed_KMH).append(" km/h");
                 }
                 else{ // knots
-                    sb.append(reading.WindSpeed_KN).append(" kn");
+                    sb.append(reading.Wind_Observation.WindSpeed_KN).append(" kn");
                 }
                 
-                if(reading.CardinalWindDirection != null && !reading.CardinalWindDirection.equals("calm")) {
-                    sb.append(" from ").append(getDirectionWordsFromChars(reading.CardinalWindDirection));
+                if(reading.Wind_Observation.CardinalWindDirection != null && !reading.Wind_Observation.CardinalWindDirection.equals("calm")) {
+                    sb.append(" from ").append(getDirectionWordsFromChars(reading.Wind_Observation.CardinalWindDirection));
                     speedLabel.setText(sb.toString());
                 }
             }

@@ -16,8 +16,6 @@ import com.feer.windcast.dataAccess.WeatherDataCache;
 
 import java.util.ArrayList;
 
-import static com.feer.windcast.SettingsActivity.WindSpeedUnitPref.UnitType;
-
 /**
  *
  */
@@ -68,79 +66,11 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
         TextView textView = (TextView) convertView.findViewById(R.id.station_name);
         textView.setText(stationData.Station.toString());
 
+        WindPreview windPreview = new WindPreview(convertView).invoke();
+        windPreview.SetPreviewData(stationData);
 
-        TextView windSpeed = (TextView) convertView.findViewById(R.id.preview_wind_speed);
-        windSpeed.setVisibility(View.GONE);
-
-        ImageView direction = (ImageView) convertView.findViewById(R.id.preview_wind_dir);
-        direction.setVisibility(View.GONE);
-
-
-        ImageView errorIcon = (ImageView) convertView.findViewById(R.id.error_icon);
-        errorIcon.setVisibility(View.GONE);
-
-        TextView errorText = (TextView) convertView.findViewById(R.id.error_text);
-        errorText.setVisibility(View.GONE);
-        
-        if(stationData.Station.IsFavourite && stationData.ObservationData == null)
-        {
-            // load latest reading
-            new AsyncTask<Void, Void, Boolean>()
-            {
-                WeatherData wd;
-
-                @Override
-                protected Boolean doInBackground(Void... params)
-                {
-                    if(stationData == null || stationData.Station == null)
-                    {
-                        Log.w(TAG, "No weather station!");
-                        return false;
-                    }
-
-                    Log.i("WindCast", "Getting data from: " + stationData.Station.GetURL().toString());
-                    wd = WeatherDataCache.GetInstance().GetWeatherDataFor(stationData.Station);
-                    return true;
-                }
-
-                @Override
-                protected void onPostExecute(Boolean result)
-                {
-                    if (stationData == null || wd == null || !result) return;
-                    stationData.ObservationData = wd.ObservationData;
-                    WeatherStationArrayAdapter.this.notifyDataSetChanged();
-                }
-            }.execute();
-        }
-
-        if(stationData.Station.IsFavourite && stationData.ObservationData != null && stationData.ObservationData.isEmpty() == false)
-        {
-            ObservationReading latestReading = stationData.ObservationData.get(0);
-            Integer speed = mUseKMH ? latestReading.WindSpeed_KMH : latestReading.WindSpeed_KN;
-            String unit = mUseKMH ? "km/h" : "kn";
-            
-            if(speed != null) {
-                windSpeed.setText(String.format("%d %s", speed, unit));
-                windSpeed.setVisibility(View.VISIBLE);
-                direction.setVisibility(View.INVISIBLE);
-                if (latestReading.WindBearing != null) {
-                    // arrow image points right, rotate by 90 to point down when wind comes 
-                    // FROM north with bearing 0, see ObservationReading.WindBearing
-                    float arrowRotation = 90.f + latestReading.WindBearing;
-                    direction.setRotation(arrowRotation);
-                    direction.setVisibility(View.VISIBLE);
-                }
-            }
-            else
-            {
-                errorText.setVisibility(View.VISIBLE);
-                errorIcon.setVisibility(View.VISIBLE);
-            }
-        }
-        
         return convertView;
     }
-
 
     private class OnStarClicked implements CheckBox.OnCheckedChangeListener
     {
@@ -157,6 +87,61 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             mStation.IsFavourite = isChecked;
             mFavChangedListener.OnFavouriteChanged(mStation);
+        }
+    }
+
+    private class WindPreview {
+        private View convertView;
+        private TextView windSpeed;
+        private ImageView direction;
+        private ImageView errorIcon;
+        private TextView errorText;
+
+        public WindPreview(View convertView) {
+            this.convertView = convertView;
+        }
+
+        public WindPreview invoke() {
+            windSpeed = (TextView) convertView.findViewById(R.id.preview_wind_speed);
+            windSpeed.setVisibility(View.GONE);
+
+            direction = (ImageView) convertView.findViewById(R.id.preview_wind_dir);
+            direction.setVisibility(View.GONE);
+            
+            errorIcon = (ImageView) convertView.findViewById(R.id.error_icon);
+            errorIcon.setVisibility(View.GONE);
+
+            errorText = (TextView) convertView.findViewById(R.id.error_text);
+            errorText.setVisibility(View.GONE);
+            
+            return this;
+        }
+
+        public void SetPreviewData(WeatherData weatherData) {
+            if(weatherData.Station.IsFavourite && weatherData.ObservationData != null && weatherData.ObservationData.isEmpty() == false)
+            {
+                ObservationReading latestReading = weatherData.ObservationData.get(0);
+                Integer speed = mUseKMH ? latestReading.Wind_Observation.WindSpeed_KMH : latestReading.Wind_Observation.WindSpeed_KN;
+                String unit = mUseKMH ? "km/h" : "kn";
+
+                if(speed != null) {
+                    windSpeed.setText(String.format("%d %s", speed, unit));
+                    windSpeed.setVisibility(View.VISIBLE);
+                    direction.setVisibility(View.INVISIBLE);
+                    if (latestReading.Wind_Observation.WindBearing != null) {
+                        // arrow image points right, rotate by 90 to point down when wind comes 
+                        // FROM north with bearing 0, see ObservationReading.WindBearing
+                        float arrowRotation = 90.f + latestReading.Wind_Observation.WindBearing;
+                        direction.setRotation(arrowRotation);
+                        direction.setVisibility(View.VISIBLE);
+                    }
+                }
+                else
+                {
+                    errorText.setVisibility(View.VISIBLE);
+                    errorIcon.setVisibility(View.VISIBLE);
+                }
+            }
         }
     }
 }

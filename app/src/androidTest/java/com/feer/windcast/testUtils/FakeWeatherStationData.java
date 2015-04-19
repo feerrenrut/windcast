@@ -2,6 +2,7 @@ package com.feer.windcast.testUtils;
 
 import android.util.Log;
 
+import com.feer.windcast.WeatherData;
 import com.feer.windcast.WeatherStation;
 
 import java.net.MalformedURLException;
@@ -17,8 +18,8 @@ import static java.lang.String.format;
  */
 public class FakeWeatherStationData
 {
-    private final ArrayList<WeatherStation> mStations;
-    private final ArrayList<WeatherStation> mFavouriteStations;
+    private final ArrayList<WeatherData> mStations;
+    private final ArrayList<WeatherData> mFavouriteStations;
     private final String mStationNameBase;
     private final String mFavouriteNameBase;
 
@@ -28,11 +29,11 @@ public class FakeWeatherStationData
         checkNotNull(favouriteNameBase);
         mStationNameBase=stationNameBase;
         mFavouriteNameBase=favouriteNameBase;
-        mStations = new ArrayList<WeatherStation>();
-        mFavouriteStations = new ArrayList<WeatherStation>();
+        mStations = new ArrayList<WeatherData>();
+        mFavouriteStations = new ArrayList<WeatherData>();
     }
     
-    private void CreateMoreStations(int numToAdd, boolean areFavs, ArrayList<WeatherStation> stationList)  {
+    private void CreateMoreStations(int numToAdd, boolean areFavs, ArrayList<WeatherData> stationList)  {
         final String urlFormat = "http://WindCastTestData.com/%s%d.json";
         final String nameFormat = "%s%d";
 
@@ -51,8 +52,11 @@ public class FakeWeatherStationData
                 builder.WithURL(new URL(format(urlFormat, urlStationType, stationIndex)));
                 builder.WithState(WA);
                 builder.IsFavourite(areFavs);
+                
+                WeatherData data = new WeatherData();
+                data.Station = builder.Build();
 
-                stationList.add(builder.Build());
+                stationList.add(data);
             }
         } catch (MalformedURLException e)
         {
@@ -89,9 +93,9 @@ public class FakeWeatherStationData
         return this;
     }
     
-    public ArrayList<WeatherStation> Stations()
+    public ArrayList<WeatherData> Stations()
     {
-        ArrayList<WeatherStation> s = new ArrayList<WeatherStation>(mStations);
+        ArrayList<WeatherData> s = new ArrayList<WeatherData>(mStations);
         s.addAll(mFavouriteStations);
         return s;
     }
@@ -99,9 +103,9 @@ public class FakeWeatherStationData
     public ArrayList<String> FavURLs()
     {
         ArrayList<String> s = new ArrayList<String>();
-        for(WeatherStation station : mFavouriteStations)
+        for(WeatherData data : mFavouriteStations)
         {
-            s.add(station.GetURL().toString());
+            s.add(data.Station.GetURL().toString());
         }
         return s;
     }

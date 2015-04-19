@@ -9,6 +9,7 @@ import com.feer.windcast.StationListReader;
 import com.feer.windcast.WeatherData;
 import com.feer.windcast.WeatherStation;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -166,9 +167,14 @@ public class WeatherDataCache
                     {
                         URL url = new URL(stationLink.mUrlString);
                         stations.addAll(StationListReader.GetWeatherStationsFromURL(url, stationLink.mState));
-                    } catch (Exception e)
+                    }
+                    catch (MalformedURLException urlEx)
                     {
-                        Log.e(WeatherDataCache.TAG, "Couldn't create URL " + e.toString());
+                        Log.e(WeatherDataCache.TAG, "Couldn't create URL " + urlEx.toString());
+                        stations = null;
+                    } catch( Exception e)
+                    {
+                        Log.e(WeatherDataCache.TAG, "Error getting station list: " + e.toString());
                         stations = null;
                     }
                     return stations;

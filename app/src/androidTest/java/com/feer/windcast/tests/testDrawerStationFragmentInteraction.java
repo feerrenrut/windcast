@@ -6,6 +6,7 @@ import android.test.ActivityInstrumentationTestCase2;
 
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
+import com.feer.windcast.WeatherData;
 import com.feer.windcast.WeatherStation;
 import com.feer.windcast.testUtils.WindCastMocks;
 
@@ -179,7 +180,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         
         Mocks.Fakes.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(0);
 
-        ArrayList<WeatherStation> oneState = new ArrayList<WeatherStation>(
+        ArrayList<WeatherData> oneState = new ArrayList<WeatherData>(
                 Mocks.Fakes.Stations().subList(0, 1));
 
         when(Mocks.DataCache.CreateNewFavouriteStationAccessor())
@@ -225,7 +226,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
                         adapterHasCount(equalTo(EXPECTED_NUM_STATIONS))));
 
         onView(withId(R.id.search)).perform(click());
-        WeatherStation searchStation = Mocks.Fakes.Stations().get(2);
+        WeatherStation searchStation = Mocks.Fakes.Stations().get(2).Station;
 
         String searchTerm = searchStation.GetName();
         onView(withId(R.id.weather_station_search_box))

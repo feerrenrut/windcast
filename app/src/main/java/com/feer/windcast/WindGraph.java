@@ -95,18 +95,18 @@ public class WindGraph
             Integer val;
 
             if(unitType == SettingsActivity.WindSpeedUnitPref.UnitType.kmh) {
-                val = reading1.WindSpeed_KMH != null ?
-                        reading1.WindSpeed_KMH : 0;
+                val = reading1.Wind_Observation.WindSpeed_KMH != null ?
+                        reading1.Wind_Observation.WindSpeed_KMH : 0;
             }
             else
             {
-                val = reading1.WindSpeed_KN != null ?
-                        reading1.WindSpeed_KN : 0;
+                val = reading1.Wind_Observation.WindSpeed_KN != null ?
+                        reading1.Wind_Observation.WindSpeed_KN : 0;
             }
 
             windSpeeds.add(val);
             readingTimes.add(reading1.LocalTime);
-            windDirections.add(reading1.WindBearing);
+            windDirections.add(reading1.Wind_Observation.WindBearing);
         }
 
         Collections.reverse(windSpeeds);

@@ -34,6 +34,8 @@ public class ObservationReader
         InputStream is = urlConnection.getInputStream();
         bis = new BufferedInputStream(is);
         ReadJsonStream(bis);
+        
+        mWeatherData.Source = mWeatherData.Station.GetURL().toString().replaceFirst("http://www.bom.gov.au/", "");
 
         return mWeatherData;
     }
@@ -116,46 +118,89 @@ public class ObservationReader
                         Log.e("WindCast", "unable to parse date string: " + dateString);
                         throw new IOException("Unable to parse date string", e);
                     }
-                // read wind info
-                } else if (name.equals("wind_spd_kmh") ) {
-                    ob.WindSpeed_KMH = reader.nextInt();
-                } else if (name.equals("wind_spd_kt") ) {
-                    ob.WindSpeed_KN = reader.nextInt();
-                } else if (name.equals("wind_dir") ) {
-                    ob.CardinalWindDirection = reader.nextString().toLowerCase(Locale.US);
-                    ob.WindBearing = ConvertCardinalCharsToBearing(ob.CardinalWindDirection);
-                }else if (name.equals("gust_kmh") ) {
-                    ob.WindGustSpeed_KMH = reader.nextInt();
-                }
-                // read temp info
-                else if (name.equals("air_temp")) {
-                    ob.AirTemp_DegCel = (float)reader.nextDouble();
-                }else if (name.equals("apparent_t")) {
-                    ob.ApparentTemp_DegCel = (float)reader.nextDouble();
-                }
-                // read swell info
-                else if (name.equals("swell_dir_worded")) {
-                    ob.CardinalSwellDirection = reader.nextString().toLowerCase(Locale.US);
-                    ob.SwellBearing = ConvertCardinalCharsToBearing(ob.CardinalSwellDirection);
-                }else if (name.equals("swell_height") ) {
-                    ob.SwellHeight_meters = reader.nextDouble();
-                }else if (name.equals("swell_period")) {
-                    ob.SwellPeriod_seconds = reader.nextInt();
-                }
-                else {
-                    reader.skipValue();
+                } else
+                {
+                    boolean valueRead = ReadWindInfo(ob, name, reader);
+                    
+                    if(!valueRead) {
+                        reader.skipValue();
+                    }
                 }
             }
         }
         reader.endObject();
         return ob;
     }
+    
+    // Returns true if the value was handled
+    static boolean ReadWindInfo(ObservationReading ob, String name, JsonReader reader) throws IOException {
+        if(ob.Wind_Observation == null) {
+            ob.Wind_Observation = new WindObservation();
+        }
+        
+        if (name.equals("wind_spd_kmh") ) {
+            ob.Wind_Observation.WindSpeed_KMH = reader.nextInt();
+            return true;
+        } else if (name.equals("wind_spd_kt") ) {
+            ob.Wind_Observation.WindSpeed_KN = reader.nextInt();
+            return true;
+        } else if (name.equals("wind_dir") ) {
+            ob.Wind_Observation.CardinalWindDirection = reader.nextString().toLowerCase(Locale.US);
+            ob.Wind_Observation.WindBearing = ConvertCardinalCharsToBearing(ob.Wind_Observation.CardinalWindDirection);
+            return true;
+        }else if (name.equals("gust_kmh") ) {
+            ob.Wind_Observation.WindGustSpeed_KMH = reader.nextInt();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    // Returns true if the value was handled
+    static boolean ReadTempInfo(ObservationReading ob, String name, JsonReader reader) throws IOException {
+        if(ob.Temp_Observation == null) {
+            ob.Temp_Observation = new TempObservation();
+        }
+        if (name.equals("air_temp")) {
+            ob.Temp_Observation.AirTemp_DegCel = (float)reader.nextDouble();
+            return true;
+        }else if (name.equals("apparent_t")) {
+            ob.Temp_Observation.ApparentTemp_DegCel = (float)reader.nextDouble();
+            return true;
+        }
+        else {
+            return false;
+        }        
+    }
+
+    // Returns true if the value was handled
+    static boolean ReadSwellInfo(ObservationReading ob, String name, JsonReader reader) throws IOException {
+        if(ob.Swell_Observation == null)
+        {
+            ob.Swell_Observation = new SwellObservation();
+        }
+        if (name.equals("swell_dir_worded")) {
+            ob.Swell_Observation.CardinalSwellDirection = reader.nextString().toLowerCase(Locale.US);
+            ob.Swell_Observation.SwellBearing = ConvertCardinalCharsToBearing(ob.Swell_Observation.CardinalSwellDirection);
+            return true;
+        }else if (name.equals("swell_height") ) {
+            ob.Swell_Observation.SwellHeight_meters = reader.nextDouble();
+            return true;
+        }else if (name.equals("swell_period")) {
+            ob.Swell_Observation.SwellPeriod_seconds = reader.nextInt();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
     /* Convert a string of lowercase chars representing a cardinal direction
     *  into a bearing. 0 = North, 90 = East, 180 = South, 270 = West
     *  Handles empty String and "-" by returning null
      */
-    private static Float ConvertCardinalCharsToBearing(String dirs)
+    public static Float ConvertCardinalCharsToBearing(String dirs)
     {
         Float bearing = null;
         final int len = dirs.length();

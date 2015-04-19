@@ -13,6 +13,10 @@ public class WeatherData implements Comparable
     /* The observation data for this location */
     public List<ObservationReading> ObservationData;
 
+    /* A description of the source of the data
+     */
+    String Source;
+
     @Override
     public String toString()
     {

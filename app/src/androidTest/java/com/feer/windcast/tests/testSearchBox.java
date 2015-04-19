@@ -105,7 +105,7 @@ public class testSearchBox extends ActivityInstrumentationTestCase2<MainActivity
                         adapterHasCount(CoreMatchers.equalTo(EXPECTED_NUM_STATIONS))));
 
         onView(withId(R.id.search)).perform(click());
-        WeatherStation expected = Mocks.Fakes.Stations().get(2);
+        WeatherStation expected = Mocks.Fakes.Stations().get(2).Station;
         
         // just use the last few characters of the name;
         String searchTerm = expected.GetName();
