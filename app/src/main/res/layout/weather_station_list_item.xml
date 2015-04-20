@@ -10,8 +10,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_vertical"
-    android:descendantFocusability="blocksDescendants" 
+    android:descendantFocusability="blocksDescendants"
     android:paddingRight="8dp"
+    android:paddingEnd="8dp"
     tools1:context=".MainActivity">
 
     <CheckBox
@@ -28,7 +29,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Weather Station A"
+        tools1:text="Weather Station A"
         android:id="@+id/station_name"
         android:gravity="center_vertical"
         android:layout_centerVertical="true"
@@ -39,7 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/preview_wind_speed"
-        android:text="12 km/h"
+        tools1:text="12 km/h"
 
         android:layout_toLeftOf="@+id/preview_wind_dir"
         android:layout_toStartOf="@+id/preview_wind_dir"
@@ -62,34 +63,39 @@
         android:visibility="gone"/>
 
 
-    
-    <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:id="@+id/error_icon"
-        android:layout_marginRight="4dp"
-        android:layout_marginLeft="8dp"
 
-        android:src="@drawable/warning_icon"
-
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-
-        android:visibility="gone"
-        />
-    
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/error_text"
-        
+        android:layout_marginRight="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginStart="4dp"
+
         android:text="No Info"
-        android:textColor="@android:color/darker_gray"
-        android:layout_toLeftOf="@id/error_icon"
-        android:layout_toStartOf="@id/error_icon"
+        android:textStyle="bold"
+        android:textColor="#ffa8a8a8"
+
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:visibility="gone"
+        android:visibility="visible"
         />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/error_icon"
+        android:layout_marginRight="4dp"
+        android:layout_marginLeft="4dp"
+
+        android:src="@drawable/warning_icon"
+        android:layout_toLeftOf="@id/error_text"
+        android:layout_toStartOf="@id/error_text"
+        android:layout_centerVertical="true"
+
+        android:visibility="visible"
+        android:contentDescription="Error getting data" />
 
 </RelativeLayout>
