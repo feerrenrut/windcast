@@ -149,18 +149,11 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             }
         };
 
-
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        final String unitTypePrefValue = preferences.getString(SettingsActivity.PREF_KEY_WIND_SPEED_UNIT, "0");
-        boolean useKmh = SettingsActivity.WindSpeedUnitPref.GetUnitTypeFromValue(Integer.parseInt(unitTypePrefValue)) == SettingsActivity.WindSpeedUnitPref.UnitType.kmh;
-
         mAdapter = new WeatherStationArrayAdapter(
                 getActivity(),
                 R.layout.weather_station_list_item,
                 new ArrayList<WeatherData>(),
-                handleFavChange,
-                useKmh);
+                handleFavChange);
 
         AbsListView listView = (AbsListView) view.findViewById(android.R.id.list);
         mEmptyView = (TextView) view.findViewById(android.R.id.empty); // default text is loading_station_list
@@ -411,6 +404,12 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         {
             mAdapter.clear();
             mAdapter.addAll(listStations);
+
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            final String unitTypePrefValue = preferences.getString(SettingsActivity.PREF_KEY_WIND_SPEED_UNIT, "0");
+            boolean useKmh = SettingsActivity.WindSpeedUnitPref.GetUnitTypeFromValue(Integer.parseInt(unitTypePrefValue)) == SettingsActivity.WindSpeedUnitPref.UnitType.kmh;
+            mAdapter.SetUseKMH(useKmh);
 
             // this has to be done to refresh the filter on mAdapter.
             // Otherwise the previously set filter will persist, and the list of objects returned by

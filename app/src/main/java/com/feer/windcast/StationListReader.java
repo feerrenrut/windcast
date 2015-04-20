@@ -60,9 +60,9 @@ public class StationListReader
         String str;
         
         Pattern obsDayAndTime = Pattern.compile("<td headers=\".*-datetime.*>(.*)</td>");
-        Pattern obsWindDir = Pattern.compile("<td headers=\".*-wind-dir .*\">(.*)</td>");
-        Pattern obsWindSpdKmh = Pattern.compile("<td headers=\".*-wind-spd-kmh .*\">(.*)</td>");
-        Pattern obsWindSpdKts = Pattern.compile("<td headers=\".*-wind-spd-kts .*\">(.*)</td>");
+        Pattern obsWindDir = Pattern.compile("<td headers=\".*-wind.dir .*\">(.*)</td>");
+        Pattern obsWindSpdKmh = Pattern.compile("<td headers=\".*-wind.spd.kmh.*\">(.*)</td>");
+        Pattern obsWindSpdKts = Pattern.compile("<td headers=\".*-wind.spd.kts.*\">(.*)</td>"); // could be -wind-spd-kts or -wind-spd_kts
         Pattern endOfStationDetails = Pattern.compile("</tr>");
         
         

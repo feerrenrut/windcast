@@ -31,16 +31,20 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
     private final Context mContext;
     private final int mLayoutResourceID;
     private final OnFavouriteChangedListener mFavChangedListener;
-    private final boolean mUseKMH;
+    private boolean mUseKMH = true;
 
-    public WeatherStationArrayAdapter(Context context, int layoutResourceID, ArrayList<WeatherData> objects, OnFavouriteChangedListener favChangedListner, boolean useKMH)
+    public WeatherStationArrayAdapter(Context context, int layoutResourceID, ArrayList<WeatherData> objects, OnFavouriteChangedListener favChangedListner)
     {
         super(context, layoutResourceID, objects);
 
         mContext = context;
         mLayoutResourceID = layoutResourceID;
         mFavChangedListener = favChangedListner;
-        mUseKMH = useKMH;
+    }
+    
+    public void SetUseKMH(boolean shouldUseKMH)
+    {
+        mUseKMH = shouldUseKMH;
     }
 
     @Override
