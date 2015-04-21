@@ -1,6 +1,7 @@
 package com.feer.windcast;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -44,7 +45,7 @@ import static com.feer.windcast.EmptyDataError.EmptyTextState.NoStationsAvailabl
  * Activities containing this fragment MUST implement the callbacks
  * interface.
  */
-public class WeatherStationFragment extends Fragment implements AbsListView.OnItemClickListener {
+public class WeatherStationFragment extends Fragment implements AbsListView.OnItemClickListener, AdapterView.OnItemLongClickListener {
 
     private static final String TAG = "WeatherStationFragment" ;
     private static final String PARAM_STATIONS_TO_SHOW = "param_stations_to_show";
@@ -163,6 +164,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
         // Set OnItemClickListener so we can be notified on item clicks
         listView.setOnItemClickListener(this);
+        listView.setOnItemLongClickListener(this);
         InitializeSearchBox(view);
 
         return view;
@@ -360,6 +362,26 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 Log.e(TAG, "Exception when selecting the station", e);
             }
         }
+    }
+
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        WeatherStationArrayAdapter adapter;
+        if ( (adapter = mAdapter) != null || (adapter = (WeatherStationArrayAdapter) parent.getAdapter()) != null) {
+            WeatherData data = adapter.getItem(position);
+            
+            StringBuilder message = new StringBuilder()
+                .append("Source: ").append(data.Source);
+
+            AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+                    .setTitle(data.Station.toString() + " details")
+                    .setMessage(message)
+                    .create();
+            alertDialog.show();
+            return true;
+        }
+        return false;
     }
 
     private void WeatherStationSelected(WeatherStation station) throws Exception
