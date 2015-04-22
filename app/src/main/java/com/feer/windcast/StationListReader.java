@@ -10,6 +10,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -59,6 +60,9 @@ public class StationListReader
         Pattern idUrlAndNamePattern = Pattern.compile("<th id=\"(.*)\" class.*<a href=\"(.*shtml)\">(.*)</a>.*");
         String str;
         
+        // get timezone from string eg: 
+        // <th id="tKIM-datetime" rowspan="2">Date/Time<br /><acronym title="Western Standard Time">WST</acronym></th>
+        Pattern obsTimeZone = Pattern.compile("<th id=\".*-datetime.*><acronym title=\"(.*)\">");
         Pattern obsDayAndTime = Pattern.compile("<td headers=\".*-datetime.*>(.*)</td>");
         Pattern obsWindDir = Pattern.compile("<td headers=\".*-wind.dir .*\">(.*)</td>");
         Pattern obsWindSpdKmh = Pattern.compile("<td headers=\".*-wind.spd.kmh.*\">(.*)</td>");
@@ -69,9 +73,16 @@ public class StationListReader
         WeatherData d = null;
         ObservationReading r = null;
         final String source = fromUrl.toString().replaceFirst("http://www.bom.gov.au/", "");
+        String lastFoundTimeZone = null;
         while((str = buf.readLine()) != null)
         {
-            Matcher m = idUrlAndNamePattern.matcher(str);
+            Matcher m = obsTimeZone.matcher(str);
+            if(m.find())
+            {
+                lastFoundTimeZone = "Australian " + m.group(1); // added since BOM time zone acronym's and title exclude the A (Australia) see  http://www.timeanddate.com/time/zones/au
+            }
+            
+            m = idUrlAndNamePattern.matcher(str);
             if(m.find())
             {
                 d = new WeatherData();
@@ -93,15 +104,19 @@ public class StationListReader
             m = obsDayAndTime.matcher(str);
             if ( m.find())
             {
-                    /*String dateTime = String.format("", m.group(1)) // The date is in the form dd/hh:mm followed by am or pm. We need to prefix it with year and month.
-                    SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss",  Locale.US);
-                    try
-                    {
-                        r.LocalTime = df.parse(dateTime);
-                    } catch (ParseException e)
-                    {
-                        Log.e("WindCast", "unable to parse date string: " + dateTime);
-                    }*/
+                // The date is in the form dd/hh:mm followed by am or pm.
+                // We need to prefix it with year and month.
+                SimpleDateFormat df = new SimpleDateFormat("yyyyMM", Locale.US);
+                String dateTime = df.format(Calendar.getInstance().getTime()) + m.group(1) + ' ' +  lastFoundTimeZone;
+            
+                df = new SimpleDateFormat("yyyyMMdd/hh:mmaa zzzz",  Locale.US);
+                try
+                {
+                    r.LocalTime = df.parse(dateTime);
+                } catch (ParseException e)
+                {
+                    Log.e("WindCast", "unable to parse date string: " + dateTime);
+                }
                 continue;
             }
 

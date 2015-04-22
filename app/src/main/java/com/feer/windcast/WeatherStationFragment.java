@@ -373,6 +373,11 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             
             StringBuilder message = new StringBuilder()
                 .append("Source: ").append(data.Source);
+            
+            if(data.ObservationData != null && !data.ObservationData.isEmpty() && data.ObservationData.get(0).LocalTime != null) {
+                message.append('\n')
+                        .append("Latest reading: ").append(data.ObservationData.get(0).LocalTime.toString());
+            }
 
             AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
                     .setTitle(data.Station.toString() + " details")
