@@ -18,7 +18,8 @@ import com.feer.windcast.dataAccess.WeatherDataCache;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -171,14 +172,10 @@ public class WindGraphFragment extends Fragment
     private void PopulateWeatherStationSummary(Activity act, WeatherData wd) {
         ObservationReading reading = wd.ObservationData.get(0);
 
-        DateFormat localDate = android.text.format.DateFormat
-                .getDateFormat(act);
-
-        DateFormat localTime = android.text.format.DateFormat
-                .getTimeFormat(act);
+        SimpleDateFormat localDate = new SimpleDateFormat( "dd/MM/yy hh:mm a zzz");
 
         ((TextView) act.findViewById(R.id.readingTimeLabel)).setText(
-                localTime.format(reading.LocalTime) + ' ' + localDate.format(reading.LocalTime)
+                 localDate.format(reading.LocalTime)
                         + "\n");
 
         if(reading.Wind_Observation.WindSpeed_KMH != null) {

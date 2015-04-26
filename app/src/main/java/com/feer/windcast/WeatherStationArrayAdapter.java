@@ -1,8 +1,6 @@
 package com.feer.windcast;
 
 import android.content.Context;
-import android.os.AsyncTask;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +10,9 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.feer.windcast.dataAccess.WeatherDataCache;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  *
@@ -97,9 +95,11 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
     private class WindPreview {
         private View convertView;
         private TextView windSpeed;
+        private TextView readingTime;
         private ImageView direction;
         private ImageView errorIcon;
         private TextView errorText;
+        private final SimpleDateFormat readingTimeFormat = new SimpleDateFormat("h:mm a");
 
         public WindPreview(View convertView) {
             this.convertView = convertView;
@@ -108,6 +108,9 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
         public WindPreview invoke() {
             windSpeed = (TextView) convertView.findViewById(R.id.preview_wind_speed);
             windSpeed.setVisibility(View.GONE);
+            
+            readingTime = (TextView) convertView.findViewById(R.id.reading_time);
+            readingTime.setVisibility(View.GONE);
 
             direction = (ImageView) convertView.findViewById(R.id.preview_wind_dir);
             direction.setVisibility(View.GONE);
@@ -122,7 +125,7 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
         }
 
         public void SetPreviewData(WeatherData weatherData) {
-            if(weatherData.ObservationData != null && weatherData.ObservationData.isEmpty() == false)
+            if(weatherData.ObservationData != null && !weatherData.ObservationData.isEmpty())
             {
                 ObservationReading latestReading = weatherData.ObservationData.get(0);
                 Integer speed = mUseKMH ? latestReading.Wind_Observation.WindSpeed_KMH : latestReading.Wind_Observation.WindSpeed_KN;
@@ -131,6 +134,13 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
                 if(speed != null) {
                     windSpeed.setText(String.format("%d %s", speed, unit));
                     windSpeed.setVisibility(View.VISIBLE);
+                    Date now = new Date();
+                    long tooLong = 75L * 60 * 1000;
+                    if(latestReading.LocalTime != null && now.getTime() - latestReading.LocalTime.getTime() > tooLong)
+                    {
+                        readingTime.setText("At: " + readingTimeFormat.format(latestReading.LocalTime));
+                        readingTime.setVisibility(View.VISIBLE);
+                    }
                     direction.setVisibility(View.INVISIBLE);
                     if (latestReading.Wind_Observation.WindBearing != null) {
                         // arrow image points right, rotate by 90 to point down when wind comes

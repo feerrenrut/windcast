@@ -8,66 +8,43 @@
     xmlns:tools1="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center_vertical"
+    android:layout_height="60dp"
     android:descendantFocusability="blocksDescendants"
     android:paddingRight="8dp"
     android:paddingEnd="8dp"
-    tools1:context=".MainActivity">
+    tools1:context=".MainActivity"
+    >
 
-    <CheckBox
+    <CheckBox  android:id="@+id/is_favourite_checkbox"
         android:layout_width="48dp"
         android:layout_height="fill_parent"
-        android:id="@+id/is_favourite_checkbox"
+      
 
         android:button="@drawable/btn_fav"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentBottom="false"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+
+        android:gravity="center_vertical"
+        android:layout_centerVertical="true"
         />
 
-    <TextView
+    <TextView  android:id="@+id/station_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools1:text="Weather Station A"
-        android:id="@+id/station_name"
+        android:text="Weather Station A"
+      
+        android:textAppearance="?android:attr/textAppearanceSmall"
         android:gravity="center_vertical"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@id/is_favourite_checkbox"
-        android:layout_toEndOf="@id/is_favourite_checkbox" />
-    
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/preview_wind_speed"
-        tools1:text="12 km/h"
-
-        android:layout_toLeftOf="@+id/preview_wind_dir"
-        android:layout_toStartOf="@+id/preview_wind_dir"
-        android:layout_centerVertical="true"
-        android:visibility="gone"
+        android:layout_toEndOf="@id/is_favourite_checkbox"
         />
 
-    <ImageView
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:id="@+id/preview_wind_dir"
-        android:layout_marginRight="8dp"
-        android:layout_marginLeft="8dp"
-
-        android:src="@drawable/wind_dir_arrow"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-
-        android:visibility="gone"/>
-
-
-
-    <TextView
+    <TextView android:id="@+id/error_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/error_text"
+       
         android:layout_marginRight="24dp"
         android:layout_marginEnd="24dp"
         android:layout_marginLeft="4dp"
@@ -80,13 +57,13 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:visibility="visible"
+        android:visibility="gone"
         />
 
-    <ImageView
+    <ImageView android:id="@+id/error_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/error_icon"
+       
         android:layout_marginRight="4dp"
         android:layout_marginLeft="4dp"
 
@@ -95,7 +72,50 @@
         android:layout_toStartOf="@id/error_text"
         android:layout_centerVertical="true"
 
+        android:visibility="gone"
+        android:contentDescription="Error getting data"
+        />
+
+    <TextView android:id="@+id/preview_wind_speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        
+        android:layout_alignTop="@+id/station_name"
+        android:layout_toLeftOf="@+id/preview_wind_dir"
+        android:layout_toStartOf="@+id/preview_wind_dir"
+       
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="12 km/h"
+        />
+
+
+    <TextView android:id="@+id/reading_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="10sp"
+        android:text="At: 6:30pm"
+        android:textColor="#ffa8a8a8"
         android:visibility="visible"
-        android:contentDescription="Error getting data" />
+        
+        android:layout_below="@+id/preview_wind_speed"
+        android:layout_toLeftOf="@id/preview_wind_dir"
+        />
+    
+        <ImageView  android:id="@+id/preview_wind_dir"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+          
+            android:layout_marginRight="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+
+            android:src="@drawable/wind_dir_arrow"
+
+            android:visibility="visible" 
+            />
 
 </RelativeLayout>

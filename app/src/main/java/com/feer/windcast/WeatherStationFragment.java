@@ -29,6 +29,7 @@ import com.feer.windcast.dataAccess.FavouriteStationCache;
 import com.feer.windcast.dataAccess.LoadedWeatherStationCache;
 import com.feer.windcast.dataAccess.WeatherDataCache;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -375,8 +376,9 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 .append("Source: ").append(data.Source);
             
             if(data.ObservationData != null && !data.ObservationData.isEmpty() && data.ObservationData.get(0).LocalTime != null) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("M LLL kk:mm z");
                 message.append('\n')
-                        .append("Latest reading: ").append(data.ObservationData.get(0).LocalTime.toString());
+                       .append("Latest reading: ").append(dateFormat.format(data.ObservationData.get(0).LocalTime));
             }
 
             AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
