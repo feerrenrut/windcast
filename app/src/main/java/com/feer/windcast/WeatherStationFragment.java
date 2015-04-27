@@ -22,6 +22,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.feer.windcast.dataAccess.BackgroundTaskManager;
@@ -35,7 +36,6 @@ import java.util.Collection;
 
 import static android.support.v4.app.ActivityCompat.invalidateOptionsMenu;
 import static com.feer.windcast.EmptyDataError.*;
-import static com.feer.windcast.EmptyDataError.EmptyTextState.LoadingData;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoFavourites;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoInternetAccess;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoResultsAfterFilter;
@@ -158,10 +158,9 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 handleFavChange);
 
         AbsListView listView = (AbsListView) view.findViewById(android.R.id.list);
-        mEmptyView = (TextView) view.findViewById(android.R.id.empty); // default text is loading_station_list
+        mEmptyView = (TextView) view.findViewById(android.R.id.empty);
         listView.setEmptyView(mEmptyView);
         listView.setAdapter(mAdapter);
-        mEmptyTextEnum.AddEmptyListReason(LoadingData);
 
         // Set OnItemClickListener so we can be notified on item clicks
         listView.setOnItemClickListener(this);
@@ -311,7 +310,13 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                                     " mFavs is null: " + favsNull.toString() +
                                     " cacheStations is null: " + cacheStationsNull.toString());
                 }
-                mEmptyTextEnum.RemoveEmptyListReason(LoadingData);
+                
+                // show the list view, hide the progress bar
+                AbsListView listView = (AbsListView) act.findViewById(android.R.id.list);
+                ProgressBar progressBar = (ProgressBar) act.findViewById(R.id.loading);
+                listView.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+                
                 invalidateOptionsMenu(act);
             }
         });
@@ -321,16 +326,13 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         Activity act;
         Resources res;
         if(mEmptyView != null && (act = getActivity()) != null && (res = act.getResources()) != null) {
-
+            
             switch (reason) {
                 case NoInternetAccess:
                     mEmptyView.setText(res.getText(R.string.no_internet_access));
                     break;
                 case NoStationsAvailable:
                     mEmptyView.setText(res.getText(R.string.no_stations_available));
-                    break;
-                case LoadingData:
-                    mEmptyView.setText(res.getText(R.string.loading_station_list));
                     break;
                 case NoResultsAfterFilter:
                     mEmptyView.setText(R.string.filter_results_no_stations_found);

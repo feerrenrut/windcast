@@ -7,14 +7,11 @@ import java.util.Collections;
 public class EmptyDataError {
     public enum EmptyTextState
     {
-
         NoReason,
         NoResultsAfterFilter,
         NoFavourites,
-        LoadingData,
         NoStationsAvailable,
         NoInternetAccess,
-
     }
 
     public interface OnEmptyListReasonChanged

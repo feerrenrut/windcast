@@ -36,6 +36,13 @@
         android:textSize="10sp"
         android:layout_gravity="center_horizontal"
         />
+    
+    <ProgressBar android:id="@+id/loading"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:visibility="visible"
+        android:layout_gravity="center"
+        />
 
     <com.androidplot.xy.XYPlot
         android:id="@+id/mySimpleXYPlot"

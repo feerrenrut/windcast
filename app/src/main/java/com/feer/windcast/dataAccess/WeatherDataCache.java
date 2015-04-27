@@ -182,10 +182,12 @@ public class WeatherDataCache
 
                 @Override
                 protected void onPostExecute(ArrayList<WeatherData> weatherStations) {
-                    if(weatherStations != null)
+                    if(weatherStations == null)
                     {
-                        mInternalStationCache.AddStationsForState(weatherStations, stationLink.mState);
+                        weatherStations = new ArrayList<WeatherData>();
                     }
+                    mInternalStationCache.AddStationsForState(weatherStations, stationLink.mState);
+                    
                     
                     if(mInternalStationCache.StationsForAllStatesAdded())
                     {

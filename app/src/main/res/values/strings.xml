@@ -13,7 +13,6 @@
     <string name="all">All</string>
     <string name="drawer_open">Open Navigation Drawer</string>
     <string name="drawer_close">Close Navigation Drawer</string>
-    <string name="loading_station_list">Loading station list, please be patient.</string>
     <string name="no_internet_access">Unable to access the internet.</string>
     <string name="no_stations_available">No stations available.</string>
     <string name="weather_data_not_available">Weather data not available</string>

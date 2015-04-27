@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.androidplot.xy.XYPlot;
@@ -165,6 +166,9 @@ public class WindGraphFragment extends Fragment
 
                 WindGraph.SetupGraph(wd, plot, act, mUseKMH? SettingsActivity.WindSpeedUnitPref.UnitType.kmh : SettingsActivity.WindSpeedUnitPref.UnitType.knots);
                 plot.setVisibility(View.VISIBLE);
+
+                ProgressBar progressBar = (ProgressBar) act.findViewById(R.id.loading);
+                progressBar.setVisibility(View.GONE);
             }
         }.execute();
     }
