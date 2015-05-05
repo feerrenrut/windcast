@@ -48,16 +48,19 @@ public class StationListReader
            <th id="tKIM-station-broome-port" class="rowleftcolumn"><a href="/products/IDW60801/IDW60801.95202.shtml">Broome Port</a></th>
            <th id="obs-station-braidwood" class="rowleftcolumn"><a href="/products/IDN60903/IDN60903.94927.shtml">Braidwood</a></th>
 
-           we want two groups one for the url (group 1) and one for the full station name (group 2)
-           it seems all stations have an id that includes the word 'station'
-           Group 1: ([\/\w.]*shtml)
-           this is the relative link to the station page. It contains words, forward slashes('/') and
-           period characters. It ends with 'shtml'
+           we want two groups:
+                - one for the url (group 1) 
+                - one for the full station name (group 2)
+                
+           Group 1: (.*shtml)
+           this is the relative link to the station page.
+            - It comes after <a href="
+            - It ends with 'shtml'
 
            Group 2: >(.*)</a>
            is all characters inside the anchor tag
         */
-        Pattern idUrlAndNamePattern = Pattern.compile("<th id=\"(.*)\" class.*<a href=\"(.*shtml)\">(.*)</a>.*");
+        Pattern idUrlAndNamePattern = Pattern.compile("<th id=\".*\" class.*<a href=\"(.*shtml)\">(.*)</a>.*");
         String str;
         
         // get timezone from string eg: 
@@ -80,6 +83,7 @@ public class StationListReader
             if(m.find())
             {
                 lastFoundTimeZone = "Australian " + m.group(1); // added since BOM time zone acronym's and title exclude the A (Australia) see  http://www.timeanddate.com/time/zones/au
+                continue;
             }
             
             m = idUrlAndNamePattern.matcher(str);
@@ -94,10 +98,15 @@ public class StationListReader
 
                 d.Station = new WeatherStation.WeatherStationBuilder()
                         .WithState(States.valueOf(state))
-                        .WithURL(new URL("http://www.bom.gov.au" + StationListReader.ConvertToJSONURL(m.group(2))))
-                        .WithName(m.group(3))
+                        .WithURL(new URL("http://www.bom.gov.au" + StationListReader.ConvertToJSONURL(m.group(1))))
+                        .WithName(m.group(2))
                         .Build();
 
+                continue;
+            }
+            
+            if(d == null || r == null)
+            {
                 continue;
             }
             
@@ -146,6 +155,8 @@ public class StationListReader
             if ( m.find() && d != null && d.Station != null)
             {
                 weatherStations.add(d);
+                d = null;
+                r = null;
             }
         }
 
