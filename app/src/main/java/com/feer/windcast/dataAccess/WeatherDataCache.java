@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.feer.windcast.ObservationReader;
-import com.feer.windcast.ObservationReading;
 import com.feer.windcast.StationListReader;
 import com.feer.windcast.WeatherData;
 import com.feer.windcast.WeatherStation;
@@ -13,6 +12,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 
 class InternalStationCache implements LoadedWeatherStationCache {
@@ -89,6 +89,7 @@ public class WeatherDataCache
     * Has to be package local for tests.
      */
     InternalStationCache mInternalStationCache = null;
+    Date mInternalStationCacheTime = null;
     private static WeatherDataCache sInstance = null;
     
     private WeatherDataCache() { }
@@ -111,9 +112,25 @@ public class WeatherDataCache
     {
         return mInternalStationCache;
     }
+    
+    private boolean IsStationCacheStale()
+    {
+        long cacheTimeout = 15L * 60 * 1000; // 15 min
+        
+        return mInternalStationCacheTime != null &&
+               new Date().getTime() - mInternalStationCacheTime.getTime() // elapsed time
+               > cacheTimeout;
+    }
 
     public void OnStationCacheFilled(NotifyWhenStationCacheFilled notify)
     {
+        if( IsStationCacheFilled() && IsStationCacheStale() )
+        {
+            notify.OnCacheFilled(GetInternalStationCache());
+            mInternalStationCache = null;
+            mInternalStationCacheTime = null;
+        }
+        
         if(IsStationCacheFilled())
         {
             notify.OnCacheFilled(GetInternalStationCache());
@@ -155,6 +172,7 @@ public class WeatherDataCache
 
     private void TriggerFillStationCache()
     {
+        mInternalStationCacheTime = null;
         mInternalStationCache = new InternalStationCache();
 
         for(final InternalStationCache.AllStationsURLForState stationLink : InternalStationCache.mAllStationsInState_UrlList)
@@ -191,6 +209,7 @@ public class WeatherDataCache
                     
                     if(mInternalStationCache.StationsForAllStatesAdded())
                     {
+                        mInternalStationCacheTime = new Date();
                         NotifyOfStationCacheFilled();
                     }
                 }

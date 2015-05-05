@@ -244,80 +244,88 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         super.onActivityCreated(savedInstanceState);
         if(savedInstanceState != null) readBundle(savedInstanceState);
     }
+    
+    class FillStationArrayAsync  extends AsyncTask<Void, Void, ArrayList<WeatherData>>
+    {
+        private final LoadedWeatherStationCache mWeatherCache;
+        
+        FillStationArrayAsync(LoadedWeatherStationCache weatherCache)
+        {
+            mWeatherCache = weatherCache;
+        }
+        
+        @Override
+        protected ArrayList<WeatherData> doInBackground(Void... params) {
+            Context con;
+            if (getActivity() == null || (con = getActivity().getApplicationContext()) == null || mWeatherCache == null)
+                return null;
+
+            mFavs.Initialise(con, mTaskManager);
+            if (mShowOnlyStations == null || mShowOnlyStations == StationsToShow.All || mShowOnlyStations == StationsToShow.Favourites) {
+                return mWeatherCache.GetWeatherStationsFromAllStates();
+            } else {
+                return mWeatherCache.GetWeatherStationsFrom(mShowOnlyStations.toString());
+            }
+        }
+
+        @Override
+        protected void onPostExecute(final ArrayList<WeatherData> cacheStations) {
+            Activity act = getActivity();
+            if (act == null) return;
+
+            if (mShowOnlyStations == null) {
+                mShowOnlyStations = (mFavs == null || mFavs.GetFavouriteURLs().isEmpty()) ? StationsToShow.All : StationsToShow.Favourites;
+            }
+
+            if (mFavs != null && cacheStations != null) {
+                ArrayList<String> favs = mFavs.GetFavouriteURLs();
+                ArrayList<WeatherData> useStations = cacheStations;
+                SetFavStations(useStations, favs);
+
+                if (mShowOnlyStations == StationsToShow.Favourites) {
+                    useStations = FilterToOnlyFavs(useStations);
+                    if (useStations.isEmpty()) {
+                        mEmptyTextEnum.AddEmptyListReason(NoFavourites);
+                    }
+                    getActivity().setTitle(R.string.favourite_stations);
+                } else if (useStations.isEmpty()) {
+                    mEmptyTextEnum.AddEmptyListReason(NoStationsAvailable);
+                }
+
+                SetStationList(useStations);
+                Log.i(TAG, "Finished adding new stations.");
+            } else {
+                Boolean favsNull = mFavs == null;
+                Boolean cacheStationsNull = cacheStations == null;
+                mEmptyTextEnum.AddEmptyListReason(NoInternetAccess);
+
+                Log.i(TAG,
+                        "Could not add new stations." +
+                                " mFavs is null: " + favsNull.toString() +
+                                " cacheStations is null: " + cacheStationsNull.toString());
+            }
+
+            // show the list view, hide the progress bar
+            AbsListView listView = (AbsListView) act.findViewById(android.R.id.list);
+            ProgressBar progressBar = (ProgressBar) act.findViewById(R.id.loading);
+            listView.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
+
+            invalidateOptionsMenu(act);
+        }
+        
+    }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        abstract class FillStation extends AsyncTask<Void, Void, ArrayList<WeatherData>> implements WeatherDataCache.NotifyWhenStationCacheFilled {}
+        abstract class FillStation implements WeatherDataCache.NotifyWhenStationCacheFilled {}
 
         WeatherDataCache.GetInstance().OnStationCacheFilled(new FillStation() {
             @Override
             public void OnCacheFilled(LoadedWeatherStationCache fullCache) {
-                weatherCache = fullCache;
-                execute();
-            }
-
-            public LoadedWeatherStationCache weatherCache = null;
-
-            @Override
-            protected ArrayList<WeatherData> doInBackground(Void... params) {
-                Context con;
-                if (getActivity() == null || (con = getActivity().getApplicationContext()) == null || weatherCache == null)
-                    return null;
-
-                mFavs.Initialise(con, mTaskManager);
-                if (mShowOnlyStations == null || mShowOnlyStations == StationsToShow.All || mShowOnlyStations == StationsToShow.Favourites) {
-                    return weatherCache.GetWeatherStationsFromAllStates();
-                } else {
-                    return weatherCache.GetWeatherStationsFrom(mShowOnlyStations.toString());
-                }
-            }
-
-            @Override
-            protected void onPostExecute(final ArrayList<WeatherData> cacheStations) {
-                Activity act = getActivity();
-                if (act == null) return;
-
-                if (mShowOnlyStations == null) {
-                    mShowOnlyStations = (mFavs == null || mFavs.GetFavouriteURLs().isEmpty()) ? StationsToShow.All : StationsToShow.Favourites;
-                }
-
-                if (mFavs != null && cacheStations != null) {
-                    ArrayList<String> favs = mFavs.GetFavouriteURLs();
-                    ArrayList<WeatherData> useStations = cacheStations;
-                    SetFavStations(useStations, favs);
-                    
-                    if (mShowOnlyStations == StationsToShow.Favourites) {
-                        useStations = FilterToOnlyFavs(useStations);
-                        if (useStations.isEmpty()) {
-                            mEmptyTextEnum.AddEmptyListReason(NoFavourites);
-                        }
-                        getActivity().setTitle(R.string.favourite_stations);
-                    } else if (useStations.isEmpty()) {
-                        mEmptyTextEnum.AddEmptyListReason(NoStationsAvailable);
-                    }
-
-                    SetStationList(useStations);
-                    Log.i(TAG, "Finished adding new stations.");
-                } else {
-                    Boolean favsNull = mFavs == null;
-                    Boolean cacheStationsNull = cacheStations == null;
-                    mEmptyTextEnum.AddEmptyListReason(NoInternetAccess);
-
-                    Log.i(TAG,
-                            "Could not add new stations." +
-                                    " mFavs is null: " + favsNull.toString() +
-                                    " cacheStations is null: " + cacheStationsNull.toString());
-                }
-                
-                // show the list view, hide the progress bar
-                AbsListView listView = (AbsListView) act.findViewById(android.R.id.list);
-                ProgressBar progressBar = (ProgressBar) act.findViewById(R.id.loading);
-                listView.setVisibility(View.VISIBLE);
-                progressBar.setVisibility(View.GONE);
-                
-                invalidateOptionsMenu(act);
+                new FillStationArrayAsync(fullCache).execute();
             }
         });
     }

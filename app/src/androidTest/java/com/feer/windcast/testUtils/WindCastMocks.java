@@ -65,17 +65,45 @@ public class WindCastMocks {
         StrictMock.verifyNoUnstubbedInteractions(DataCache);
         StrictMock.verifyNoUnstubbedInteractions(FavouritesCache);
     }
+
+    public class RememberNotifyOnStationCacheFilled extends WindCastMocks.OnStationCacheFilledAnswer {
+        public RememberNotifyOnStationCacheFilled(LoadedWeatherStationCache cache) {
+            super(cache);
+        }
+
+        public WeatherDataCache.NotifyWhenStationCacheFilled mNotify;
+
+        @Override
+        protected void handleOnCacheFilledRequest(WeatherDataCache.NotifyWhenStationCacheFilled notifyMe)
+        {
+            mNotify = notifyMe;
+            super.handleOnCacheFilledRequest(mNotify);
+        }
+    };
+
+    public class OnStationCacheFilledAnswer implements  Answer<Void>{
+        final LoadedWeatherStationCache mCache;
+        OnStationCacheFilledAnswer(LoadedWeatherStationCache cache)
+        {
+            mCache = cache;
+        }
+        
+        @Override
+        public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+            handleOnCacheFilledRequest(
+                    (WeatherDataCache.NotifyWhenStationCacheFilled)invocationOnMock.getArguments()[0]);
+            return null;
+        }
+        
+        protected void handleOnCacheFilledRequest(WeatherDataCache.NotifyWhenStationCacheFilled notifyMe)
+        {
+            notifyMe.OnCacheFilled(mCache);
+        }
+    };
    
     private Answer<Void> createCallCacheFilledAnswer(final LoadedWeatherStationCache cache)
     {
-        return new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-                ((WeatherDataCache.NotifyWhenStationCacheFilled)invocationOnMock.getArguments()[0])
-                        .OnCacheFilled(cache);
-                return null;
-            }
-        };
+        return new OnStationCacheFilledAnswer(cache);
     }
     
     public void ClearPreferences()
