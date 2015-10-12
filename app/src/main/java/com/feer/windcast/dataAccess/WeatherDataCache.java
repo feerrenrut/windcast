@@ -175,6 +175,8 @@ public class WeatherDataCache
         mInternalStationCacheTime = null;
         mInternalStationCache = new InternalStationCache();
 
+        final long StartTime = System.nanoTime();
+
         for(final InternalStationCache.AllStationsURLForState stationLink : InternalStationCache.mAllStationsInState_UrlList)
         {
             new AsyncTask<Void, Void, ArrayList<WeatherData>>() {
@@ -210,6 +212,9 @@ public class WeatherDataCache
                     if(mInternalStationCache.StationsForAllStatesAdded())
                     {
                         mInternalStationCacheTime = new Date();
+
+                        double difference = (System.nanoTime() - StartTime) / 1E9;
+                        Log.i("StationList", "Filled station list in (seoonds): " + difference);
                         NotifyOfStationCacheFilled();
                     }
                 }
