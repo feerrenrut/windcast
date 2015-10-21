@@ -1,79 +1,34 @@
 package com.feer.windcast.dataAccess;
 
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.feer.windcast.ObservationReader;
+import com.feer.windcast.ObservationReading;
 import com.feer.windcast.StationListReader;
 import com.feer.windcast.WeatherData;
 import com.feer.windcast.WeatherStation;
+import com.feer.windcast.WindObservation;
+import com.feer.windcast.backend.windcastdata.Windcastdata;
+import com.feer.windcast.backend.windcastdata.model.LatestReading;
+import com.feer.windcast.backend.windcastdata.model.LatestReadingCollection;
+import com.feer.windcast.backend.windcastdata.model.StationData;
+import com.feer.windcast.backend.windcastdata.model.StationDataCollection;
+import com.feer.windcast.dataAccess.backend.CreateWindcastBackendApi;
+import com.feer.windcast.dataAccess.backend.GAE_StationCache;
 
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
-
-class InternalStationCache implements LoadedWeatherStationCache {
-
-    protected InternalStationCache()
-    {}
-
-    private final ArrayList<WeatherData> mStations = new ArrayList<WeatherData>();
-    private final ArrayList<String> mStatesLoaded = new ArrayList<String>();
-    
-    @Override
-    public ArrayList<WeatherData> GetWeatherStationsFrom(String state) {
-        ArrayList<WeatherData> stationsForState = new ArrayList<WeatherData>();
-        for (WeatherData station : mStations) {
-            if (station.Station.GetStateAbbreviated().equals(state)) {
-                stationsForState.add(station);
-            }
-        }
-        return stationsForState;
-    }
-
-    @Override
-    public ArrayList<WeatherData> GetWeatherStationsFromAllStates() {
-        return mStations;
-    }
-    
-    public void AddStationsForState(ArrayList<WeatherData> stations, String state)
-    {
-        mStations.addAll(stations);
-        mStatesLoaded.add(state);
-        Collections.sort(mStations);
-    }
-    
-    public boolean StationsForAllStatesAdded()
-    {
-        return mStatesLoaded.size() == mAllStationsInState_UrlList.length;
-    }
-
-    static class AllStationsURLForState
-    {
-        public AllStationsURLForState(String urlString, String state)
-        {mUrlString = urlString; mState = state;}
-
-        public String mUrlString;
-        public String mState;
-    }
-
-    static final AllStationsURLForState[] mAllStationsInState_UrlList =
-            {
-                    new AllStationsURLForState("http://www.bom.gov.au/wa/observations/waall.shtml", "WA"),
-                    new AllStationsURLForState("http://www.bom.gov.au/nsw/observations/nswall.shtml", "NSW"), //Strangely some the stations for ACT (inc. Canberra) are on this page!
-                    new AllStationsURLForState("http://www.bom.gov.au/vic/observations/vicall.shtml", "VIC"),
-                    new AllStationsURLForState("http://www.bom.gov.au/qld/observations/qldall.shtml", "QLD"),
-                    new AllStationsURLForState("http://www.bom.gov.au/sa/observations/saall.shtml", "SA"),
-                    new AllStationsURLForState("http://www.bom.gov.au/tas/observations/tasall.shtml", "TAS"),
-                    new AllStationsURLForState("http://www.bom.gov.au/act/observations/canberra.shtml", "ACT"),
-                    new AllStationsURLForState("http://www.bom.gov.au/nt/observations/ntall.shtml", "NT")
-            };
-}
 /**
- *
  */
 public class WeatherDataCache
 {
@@ -88,7 +43,8 @@ public class WeatherDataCache
     /* when this is null, loading of the cache has not yet started.
     * Has to be package local for tests.
      */
-    InternalStationCache mInternalStationCache = null;
+    LoadedWeatherStationCache mInternalStationCache = null;
+
     Date mInternalStationCacheTime = null;
     private static WeatherDataCache sInstance = null;
     
@@ -107,12 +63,7 @@ public class WeatherDataCache
     {
         sInstance = instance;
     }
-    
-    private InternalStationCache GetInternalStationCache()
-    {
-        return mInternalStationCache;
-    }
-    
+
     private boolean IsStationCacheStale()
     {
         long cacheTimeout = 15L * 60 * 1000; // 15 min
@@ -126,26 +77,26 @@ public class WeatherDataCache
     {
         if( IsStationCacheFilled() && IsStationCacheStale() )
         {
-            notify.OnCacheFilled(GetInternalStationCache());
+            notify.OnCacheFilled(mInternalStationCache);
             mInternalStationCache = null;
             mInternalStationCacheTime = null;
         }
         
         if(IsStationCacheFilled())
         {
-            notify.OnCacheFilled(GetInternalStationCache());
+            notify.OnCacheFilled(mInternalStationCache);
         }
         else
         {
             mNotifyUs.add(notify);
-            if(GetInternalStationCache() == null)
+            if(mInternalStationCache == null)
             {
                 TriggerFillStationCache();
             }
         }
     }
 
-    private boolean IsStationCacheFilled() {return GetInternalStationCache() != null && GetInternalStationCache().StationsForAllStatesAdded();}
+    private boolean IsStationCacheFilled() {return mInternalStationCache != null && mInternalStationCache.AreAllStatesFilled();}
 
     public FavouriteStationCache CreateNewFavouriteStationAccessor()
     {
@@ -172,8 +123,109 @@ public class WeatherDataCache
 
     private void TriggerFillStationCache()
     {
+        LoadCacheUsingWindcastAPI();
+    }
+
+    private void LoadCacheUsingWindcastAPI() {
         mInternalStationCacheTime = null;
-        mInternalStationCache = new InternalStationCache();
+
+        final GAE_StationCache cache = new GAE_StationCache();
+        mInternalStationCache = cache;
+
+        final long StartTime = System.nanoTime();
+
+        new AsyncTask<Void, Void, ArrayList<WeatherData>>() {
+            @Override
+            protected ArrayList<WeatherData> doInBackground(Void... params) {
+                return getWeatherDataFromBackend();
+            }
+
+            @Override
+            protected void onPostExecute(ArrayList<WeatherData> weatherStations) {
+                if(weatherStations == null)
+                {
+                    weatherStations = new ArrayList<WeatherData>();
+                }
+                cache.SetCachedStations(weatherStations);
+
+                mInternalStationCacheTime = new Date();
+
+                double difference = (System.nanoTime() - StartTime) / 1E9;
+                Log.i("StationList", "Filled station list from GAE in (seoonds): " + difference);
+                NotifyOfStationCacheFilled();
+
+            }
+        }.execute();
+    }
+
+    @Nullable
+    private ArrayList<WeatherData> getWeatherDataFromBackend() {
+        final DateTimeFormatter DATE_TIME_FORMATTER = ISODateTimeFormat.ordinalDateTime().withOffsetParsed();
+        final float KMH_TO_KNOT = 0.539957f;
+
+        Windcastdata windcastdata = CreateWindcastBackendApi.create();
+        StationDataCollection stations = null;
+        LatestReadingCollection readings = null;
+        try {
+            stations = windcastdata.getStationList().execute();
+            readings = windcastdata.getLatestObservation().execute();
+        } catch (IOException e) {
+            Log.e("WeatherDataCache", "Couldnt load stations and latest readings: " + e.toString());
+        }
+        if(stations == null ) return null;
+        List<LatestReading> readingsList = readings.getItems();
+        ArrayList<WeatherData> weatherData = new ArrayList<>();
+        for (StationData stationData: stations.getItems()) {
+            try {
+                LatestReading readingForStation = null;
+                for (LatestReading reading : readingsList) {
+                    if(reading.getStationID().equals(stationData.getStationID())) {
+                        readingForStation = reading;
+                        readingsList.remove(reading);
+                        break;
+                    }
+                }
+                WeatherData d = new WeatherData();
+                d.ObservationData = new ArrayList<>(1);
+                if(readingForStation != null) {
+                    ObservationReading r = new ObservationReading();
+                    r.Wind_Observation = new WindObservation();
+
+                    if(readingForStation.getLocalTime() != null) {
+                        r.LocalTime = DATE_TIME_FORMATTER
+                                .parseDateTime(readingForStation.getLocalTime())
+                                .toDate();
+                    }
+                    if(readingForStation.getWindSpeedKMH() != null) {
+                        r.Wind_Observation.WindSpeed_KMH = readingForStation.getWindSpeedKMH();
+                        r.Wind_Observation.WindSpeed_KN = (int) (KMH_TO_KNOT * readingForStation.getWindSpeedKMH());
+                    }
+                    if(readingForStation.getCardinalWindDirection() != null) {
+                        r.Wind_Observation.CardinalWindDirection = readingForStation.getCardinalWindDirection();
+                        r.Wind_Observation.WindBearing = ObservationReader.ConvertCardinalCharsToBearing(r.Wind_Observation.CardinalWindDirection);
+                    }
+                    r.Wind_Observation.WindGustSpeed_KMH = 0;
+                    d.ObservationData.add(r);
+                }
+
+                d.Station = new WeatherStation.WeatherStationBuilder()
+                        .WithName(stationData.getDisplayName())
+                        .WithState(WeatherStation.States.valueOf(stationData.getState()))
+                        .WithURL(new URL(stationData.getDataUrl()))
+                        .Build();
+                weatherData.add(d);
+            } catch (MalformedURLException e) {
+                Log.e("WeatherDataCache", "Loading weatherStation: " + stationData.getDisplayName()
+                        + " exception: " + e.toString());
+            }
+        }
+        return weatherData;
+    }
+
+    private void LoadCacheDirectlyFromBOM() {
+        mInternalStationCacheTime = null;
+        final InternalStationCache iCache = new InternalStationCache();
+        mInternalStationCache = iCache;
 
         final long StartTime = System.nanoTime();
 
@@ -206,15 +258,15 @@ public class WeatherDataCache
                     {
                         weatherStations = new ArrayList<WeatherData>();
                     }
-                    mInternalStationCache.AddStationsForState(weatherStations, stationLink.mState);
-                    
-                    
-                    if(mInternalStationCache.StationsForAllStatesAdded())
+                    iCache.AddStationsForState(weatherStations, stationLink.mState);
+
+
+                    if(iCache.StationsForAllStatesAdded())
                     {
                         mInternalStationCacheTime = new Date();
 
                         double difference = (System.nanoTime() - StartTime) / 1E9;
-                        Log.i("StationList", "Filled station list in (seoonds): " + difference);
+                        Log.i("StationList", "Filled station list from BOM in (seoonds): " + difference);
                         NotifyOfStationCacheFilled();
                     }
                 }
@@ -225,7 +277,7 @@ public class WeatherDataCache
     private void NotifyOfStationCacheFilled() {
         for(NotifyWhenStationCacheFilled notify : mNotifyUs)
         {
-            notify.OnCacheFilled(GetInternalStationCache());
+            notify.OnCacheFilled(mInternalStationCache);
         }
         mNotifyUs.clear();
     }

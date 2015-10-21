@@ -10,13 +10,16 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 
-import javax.inject.Named;
+import java.util.List;
+import java.util.logging.Logger;
+
+import static com.googlecode.objectify.ObjectifyService.ofy;
 
 /**
  * An endpoint class we are exposing
  */
 @Api(
-        name = "myApi",
+        name = "windcastdata",
         version = "v1",
         namespace = @ApiNamespace(
                 ownerDomain = "backend.windcast.feer.com",
@@ -24,17 +27,25 @@ import javax.inject.Named;
                 packagePath = ""
         )
 )
-public class MyEndpoint {
+public class WindCastDataEndpoint {
+
+    private static final Logger log = Logger.getLogger(WindCastDataEndpoint.class.getName());
 
     /**
-     * A simple endpoint method that takes a name and says Hi back
+     * Get data latest reading
      */
-    @ApiMethod(name = "sayHi")
-    public MyBean sayHi(@Named("name") String name) {
-        MyBean response = new MyBean();
-        response.setData("Hi, " + name);
-
-        return response;
+    @ApiMethod(name = "getLatestObservation")
+    public List<LatestReading> getLatestObservations() {
+        List<LatestReading> l = ofy().load().type(LatestReading.class).list();
+        return l;
     }
 
+    /**
+     * Get list of stations
+     */
+    @ApiMethod(name = "getStationList")
+    public List<StationData> getStationList() {
+        List<StationData> l = ofy().load().type(StationData.class).list();
+        return l;
+    }
 }

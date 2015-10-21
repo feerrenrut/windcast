@@ -43,7 +43,10 @@
     <orderEntry type="library" exported="" name="appengine-endpoints-1.9.18" level="project" />
     <orderEntry type="library" exported="" name="appengine-endpoints-deps-1.9.18" level="project" />
     <orderEntry type="library" exported="" name="servlet-api-2.5" level="project" />
+    <orderEntry type="library" exported="" name="objectify-5.1.8" level="project" />
+    <orderEntry type="library" exported="" name="joda-time-2.8.2" level="project" />
     <orderEntry type="library" exported="" name="appengine-api-1.0-sdk-1.9.18" level="project" />
+    <orderEntry type="library" exported="" name="guava-18.0" level="project" />
     <orderEntry type="library" exported="" name="WindCastBackend.WindCastBackend-android-endpoints" level="project" />
   </component>
 </module>
