@@ -1,21 +1,34 @@
 package com.feer.windcast;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Describes weather data for a particular location
  */
 public class WeatherData implements Comparable
 {
-    public WeatherStation Station;
+    public AWeatherStation Station;
 
     /* The observation data for this location */
-    public List<ObservationReading> ObservationData;
+    public List<IObservationReading> ObservationData;
+
+    /* The latest reading for this location */
+    private IObservationReading latestReading;
+
+    public IObservationReading getLatestReading() {
+        if(latestReading == null && ObservationData != null && !ObservationData.isEmpty()){
+            latestReading = ObservationData.get(0);
+        }
+        return latestReading;
+    }
+
+    public void setLatestReading(IObservationReading latestReading) {
+        this.latestReading = latestReading;
+    }
 
     /* A description of the source of the data
      */
-    String Source;
+    public String Source;
 
     @Override
     public String toString()
@@ -57,6 +70,7 @@ public class WeatherData implements Comparable
         return sameSame;
     }
 
+    private int mHashCode =0;
     @Override
     public int hashCode()
     {
@@ -69,7 +83,5 @@ public class WeatherData implements Comparable
         }
         return mHashCode;
     }
-
-    private int mHashCode =0;
 }
 

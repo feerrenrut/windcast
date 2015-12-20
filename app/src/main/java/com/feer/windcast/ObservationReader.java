@@ -7,6 +7,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,16 +27,15 @@ public class ObservationReader
         mWeatherData.Station = station;
     }
 
-    public WeatherData GetWeatherData() throws IOException
-    {
+    public WeatherData GetWeatherData() throws IOException {
         BufferedInputStream bis;
-
-        URLConnection urlConnection = mWeatherData.Station.GetURL().openConnection();
+        URL stationUrl = new URL(mWeatherData.Station.GetURL());
+        URLConnection urlConnection = stationUrl.openConnection();
         InputStream is = urlConnection.getInputStream();
         bis = new BufferedInputStream(is);
         ReadJsonStream(bis);
         
-        mWeatherData.Source = mWeatherData.Station.GetURL().toString().replaceFirst("http://www.bom.gov.au/", "");
+        mWeatherData.Source = mWeatherData.Station.GetURL().replaceFirst("http://www.bom.gov.au/", "");
 
         return mWeatherData;
     }
@@ -66,16 +66,16 @@ public class ObservationReader
         while(reader.hasNext())
         {
             String name = reader.nextName();
-            if(name.equals("header"))
-            {
-                reader.skipValue();
-            }
-            else if(name.equals("data"))
-            {
-                mWeatherData.ObservationData = ReadAllObservationData(reader);
-            } else
-            {
-                reader.skipValue();
+            switch (name) {
+                case "header":
+                    reader.skipValue();
+                    break;
+                case "data":
+                    mWeatherData.ObservationData = ReadAllObservationData(reader);
+                    break;
+                default:
+                    reader.skipValue();
+                    break;
             }
         }
         reader.endObject();
@@ -86,9 +86,9 @@ public class ObservationReader
         }
     }
 
-    private static List<ObservationReading> ReadAllObservationData(JsonReader reader) throws IOException
+    private static List<IObservationReading> ReadAllObservationData(JsonReader reader) throws IOException
     {
-        List<ObservationReading> obs = new ArrayList<ObservationReading>();
+        List<IObservationReading> obs = new ArrayList<IObservationReading>();
         reader.beginArray();
         while (reader.hasNext()) {
             obs.add(ReadObservation(reader));
@@ -97,7 +97,7 @@ public class ObservationReader
         return obs;
     }
 
-    private static ObservationReading ReadObservation(JsonReader reader) throws IOException {
+    private static IObservationReading ReadObservation(JsonReader reader) throws IOException {
         ObservationReading ob = new ObservationReading();
         reader.beginObject();
         while (reader.hasNext()) {
@@ -112,7 +112,7 @@ public class ObservationReader
                     SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss",  Locale.US);
                     try
                     {
-                        ob.LocalTime = df.parse(dateString);
+                        ob.setLocalTime(df.parse(dateString));
                     } catch (ParseException e)
                     {
                         Log.e("WindCast", "unable to parse date string: " + dateString);
@@ -134,61 +134,23 @@ public class ObservationReader
     
     // Returns true if the value was handled
     static boolean ReadWindInfo(ObservationReading ob, String name, JsonReader reader) throws IOException {
-        if(ob.Wind_Observation == null) {
-            ob.Wind_Observation = new WindObservation();
+        if(ob.getWind_Observation() == null) {
+            ob.setWind_Observation(new WindObservation());
         }
-        
+        WindObservation windObvs = (WindObservation) ob.getWind_Observation();
+
         if (name.equals("wind_spd_kmh") ) {
-            ob.Wind_Observation.WindSpeed_KMH = reader.nextInt();
+            windObvs.setWindSpeed_KMH(reader.nextInt());
             return true;
         } else if (name.equals("wind_spd_kt") ) {
-            ob.Wind_Observation.WindSpeed_KN = reader.nextInt();
+            windObvs.setWindSpeed_KN(reader.nextInt());
             return true;
         } else if (name.equals("wind_dir") ) {
-            ob.Wind_Observation.CardinalWindDirection = reader.nextString().toLowerCase(Locale.US);
-            ob.Wind_Observation.WindBearing = ConvertCardinalCharsToBearing(ob.Wind_Observation.CardinalWindDirection);
+            windObvs.setCardinalWindDirection(reader.nextString().toLowerCase(Locale.US));
+            windObvs.setWindBearing(ConvertCardinalCharsToBearing(ob.getWind_Observation().getCardinalWindDirection()));
             return true;
         }else if (name.equals("gust_kmh") ) {
-            ob.Wind_Observation.WindGustSpeed_KMH = reader.nextInt();
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
-    // Returns true if the value was handled
-    static boolean ReadTempInfo(ObservationReading ob, String name, JsonReader reader) throws IOException {
-        if(ob.Temp_Observation == null) {
-            ob.Temp_Observation = new TempObservation();
-        }
-        if (name.equals("air_temp")) {
-            ob.Temp_Observation.AirTemp_DegCel = (float)reader.nextDouble();
-            return true;
-        }else if (name.equals("apparent_t")) {
-            ob.Temp_Observation.ApparentTemp_DegCel = (float)reader.nextDouble();
-            return true;
-        }
-        else {
-            return false;
-        }        
-    }
-
-    // Returns true if the value was handled
-    static boolean ReadSwellInfo(ObservationReading ob, String name, JsonReader reader) throws IOException {
-        if(ob.Swell_Observation == null)
-        {
-            ob.Swell_Observation = new SwellObservation();
-        }
-        if (name.equals("swell_dir_worded")) {
-            ob.Swell_Observation.CardinalSwellDirection = reader.nextString().toLowerCase(Locale.US);
-            ob.Swell_Observation.SwellBearing = ConvertCardinalCharsToBearing(ob.Swell_Observation.CardinalSwellDirection);
-            return true;
-        }else if (name.equals("swell_height") ) {
-            ob.Swell_Observation.SwellHeight_meters = reader.nextDouble();
-            return true;
-        }else if (name.equals("swell_period")) {
-            ob.Swell_Observation.SwellPeriod_seconds = reader.nextInt();
+            windObvs.setWindGustSpeed_KMH(reader.nextInt());
             return true;
         }
         else {

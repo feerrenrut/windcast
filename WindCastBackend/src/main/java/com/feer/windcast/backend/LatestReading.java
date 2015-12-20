@@ -1,13 +1,9 @@
 package com.feer.windcast.backend;
 
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
-@Entity
 public class LatestReading{
 
     final private static DateTimeFormatter DATE_TIME_FORMATTER = ISODateTimeFormat.ordinalDateTime().withOffsetParsed();
@@ -24,9 +20,6 @@ public class LatestReading{
         r.setLocalTime( d.toString(DATE_TIME_FORMATTER) );
         return r;
     }
-
-    @Id
-    private String StationID;
 
     /* Local time at the place of reading
      */
@@ -63,13 +56,5 @@ public class LatestReading{
 
     public void setWindSpeed_KMH(Integer windSpeed_KMH) {
         WindSpeed_KMH = windSpeed_KMH;
-    }
-
-    public String getStationID() {
-        return StationID;
-    }
-
-    public void setStationID(String stationID) {
-        StationID = stationID;
     }
 }

@@ -9,7 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-import static com.feer.windcast.WeatherStation.States.*;
+import static com.feer.windcast.AWeatherStation.States.*;
 import static com.google.android.apps.common.testing.testrunner.util.Checks.checkNotNull;
 import static java.lang.String.format;
 

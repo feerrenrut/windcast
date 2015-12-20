@@ -2,12 +2,11 @@ package com.feer.windcast.tests;
 
 import android.preference.PreferenceManager;
 import android.test.ActivityInstrumentationTestCase2;
-import android.widget.TextView;
 
+import com.feer.windcast.AWeatherStation;
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.WeatherData;
-import com.feer.windcast.WeatherStation;
 import com.feer.windcast.testUtils.WindCastMocks;
 
 import org.hamcrest.CoreMatchers;
@@ -19,7 +18,6 @@ import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
 import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
 import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
 import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
@@ -27,8 +25,6 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
 
 /**
  * http://youtu.be/uHoB0KzQGRg?t=54s
@@ -105,7 +101,7 @@ public class testSearchBox extends ActivityInstrumentationTestCase2<MainActivity
                         adapterHasCount(CoreMatchers.equalTo(EXPECTED_NUM_STATIONS))));
 
         onView(withId(R.id.search)).perform(click());
-        WeatherStation expected = Mocks.Fakes.Stations().get(2).Station;
+        AWeatherStation expected = Mocks.Fakes.Stations().get(2).Station;
         
         // just use the last few characters of the name;
         String searchTerm = expected.GetName();

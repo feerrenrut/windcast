@@ -16,7 +16,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.feer.windcast.WeatherStation.States;
+import static com.feer.windcast.AWeatherStation.States;
 
 /**
  * Reads weather stations embedded as links in html
@@ -80,6 +80,7 @@ public class StationListReader
         boolean inTr = false;
         WeatherData d = null;
         ObservationReading r = null;
+        WindObservation windObvs = null;
         final String source = fromUrl.toString().replaceFirst("http://www.bom.gov.au/", "");
         String lastFoundTimeZone = null;
         Matcher m = null;
@@ -104,8 +105,9 @@ public class StationListReader
                 d = new WeatherData();
                 d.Source = source;
                 r = new ObservationReading();
-                r.Wind_Observation = new WindObservation();
-                d.ObservationData = new ArrayList<ObservationReading>(1);
+                windObvs = new WindObservation();
+                r.setWind_Observation(windObvs);
+                d.ObservationData = new ArrayList<IObservationReading>(1);
                 d.ObservationData.add(r);
 
                 d.Station = new WeatherStation.WeatherStationBuilder()
@@ -122,7 +124,7 @@ public class StationListReader
                 continue;
             }
 
-            if (r.LocalTime == null && (m = obsDayAndTime.matcher(str)).find())
+            if (r.getLocalTime() == null && (m = obsDayAndTime.matcher(str)).find())
             {
                 String day_hour_min = m.group(1); // in "dd/hh:mmam" form
 
@@ -133,10 +135,10 @@ public class StationListReader
                 try
                 {
                     if(parsedDatesmap.containsKey(dateTime)) {
-                        r.LocalTime = parsedDatesmap.get(dateTime);
+                        r.setLocalTime(parsedDatesmap.get(dateTime));
                     }else{
-                        r.LocalTime = full_date_parse_format.parse(dateTime);
-                        parsedDatesmap.put(dateTime, r.LocalTime);
+                        r.setLocalTime(full_date_parse_format.parse(dateTime));
+                        parsedDatesmap.put(dateTime, r.getLocalTime());
                     }
                 } catch (ParseException e)
                 {
@@ -146,26 +148,26 @@ public class StationListReader
                 continue;
             }
 
-            if (r.Wind_Observation.WindBearing == null && (m = obsWindDir.matcher(str)).find())
+            if (windObvs.getWindBearing() == null && (m = obsWindDir.matcher(str)).find())
             {
-                r.Wind_Observation.CardinalWindDirection = m.group(1).toLowerCase(Locale.US);
-                r.Wind_Observation.WindBearing = ObservationReader.ConvertCardinalCharsToBearing(r.Wind_Observation.CardinalWindDirection);
+                windObvs.setCardinalWindDirection(m.group(1).toLowerCase(Locale.US));
+                windObvs.setWindBearing(ObservationReader.ConvertCardinalCharsToBearing(windObvs.getCardinalWindDirection()));
                 continue;
             }
 
-            if ( r.Wind_Observation.WindSpeed_KMH == null &&
+            if ( windObvs.getWindSpeed_KMH() == null &&
                     (m = obsWindSpdKmh.matcher(str)).find() &&
                     !m.group(1).equals("-"))
             {
-                r.Wind_Observation.WindSpeed_KMH = Integer.parseInt(m.group(1));
+                windObvs.setWindSpeed_KMH(Integer.parseInt(m.group(1)));
                 continue;
             }
 
-            if (r.Wind_Observation.WindSpeed_KN == null &&
+            if (windObvs.getWindSpeed_KN() == null &&
                     (m = obsWindSpdKts.matcher(str)).find() &&
                     !m.group(1).equals("-"))
             {
-                r.Wind_Observation.WindSpeed_KN = Integer.parseInt(m.group(1));
+                windObvs.setWindSpeed_KN(Integer.parseInt(m.group(1)));
                 continue;
             }
 
@@ -173,6 +175,7 @@ public class StationListReader
                 weatherStations.add(d);
                 d = null;
                 r = null;
+                windObvs = null;
                 inTr = false;
                 continue;
             }

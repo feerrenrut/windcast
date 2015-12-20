@@ -16,8 +16,7 @@ public class ServletListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         ObjectifyService.begin();
-        ObjectifyService.register(StationData.class);
-        ObjectifyService.register(LatestReading.class);
+        ObjectifyService.register(StationsInUpdate.class);
         ObjectifyService.register(LastUpdateResult.class);
         log.info("new ServletContextListener contextInitialized");
     }

@@ -12,7 +12,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -89,6 +91,11 @@ public class StationListReader {
 
         String inputLine;
         boolean inTr = false;
+        StationsInUpdate update = new StationsInUpdate();
+        update.setState(state);
+
+        List<StationData> stationDataList = new ArrayList<>();
+        update.setStations(stationDataList);
         StationData d = null;
         LatestReading r = null;
 
@@ -117,9 +124,8 @@ public class StationListReader {
                 d.setDataUrl("http://www.bom.gov.au" + StationListReader.ConvertToJSONURL(m.group(1)));
                 d.setDisplayName(m.group(2));
                 d.setStationID(state + "_" + d.getDisplayName());
-                r.setStationID(d.getStationID());
-
-                ofy().save().entity(d);
+                d.setLatestReading(r);
+                stationDataList.add(d);
                 continue;
             }
 
@@ -164,7 +170,6 @@ public class StationListReader {
             }
 
             if (r != null && endOfStationDetails.matcher(inputLine).find()) {
-                ofy().save().entity(r);
 
                 d = null;
                 r = null;
@@ -173,6 +178,7 @@ public class StationListReader {
             }
         }
         buf.close();
+        ofy().save().entity(update);
     }
 
     public static String ConvertToJSONURL(String urlString) {

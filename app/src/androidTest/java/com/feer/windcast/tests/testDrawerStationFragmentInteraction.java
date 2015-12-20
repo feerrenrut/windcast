@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.preference.PreferenceManager;
 import android.test.ActivityInstrumentationTestCase2;
 
+import com.feer.windcast.AWeatherStation;
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.WeatherData;
@@ -226,7 +227,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
                         adapterHasCount(equalTo(EXPECTED_NUM_STATIONS))));
 
         onView(withId(R.id.search)).perform(click());
-        WeatherStation searchStation = Mocks.Fakes.Stations().get(2).Station;
+        AWeatherStation searchStation = Mocks.Fakes.Stations().get(2).Station;
 
         String searchTerm = searchStation.GetName();
         onView(withId(R.id.weather_station_search_box))

@@ -90,23 +90,23 @@ public class WindGraph
         final ArrayList<Date> readingTimes = new ArrayList<Date>(numObs);
         ArrayList<Float> windDirections = new ArrayList<Float>(numObs);
 
-        for(ObservationReading reading1 : wd.ObservationData)
+        for(IObservationReading reading1 : wd.ObservationData)
         {
             Integer val;
 
             if(unitType == SettingsActivity.WindSpeedUnitPref.UnitType.kmh) {
-                val = reading1.Wind_Observation.WindSpeed_KMH != null ?
-                        reading1.Wind_Observation.WindSpeed_KMH : 0;
+                val = reading1.getWind_Observation().getWindSpeed_KMH() != null ?
+                        reading1.getWind_Observation().getWindSpeed_KMH() : 0;
             }
             else
             {
-                val = reading1.Wind_Observation.WindSpeed_KN != null ?
-                        reading1.Wind_Observation.WindSpeed_KN : 0;
+                val = reading1.getWind_Observation().getWindSpeed_KN() != null ?
+                        reading1.getWind_Observation().getWindSpeed_KN() : 0;
             }
 
             windSpeeds.add(val);
-            readingTimes.add(reading1.LocalTime);
-            windDirections.add(reading1.Wind_Observation.WindBearing);
+            readingTimes.add(reading1.getLocalTime());
+            windDirections.add(reading1.getWind_Observation().getWindBearing());
         }
 
         Collections.reverse(windSpeeds);

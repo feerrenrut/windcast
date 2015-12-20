@@ -1,14 +1,11 @@
 package com.feer.windcast.backend;
 
-import com.googlecode.objectify.annotation.Entity;
-import com.googlecode.objectify.annotation.Id;
-
-
 /**
  * The object model for the data we are sending through endpoints
  */
-@Entity
+
 public class StationData {
+
     public enum States
     {
         WA,
@@ -21,7 +18,6 @@ public class StationData {
         VIC
     }
 
-    @Id
     private String stationID;
 
     // Acronym of the state
@@ -30,6 +26,8 @@ public class StationData {
     private String dataUrl;
 
     private String displayName;
+
+    private LatestReading latestReading;
 
     public States getState() {
         return state;
@@ -63,6 +61,12 @@ public class StationData {
         this.displayName = displayName;
     }
 
+    public LatestReading getLatestReading() {
+        return latestReading;
+    }
 
+    public void setLatestReading(LatestReading latestReading) {
+        this.latestReading = latestReading;
+    }
 }
 

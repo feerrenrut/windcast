@@ -38,7 +38,7 @@ public class WindGraphFragment extends Fragment
     public WindGraphFragment() {
     }
 
-    public static WindGraphFragment newInstance(WeatherStation station)
+    public static WindGraphFragment newInstance(AWeatherStation station)
     {
         Bundle args = new Bundle();
         addInstanceStateToBundle(args, station);
@@ -84,7 +84,7 @@ public class WindGraphFragment extends Fragment
                 WeatherStationBuilder builder = new WeatherStation.WeatherStationBuilder();
                 builder.WithName(nameString);
                 builder.WithURL(new URL(urlString));
-                builder.WithState(WeatherStation.States.valueOf(stateString));
+                builder.WithState(AWeatherStation.States.valueOf(stateString));
                 mStation = builder.Build();
             } catch (MalformedURLException e)
             {
@@ -105,7 +105,7 @@ public class WindGraphFragment extends Fragment
         populateUI();
     }
 
-    static private String FormatStationName(WeatherStation station)
+    static private String FormatStationName(AWeatherStation station)
     {
         return station.GetName() + ", " + station.GetLongStateName();
     }
@@ -132,7 +132,7 @@ public class WindGraphFragment extends Fragment
                     return false;
                 }
 
-                Log.i("WindCast", "Getting data from: " + mStation.GetURL().toString());
+                Log.i("WindCast", "Getting data from: " + mStation.GetURL());
                 wd = WeatherDataCache.GetInstance().GetWeatherDataFor(mStation);
                 return true;
             }
@@ -174,29 +174,29 @@ public class WindGraphFragment extends Fragment
     }
 
     private void PopulateWeatherStationSummary(Activity act, WeatherData wd) {
-        ObservationReading reading = wd.ObservationData.get(0);
+        IObservationReading reading = wd.ObservationData.get(0);
 
         SimpleDateFormat localDate = new SimpleDateFormat( "dd/MM/yy hh:mm a zzz");
 
         ((TextView) act.findViewById(R.id.readingTimeLabel)).setText(
-                 localDate.format(reading.LocalTime)
+                 localDate.format(reading.getLocalTime())
                         + "\n");
 
-        if(reading.Wind_Observation.WindSpeed_KMH != null) {
+        if(reading.getWind_Observation().getWindSpeed_KMH() != null) {
             final TextView speedLabel = (TextView)act.findViewById(R.id.latestReadingLabel);
 
-            if(reading.Wind_Observation.WindSpeed_KMH > 0) {
+            if(reading.getWind_Observation().getWindSpeed_KMH() > 0) {
                 StringBuilder sb = new StringBuilder();
                 
                 if(mUseKMH) {
-                    sb.append(reading.Wind_Observation.WindSpeed_KMH).append(" km/h");
+                    sb.append(reading.getWind_Observation().getWindSpeed_KMH()).append(" km/h");
                 }
                 else{ // knots
-                    sb.append(reading.Wind_Observation.WindSpeed_KN).append(" kn");
+                    sb.append(reading.getWind_Observation().getWindSpeed_KN()).append(" kn");
                 }
                 
-                if(reading.Wind_Observation.CardinalWindDirection != null && !reading.Wind_Observation.CardinalWindDirection.equals("calm")) {
-                    sb.append(" from ").append(getDirectionWordsFromChars(reading.Wind_Observation.CardinalWindDirection));
+                if(reading.getWind_Observation().getCardinalWindDirection() != null && !reading.getWind_Observation().getCardinalWindDirection().equals("calm")) {
+                    sb.append(" from ").append(getDirectionWordsFromChars(reading.getWind_Observation().getCardinalWindDirection()));
                     speedLabel.setText(sb.toString());
                 }
             }
@@ -239,9 +239,9 @@ public class WindGraphFragment extends Fragment
 
     }
 
-    static private void addInstanceStateToBundle(Bundle outState, WeatherStation station)
+    static private void addInstanceStateToBundle(Bundle outState, AWeatherStation station)
     {
-        outState.putString(PARAM_KEY_STATION_URL, station.GetURL().toString());
+        outState.putString(PARAM_KEY_STATION_URL, station.GetURL());
         outState.putString(PARAM_KEY_STATION_NAME, station.GetName());
         outState.putString(PARAM_KEY_STATION_STATE, station.GetStateAbbreviated());
     }

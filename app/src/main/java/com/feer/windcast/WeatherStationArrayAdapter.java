@@ -21,9 +21,9 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
 {
     private static final String TAG = "WeatherStationArrayAdapter";
 
-    public static interface OnFavouriteChangedListener
+    public interface OnFavouriteChangedListener
     {
-        public void OnFavouriteChanged(WeatherStation station);
+        void OnFavouriteChanged(AWeatherStation station);
     }
 
     private final Context mContext;
@@ -76,10 +76,10 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
 
     private class OnStarClicked implements CheckBox.OnCheckedChangeListener
     {
-        private final WeatherStation mStation;
+        private final AWeatherStation mStation;
         private final OnFavouriteChangedListener mFavChangedListener;
 
-        OnStarClicked(WeatherStation station, OnFavouriteChangedListener favChangedListener)
+        OnStarClicked(AWeatherStation station, OnFavouriteChangedListener favChangedListener)
         {
             mStation = station;
             mFavChangedListener = favChangedListener;
@@ -125,10 +125,10 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
         }
 
         public void SetPreviewData(WeatherData weatherData) {
-            if(weatherData.ObservationData != null && !weatherData.ObservationData.isEmpty())
+            if(weatherData.getLatestReading() != null)
             {
-                ObservationReading latestReading = weatherData.ObservationData.get(0);
-                Integer speed = mUseKMH ? latestReading.Wind_Observation.WindSpeed_KMH : latestReading.Wind_Observation.WindSpeed_KN;
+                IObservationReading latestReading = weatherData.getLatestReading();
+                Integer speed = mUseKMH ? latestReading.getWind_Observation().getWindSpeed_KMH() : latestReading.getWind_Observation().getWindSpeed_KN();
                 String unit = mUseKMH ? "km/h" : "kn";
 
                 if(speed != null) {
@@ -136,16 +136,16 @@ public class WeatherStationArrayAdapter extends ArrayAdapter<WeatherData>
                     windSpeed.setVisibility(View.VISIBLE);
                     Date now = new Date();
                     long tooLong = 75L * 60 * 1000;
-                    if(latestReading.LocalTime != null && now.getTime() - latestReading.LocalTime.getTime() > tooLong)
+                    if(latestReading.getLocalTime() != null && now.getTime() - latestReading.getLocalTime().getTime() > tooLong)
                     {
-                        readingTime.setText("At: " + readingTimeFormat.format(latestReading.LocalTime));
+                        readingTime.setText("At: " + readingTimeFormat.format(latestReading.getLocalTime()));
                         readingTime.setVisibility(View.VISIBLE);
                     }
                     direction.setVisibility(View.INVISIBLE);
-                    if (latestReading.Wind_Observation.WindBearing != null) {
+                    if (latestReading.getWind_Observation().getWindBearing() != null) {
                         // arrow image points right, rotate by 90 to point down when wind comes
                         // FROM north with bearing 0, see ObservationReading.WindBearing
-                        float arrowRotation = 90.f + latestReading.Wind_Observation.WindBearing;
+                        float arrowRotation = 90.f + latestReading.getWind_Observation().getWindBearing();
                         direction.setRotation(arrowRotation);
                         direction.setVisibility(View.VISIBLE);
                     }

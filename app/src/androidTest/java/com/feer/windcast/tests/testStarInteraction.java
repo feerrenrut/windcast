@@ -3,10 +3,10 @@ package com.feer.windcast.tests;
 import android.preference.PreferenceManager;
 import android.test.ActivityInstrumentationTestCase2;
 
+import com.feer.windcast.AWeatherStation;
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.WeatherData;
-import com.feer.windcast.WeatherStation;
 import com.feer.windcast.testUtils.WindCastMocks;
 
 import java.net.MalformedURLException;
@@ -67,15 +67,15 @@ public class testStarInteraction extends ActivityInstrumentationTestCase2<MainAc
         Mocks.Fakes.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(0);
         
         doNothing().when(Mocks.FavouritesCache)
-                .AddFavouriteStation(any(WeatherStation.class));
+                .AddFavouriteStation(any(AWeatherStation.class));
         doNothing().when(Mocks.FavouritesCache)
-                .RemoveFavouriteStation(any(WeatherStation.class));
+                .RemoveFavouriteStation(any(AWeatherStation.class));
         
         Mocks.JustUseMocksWithFakeData();
         
         launchActivity();
 
-        WeatherStation newFav = Mocks.Fakes.Stations().get(4).Station;
+        AWeatherStation newFav = Mocks.Fakes.Stations().get(4).Station;
         assertTrue(
                 "Station not yet clicked, it should not be a favourite!",
                 newFav.IsFavourite == false);
@@ -104,11 +104,11 @@ public class testStarInteraction extends ActivityInstrumentationTestCase2<MainAc
         when(Mocks.FavouritesCache.GetFavouriteURLs())
                 .thenReturn(Mocks.Fakes.FavURLs());
         doNothing().when(Mocks.FavouritesCache)
-                .AddFavouriteStation(any(WeatherStation.class));
+                .AddFavouriteStation(any(AWeatherStation.class));
         doNothing().when(Mocks.FavouritesCache)
-                .RemoveFavouriteStation(any(WeatherStation.class));
+                .RemoveFavouriteStation(any(AWeatherStation.class));
         
-        WeatherStation oldFav = null;
+        AWeatherStation oldFav = null;
         for(WeatherData data : Mocks.Fakes.Stations())
         {
             if(data.Station.IsFavourite)

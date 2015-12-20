@@ -105,7 +105,7 @@ public class MainActivity extends ActionBarActivity implements WeatherStationFra
     }
 
     @Override
-    public void onWeatherStationSelected(WeatherStation station)
+    public void onWeatherStationSelected(AWeatherStation station)
     {
         startActivity(ShowGraphActivity.getShowGraphForStationIntent(this, station));
     }

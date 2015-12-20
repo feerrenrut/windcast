@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,22 +20,22 @@ public class ShowGraphActivity extends ActionBarActivity {
     private static final String KEY_STATION_URL = "StationURL";
     private static final String KEY_STATION_STATE = "StationState";
 
-    static Intent getShowGraphForStationIntent(Context context, WeatherStation station)
+    static Intent getShowGraphForStationIntent(Context context, AWeatherStation station)
     {
         Intent graphIntent = new Intent(context, ShowGraphActivity.class);
         graphIntent.putExtra(KEY_STATION_NAME, station.GetName());
-        graphIntent.putExtra(KEY_STATION_URL, station.GetURL().toString());
+        graphIntent.putExtra(KEY_STATION_URL, station.GetURL());
         graphIntent.putExtra(KEY_STATION_STATE, station.GetStateAbbreviated());
 
         return graphIntent;
     }
 
-    private static WeatherStation getStationFromIntent(Intent intent) throws MalformedURLException {
+    private static AWeatherStation getStationFromIntent(Intent intent) throws MalformedURLException {
 
         return new WeatherStation.WeatherStationBuilder()
                 .WithName(intent.getStringExtra(KEY_STATION_NAME))
                 .WithURL(new URL(intent.getStringExtra(KEY_STATION_URL)))
-                .WithState(WeatherStation.States.valueOf(intent.getStringExtra(KEY_STATION_STATE)))
+                .WithState(AWeatherStation.States.valueOf(intent.getStringExtra(KEY_STATION_STATE)))
                 .Build();
     }
 

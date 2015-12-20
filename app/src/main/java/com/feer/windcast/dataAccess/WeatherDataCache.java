@@ -4,22 +4,19 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.feer.windcast.GAE_ObservationReading;
+import com.feer.windcast.GAE_WeatherStation;
 import com.feer.windcast.ObservationReader;
-import com.feer.windcast.ObservationReading;
 import com.feer.windcast.StationListReader;
 import com.feer.windcast.WeatherData;
 import com.feer.windcast.WeatherStation;
-import com.feer.windcast.WindObservation;
 import com.feer.windcast.backend.windcastdata.Windcastdata;
 import com.feer.windcast.backend.windcastdata.model.LatestReading;
-import com.feer.windcast.backend.windcastdata.model.LatestReadingCollection;
 import com.feer.windcast.backend.windcastdata.model.StationData;
-import com.feer.windcast.backend.windcastdata.model.StationDataCollection;
+import com.feer.windcast.backend.windcastdata.model.StationsInUpdate;
+import com.feer.windcast.backend.windcastdata.model.StationsInUpdateCollection;
 import com.feer.windcast.dataAccess.backend.CreateWindcastBackendApi;
 import com.feer.windcast.dataAccess.backend.GAE_StationCache;
-
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -134,10 +131,11 @@ public class WeatherDataCache
 
         final long StartTime = System.nanoTime();
 
+        final Windcastdata windcastdata = CreateWindcastBackendApi.create();
         new AsyncTask<Void, Void, ArrayList<WeatherData>>() {
             @Override
             protected ArrayList<WeatherData> doInBackground(Void... params) {
-                return getWeatherDataFromBackend();
+                return getWeatherDataFromBackend(windcastdata);
             }
 
             @Override
@@ -159,65 +157,38 @@ public class WeatherDataCache
     }
 
     @Nullable
-    private ArrayList<WeatherData> getWeatherDataFromBackend() {
-        final DateTimeFormatter DATE_TIME_FORMATTER = ISODateTimeFormat.ordinalDateTime().withOffsetParsed();
-        final float KMH_TO_KNOT = 0.539957f;
+    private ArrayList<WeatherData> getWeatherDataFromBackend(Windcastdata windcastdata) {
 
-        Windcastdata windcastdata = CreateWindcastBackendApi.create();
-        StationDataCollection stations = null;
-        LatestReadingCollection readings = null;
+        Log.i("WeatherDataCache", "Creating API sending request");
+        StationsInUpdateCollection stationsInUpdateCol = null;
         try {
-            stations = windcastdata.getStationList().execute();
-            readings = windcastdata.getLatestObservation().execute();
+            stationsInUpdateCol = windcastdata.getStationList().execute();
         } catch (IOException e) {
             Log.e("WeatherDataCache", "Couldnt load stations and latest readings: " + e.toString());
         }
-        if(stations == null ) return null;
-        List<LatestReading> readingsList = readings.getItems();
-        ArrayList<WeatherData> weatherData = new ArrayList<>();
-        for (StationData stationData: stations.getItems()) {
-            try {
-                LatestReading readingForStation = null;
-                for (LatestReading reading : readingsList) {
-                    if(reading.getStationID().equals(stationData.getStationID())) {
-                        readingForStation = reading;
-                        readingsList.remove(reading);
-                        break;
-                    }
-                }
+        if(stationsInUpdateCol == null || stationsInUpdateCol.isEmpty()) return null;
+
+        Log.i("WeatherDataCache", "Got result");
+        ArrayList<WeatherData> weatherData = new ArrayList<>(2000);
+        for (StationsInUpdate stateStations : stationsInUpdateCol.getItems()) {
+
+            List<StationData> stations = stateStations.getStations();
+            Log.i("WeatherDataCache", "Number of stations from backend: " + stations.size());
+
+            for (StationData stationData: stations) {
+                LatestReading readingForStation = stationData.getLatestReading();
+
                 WeatherData d = new WeatherData();
-                d.ObservationData = new ArrayList<>(1);
+                d.Source = "GAE-backend";
                 if(readingForStation != null) {
-                    ObservationReading r = new ObservationReading();
-                    r.Wind_Observation = new WindObservation();
-
-                    if(readingForStation.getLocalTime() != null) {
-                        r.LocalTime = DATE_TIME_FORMATTER
-                                .parseDateTime(readingForStation.getLocalTime())
-                                .toDate();
-                    }
-                    if(readingForStation.getWindSpeedKMH() != null) {
-                        r.Wind_Observation.WindSpeed_KMH = readingForStation.getWindSpeedKMH();
-                        r.Wind_Observation.WindSpeed_KN = (int) (KMH_TO_KNOT * readingForStation.getWindSpeedKMH());
-                    }
-                    if(readingForStation.getCardinalWindDirection() != null) {
-                        r.Wind_Observation.CardinalWindDirection = readingForStation.getCardinalWindDirection();
-                        r.Wind_Observation.WindBearing = ObservationReader.ConvertCardinalCharsToBearing(r.Wind_Observation.CardinalWindDirection);
-                    }
-                    r.Wind_Observation.WindGustSpeed_KMH = 0;
-                    d.ObservationData.add(r);
+                    GAE_ObservationReading latest = new GAE_ObservationReading(readingForStation);
+                    d.setLatestReading(latest);
                 }
 
-                d.Station = new WeatherStation.WeatherStationBuilder()
-                        .WithName(stationData.getDisplayName())
-                        .WithState(WeatherStation.States.valueOf(stationData.getState()))
-                        .WithURL(new URL(stationData.getDataUrl()))
-                        .Build();
+                d.Station = new GAE_WeatherStation(stationData);
                 weatherData.add(d);
-            } catch (MalformedURLException e) {
-                Log.e("WeatherDataCache", "Loading weatherStation: " + stationData.getDisplayName()
-                        + " exception: " + e.toString());
             }
+
         }
         return weatherData;
     }
