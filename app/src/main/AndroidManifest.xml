@@ -3,11 +3,8 @@
     package="com.feer.windcast" >
 
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- suppress AndroidDomInspection -->
-    <instrumentation
-        android:name="com.google.android.apps.common.testing.testrunner.GoogleInstrumentationTestRunner"
-        android:targetPackage="com.feer.windcast" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
     <application
         android:allowBackup="true"

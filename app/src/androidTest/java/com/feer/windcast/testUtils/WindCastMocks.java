@@ -99,7 +99,7 @@ public class WindCastMocks {
         {
             notifyMe.OnCacheFilled(mCache);
         }
-    };
+    }
    
     private Answer<Void> createCallCacheFilledAnswer(final LoadedWeatherStationCache cache)
     {

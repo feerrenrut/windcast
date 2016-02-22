@@ -19,7 +19,10 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
 
 
 class Constants {
+    // just so that calls from the api explorer can be authorised
     public static final String API_EXPLORER_CLIENT_ID = com.google.api.server.spi.Constant.API_EXPLORER_CLIENT_ID;
+
+
     public static final String WEB_CLIENT_ID = "537656923472-jgkvfai9gda1piiatt3sgmuco4jpv7hb.apps.googleusercontent.com";
     public static final String ANDROID_CLIENT_ID_RELEASE = "537656923472-vf7c5msr9mq3ca9074r1lbp0hh5dtgnf.apps.googleusercontent.com";
     public static final String ANDROID_CLIENT_ID_DEBUG = "537656923472-nijbkrljrd8dql6lu3ellkgplbe45pej.apps.googleusercontent.com";

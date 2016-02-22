@@ -9,15 +9,14 @@ import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.testUtils.WindCastMocks;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.doesNotExist;
-import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.openDrawer;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
-import static org.mockito.Matchers.anyString;
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.assertion.ViewAssertions.doesNotExist;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.contrib.DrawerActions.openDrawer;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.mockito.Mockito.when;
 
 /**
@@ -90,7 +89,8 @@ public class testSearchIcon extends ActivityInstrumentationTestCase2<MainActivit
 
         Activity act = getActivity();
         final String expectedTitle = act.getResources().getString(R.string.favourite_stations);
-        assertEquals(expectedTitle, act.getActionBar().getTitle().toString());
+
+        onView( withText(expectedTitle)).check(matches(isDisplayed()));
 
         onView(withId(R.id.search)).check(doesNotExist());
     }

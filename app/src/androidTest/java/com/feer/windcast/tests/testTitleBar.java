@@ -8,6 +8,11 @@ import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.testUtils.WindCastMocks;
 
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
+
 /**
  * http://youtu.be/uHoB0KzQGRg?t=54s
  * see https://code.google.com/p/android-test-kit/wiki/EspressoStartGuide
@@ -45,7 +50,7 @@ public class testTitleBar extends ActivityInstrumentationTestCase2<MainActivity>
         
         Activity act = getActivity();
         final String expectedTitle = act.getResources().getString(R.string.app_name);
-        assertEquals(expectedTitle, act.getActionBar().getTitle().toString());
+        onView( withText(expectedTitle)).check(matches(isDisplayed()));
     }
 
     public void test_initialTitleBar_NoFavourites_isWindcast()
@@ -56,7 +61,7 @@ public class testTitleBar extends ActivityInstrumentationTestCase2<MainActivity>
         
         Activity act = getActivity();
         final String expectedTitle = act.getResources().getString(R.string.app_name);
-        assertEquals(expectedTitle, act.getActionBar().getTitle().toString());
+        onView( withText(expectedTitle)).check(matches(isDisplayed()));
     }
 
     public void test_initialTitleBar_withFavourites_isFavourites()
@@ -67,6 +72,6 @@ public class testTitleBar extends ActivityInstrumentationTestCase2<MainActivity>
         
         Activity act = getActivity();
         final String expectedTitle = act.getResources().getString(R.string.favourite_stations);
-        assertEquals(expectedTitle, act.getActionBar().getTitle().toString());
+        onView( withText(expectedTitle)).check(matches(isDisplayed()));
     }
 }

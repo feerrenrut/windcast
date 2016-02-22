@@ -323,7 +323,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
         abstract class FillStation implements WeatherDataCache.NotifyWhenStationCacheFilled {}
 
-        CreateWindcastBackendApi.context = this.getContext();
+        CreateWindcastBackendApi.sContext = this.getActivity().getApplicationContext();
         WeatherDataCache.GetInstance().OnStationCacheFilled(new FillStation() {
             @Override
             public void OnCacheFilled(LoadedWeatherStationCache fullCache) {
