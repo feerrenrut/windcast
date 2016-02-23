@@ -29,18 +29,18 @@ import com.feer.windcast.dataAccess.BackgroundTaskManager;
 import com.feer.windcast.dataAccess.FavouriteStationCache;
 import com.feer.windcast.dataAccess.LoadedWeatherStationCache;
 import com.feer.windcast.dataAccess.WeatherDataCache;
-import com.feer.windcast.dataAccess.backend.CreateWindcastBackendApi;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import static android.support.v4.app.ActivityCompat.invalidateOptionsMenu;
-import static com.feer.windcast.EmptyDataError.*;
+import static com.feer.windcast.EmptyDataError.EmptyTextState;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoFavourites;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoInternetAccess;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoResultsAfterFilter;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoStationsAvailable;
+import static com.feer.windcast.EmptyDataError.OnEmptyListReasonChanged;
 
 /**
  * A fragment representing a list of Items.
@@ -323,7 +323,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
         abstract class FillStation implements WeatherDataCache.NotifyWhenStationCacheFilled {}
 
-        CreateWindcastBackendApi.sContext = this.getActivity().getApplicationContext();
         WeatherDataCache.GetInstance().OnStationCacheFilled(new FillStation() {
             @Override
             public void OnCacheFilled(LoadedWeatherStationCache fullCache) {
@@ -512,7 +511,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     */
     public interface OnWeatherStationFragmentInteractionListener
     {
-        public void onWeatherStationSelected(AWeatherStation station);
+        void onWeatherStationSelected(AWeatherStation station);
     }
 
 }
