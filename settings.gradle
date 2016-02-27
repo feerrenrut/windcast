@@ -1,1 +1,1 @@
-include ':app', ':WindCastBackend'
+include ':app', ':WindCastBackend', ':windcastbackendapitokengen'

@@ -20,3 +20,4 @@ see: http://stackoverflow.com/a/21020469/346188
   - RELEASE_STORE_PASSWORD=***** (do not use quotes to surround)
   - RELEASE_KEY_ALIAS=***** (do not use quotes to surround)
   - RELEASE_KEY_PASSWORD=***** (do not use quotes to surround)
+  - API_SECRET_WINDCAST=***** (secret override of scrts.java) see source.
