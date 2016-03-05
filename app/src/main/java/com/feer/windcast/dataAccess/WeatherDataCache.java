@@ -165,9 +165,9 @@ public class WeatherDataCache
         Log.i("WeatherDataCache", "Creating API sending request");
         StationsInUpdateCollection stationsInUpdateCol = null;
 
-        Date date = new Date(2005, 03, 28);
+        Date date = new Date();
         UUID id = new UUID(0, 1);
-        String token = TokenGen.GetToken("TEST Message", date , id);
+        String token = TokenGen.GetToken("getStationList", date , id);
         try {
             stationsInUpdateCol = windcastdata.getStationList (
                     Base64.encodeToString(id.toString().getBytes(), Base64.NO_WRAP),
