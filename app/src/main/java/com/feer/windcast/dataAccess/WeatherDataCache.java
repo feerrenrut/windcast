@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.feer.helperLib.Base64;
 import com.feer.helperLib.TokenGen;
 import com.feer.windcast.GAE_ObservationReading;
 import com.feer.windcast.GAE_WeatherStation;
@@ -25,6 +26,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  */
@@ -162,9 +164,16 @@ public class WeatherDataCache
 
         Log.i("WeatherDataCache", "Creating API sending request");
         StationsInUpdateCollection stationsInUpdateCol = null;
-        String token = TokenGen.GetToken();
+
+        Date date = new Date(2005, 03, 28);
+        UUID id = new UUID(0, 1);
+        String token = TokenGen.GetToken("TEST Message", date , id);
         try {
-            stationsInUpdateCol = windcastdata.getStationList(token).execute();
+            stationsInUpdateCol = windcastdata.getStationList (
+                    Base64.encodeToString(id.toString().getBytes(), Base64.NO_WRAP),
+                    date.getTime(),
+                    token ).execute();
+
         } catch (IOException e) {
             Log.e("WeatherDataCache", "Couldnt load stations and latest readings: " + e.toString());
         }

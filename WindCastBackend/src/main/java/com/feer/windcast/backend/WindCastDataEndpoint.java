@@ -11,7 +11,6 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.config.Named;
-import com.google.appengine.api.oauth.OAuthRequestException;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -37,10 +36,12 @@ public class WindCastDataEndpoint {
      * Get list of stations
      */
     @ApiMethod(name = "getStationList")
-    public List<StationsInUpdate> getStationList(@Named("token") String token ) throws OAuthRequestException {
-        log.info("Called getStationList" + " Token was: " + token);
-        final String expectedToken = TokenGen.GetToken();
-        log.info("token matches:" + expectedToken.equals(token));
+    public List<StationsInUpdate> getStationList(@Named("userIdStr") String userIdStr, @Named("time") Long time, @Named("token") String token ) {
+        final String methodName = "getStationList";
+
+        log.info("Called getStationList" + " Token was: " + token );
+        log.info("token matches:" + TokenGen.TestToken( methodName, userIdStr, time, token ));
+
         List<StationsInUpdate> l = ofy().load().type(StationsInUpdate.class).list();
         return l;
     }
