@@ -5,7 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.feer.windcast.dataAccess.LoadedWeatherStationCache;
+import com.feer.windcast.dataAccess.StationListCacheLoader;
 import com.feer.windcast.dataAccess.WeatherDataCache;
+
+import java.util.UUID;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -47,11 +50,22 @@ public class WeatherStationsService extends IntentService {
         {
             mCache = WeatherDataCache.GetInstance();
         }
-        
-        mCache.OnStationCacheFilled(new WeatherDataCache.NotifyWhenStationCacheFilled() {
+
+        // get the cache load started as soon as possible. We dont need the result here, but it will
+        // be stored in the cache for later components.
+        UUID userId = StationListCacheLoader.GetUserID(this.getApplicationContext());
+        StationListCacheLoader.StartStationListCacheLoad(
+                userId,
+                mCache,
+                new WeatherDataCache.NotifyWhenStationCacheFilled() {
             @Override
             public void OnCacheFilled(LoadedWeatherStationCache fullCache) {
                 return;
+            }
+
+            @Override
+            public boolean ShouldContinueGettingNotifications() {
+                return false;
             }
         });
     }

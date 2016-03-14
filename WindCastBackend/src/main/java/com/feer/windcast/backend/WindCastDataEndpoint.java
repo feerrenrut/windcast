@@ -58,7 +58,7 @@ public class WindCastDataEndpoint {
             @Named("token") String token ) throws AuthorisationException, TokenExpiredException {
         final String methodName = "getStationList";
 
-        log.info("getStationList: " + " Token: " + token + "User: " + userIdStr);
+        log.info("getStationList: " + " Token: " + token + " User: " + userIdStr);
 
         if(! TokenGen.TestToken( methodName, userIdStr, time, token ) ) {
             throw new AuthorisationException();

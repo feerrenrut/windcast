@@ -39,7 +39,7 @@ public class WindCastMocks {
         DataCache = StrictMock.create(WeatherDataCache.class);
         FavouritesCache = StrictMock.create(FavouriteStationCache.class);
 
-        WeatherDataCache.SetWeatherDataCache(DataCache); //set weather data cache singleton
+        WeatherDataCache.SetInstance(DataCache); //set weather data cache singleton
         
         Mockito.doAnswer(createCallCacheFilledAnswer(LoadedCache)) // set call back for waiting for
                 .when(DataCache).OnStationCacheFilled(                    // loaded data

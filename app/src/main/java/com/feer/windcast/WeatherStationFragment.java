@@ -28,11 +28,13 @@ import android.widget.TextView;
 import com.feer.windcast.dataAccess.BackgroundTaskManager;
 import com.feer.windcast.dataAccess.FavouriteStationCache;
 import com.feer.windcast.dataAccess.LoadedWeatherStationCache;
+import com.feer.windcast.dataAccess.StationListCacheLoader;
 import com.feer.windcast.dataAccess.WeatherDataCache;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 import static android.support.v4.app.ActivityCompat.invalidateOptionsMenu;
 import static com.feer.windcast.EmptyDataError.EmptyTextState;
@@ -321,12 +323,19 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onResume() {
         super.onResume();
 
-        abstract class FillStation implements WeatherDataCache.NotifyWhenStationCacheFilled {}
-
-        WeatherDataCache.GetInstance().OnStationCacheFilled(new FillStation() {
+        UUID userId = StationListCacheLoader.GetUserID(this.getContext());
+        StationListCacheLoader.StartStationListCacheLoad(
+                userId,
+                WeatherDataCache.GetInstance(),
+                new WeatherDataCache.NotifyWhenStationCacheFilled(){
             @Override
             public void OnCacheFilled(LoadedWeatherStationCache fullCache) {
                 new FillStationArrayAsync(fullCache).execute();
+            }
+
+            @Override
+            public boolean ShouldContinueGettingNotifications() {
+                return false;
             }
         });
     }
