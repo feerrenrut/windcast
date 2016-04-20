@@ -25,7 +25,7 @@ public class CreateWindcastBackendApi {
     private static final String ServerAddress_devServer_Genymotion =
             "http://10.0.3.2:8080/_ah/api/"; //- 10.0.3.2 is localhost's IP address in Genymotion
 
-    private static final String ServerAddress = ServerAddress_devServer_Genymotion;
+    private static final String ServerAddress = ServerAddress_realServer;
     static public Windcastdata create() {
         Windcastdata.Builder builder  = new Windcastdata
                 .Builder( AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), /*credential*/ null)

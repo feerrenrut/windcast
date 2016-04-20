@@ -4,6 +4,7 @@ import com.feer.windcast.WeatherData;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 /**
  * Created by Reef on 20/10/2015.
@@ -38,20 +39,28 @@ class InternalStationCache implements LoadedWeatherStationCache {
         return StationsForAllStatesAdded();
     }
 
-    public void AddStationsForState(ArrayList<WeatherData> stations, String state)
-    {
+    Date mInternalStationCacheTime = null;
+    @Override
+    public boolean IsStale() {
+        final long cacheTimeout = 15L * 60 * 1000; // 15 min
+        final long currentTime = new Date().getTime();
+        return mInternalStationCacheTime != null &&
+                cacheTimeout <= // elapsed time
+                        ( currentTime - mInternalStationCacheTime.getTime() );
+    }
+
+    public void AddStationsForState(ArrayList<WeatherData> stations, String state, Date loadedAt) {
         mStations.addAll(stations);
         mStatesLoaded.add(state);
         Collections.sort(mStations);
+        mInternalStationCacheTime = loadedAt;
     }
 
-    public boolean StationsForAllStatesAdded()
-    {
+    public boolean StationsForAllStatesAdded() {
         return mStatesLoaded.size() == mAllStationsInState_UrlList.length;
     }
 
-    static class AllStationsURLForState
-    {
+    static class AllStationsURLForState {
         public AllStationsURLForState(String urlString, String state)
         {mUrlString = urlString; mState = state;}
 

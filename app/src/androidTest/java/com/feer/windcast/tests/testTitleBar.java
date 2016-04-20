@@ -44,7 +44,7 @@ public class testTitleBar extends ActivityInstrumentationTestCase2<MainActivity>
 
     public void test_initialTitleBar_NoStations_isWindcast()
     {
-        Mocks.Fakes.HasStations(0).HasFavourites(0);
+        Mocks.FakeData.HasStations(0).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
         launchActivity();
         
@@ -55,7 +55,7 @@ public class testTitleBar extends ActivityInstrumentationTestCase2<MainActivity>
 
     public void test_initialTitleBar_NoFavourites_isWindcast()
     {
-        Mocks.Fakes.HasStations(10).HasFavourites(0);
+        Mocks.FakeData.HasStations(10).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
         launchActivity();
         
@@ -66,7 +66,7 @@ public class testTitleBar extends ActivityInstrumentationTestCase2<MainActivity>
 
     public void test_initialTitleBar_withFavourites_isFavourites()
     {
-        Mocks.Fakes.HasStations(10).HasFavourites(3);
+        Mocks.FakeData.HasStations(10).HasFavourites(3);
         Mocks.JustUseMocksWithFakeData();
         launchActivity();
         

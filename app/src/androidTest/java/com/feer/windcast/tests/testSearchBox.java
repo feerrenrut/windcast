@@ -59,7 +59,7 @@ public class testSearchBox extends ActivityInstrumentationTestCase2<MainActivity
     {
         // depends on:
         // testSearchIcon.test_withStationsButNoFavourites_onAllStationsView_searchIconShown();
-        Mocks.Fakes.HasStations(10).HasFavourites(0);
+        Mocks.FakeData.HasStations(10).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
 
         launchActivity();
@@ -90,9 +90,9 @@ public class testSearchBox extends ActivityInstrumentationTestCase2<MainActivity
     // * failed on nexus 4 API 19 on 12/04/15 failure due to ui change
     public void test_enteringTextIntoSearchBox_FiltersStations()
     {
-        Mocks.Fakes.HasStations(11).HasFavourites(0);
+        Mocks.FakeData.HasStations(11).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
-        int EXPECTED_NUM_STATIONS = Mocks.Fakes.Stations().size();
+        int EXPECTED_NUM_STATIONS = Mocks.FakeData.Stations().size();
         
         launchActivity();
 
@@ -101,7 +101,7 @@ public class testSearchBox extends ActivityInstrumentationTestCase2<MainActivity
                         adapterHasCount(CoreMatchers.equalTo(EXPECTED_NUM_STATIONS))));
 
         onView(withId(R.id.search)).perform(click());
-        AWeatherStation expected = Mocks.Fakes.Stations().get(2).Station;
+        AWeatherStation expected = Mocks.FakeData.Stations().get(2).Station;
         
         // just use the last few characters of the name;
         String searchTerm = expected.GetName();

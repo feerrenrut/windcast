@@ -30,6 +30,8 @@ import com.feer.windcast.dataAccess.FavouriteStationCache;
 import com.feer.windcast.dataAccess.LoadedWeatherStationCache;
 import com.feer.windcast.dataAccess.StationListCacheLoader;
 import com.feer.windcast.dataAccess.WeatherDataCache;
+import com.feer.windcast.dataAccess.dependencyProviders.FavouriteStationCacheProvider;
+import com.feer.windcast.dataAccess.dependencyProviders.StationListCacheProvider;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -239,7 +241,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 + " must implement OnWeatherStationFragmentInteractionListener");
         }
 
-        mFavs = WeatherDataCache.GetInstance().CreateNewFavouriteStationAccessor();
+        mFavs = FavouriteStationCacheProvider.CreateNewFavouriteStationAccessor();
     }
 
     @Override
@@ -324,9 +326,10 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         super.onResume();
 
         UUID userId = StationListCacheLoader.GetUserID(this.getContext());
-        StationListCacheLoader.StartStationListCacheLoad(
+        StationListCacheLoader loader = StationListCacheProvider.CreateStationListCacheLoader();
+        loader.StartStationListCacheLoad(
                 userId,
-                WeatherDataCache.GetInstance(),
+                StationListCacheProvider.GetWeatherDataCacheInstance(),
                 new WeatherDataCache.NotifyWhenStationCacheFilled(){
             @Override
             public void OnCacheFilled(LoadedWeatherStationCache fullCache) {

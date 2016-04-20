@@ -186,19 +186,21 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         final int EXPECTED_NUM_STATIONS = 11;
         final String STATE_TO_CLICK = "WA";
         
-        Mocks.Fakes.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(0);
+        Mocks.FakeData.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(0);
 
         ArrayList<WeatherData> oneState = new ArrayList<WeatherData>(
-                Mocks.Fakes.Stations().subList(0, 1));
+                Mocks.FakeData.Stations().subList(0, 1));
 
-        when(Mocks.DataCache.CreateNewFavouriteStationAccessor())
-                .thenReturn(Mocks.FavouritesCache);
         when(Mocks.FavouritesCache.GetFavouriteURLs())
-                .thenReturn(Mocks.Fakes.FavURLs());
+                .thenReturn(Mocks.FakeData.FavURLs());
         when(Mocks.LoadedCache.GetWeatherStationsFromAllStates())
-                .thenReturn(Mocks.Fakes.Stations());
+                .thenReturn(Mocks.FakeData.Stations());
         when(Mocks.LoadedCache.GetWeatherStationsFrom(STATE_TO_CLICK))
                 .thenReturn(oneState);
+        when(Mocks.LoadedCache.AreAllStatesFilled())
+                .thenReturn(true);
+        when(Mocks.LoadedCache.IsStale())
+                .thenReturn(true);
         
         Mocks.VerifyNoUnstubbedCallsOnMocks();
         launchActivity();
@@ -221,10 +223,10 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
     // Legitimate bugs found: 1
     public void test_withFilter_selectState_FilterCleared()
     {
-        Mocks.Fakes.HasStations(11).HasFavourites(0);
+        Mocks.FakeData.HasStations(11).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
 
-        final Integer EXPECTED_NUM_STATIONS = Mocks.Fakes.Stations().size();
+        final Integer EXPECTED_NUM_STATIONS = Mocks.FakeData.Stations().size();
         final String STATE_TO_CLICK = "WA";
 
         launchActivity();
@@ -234,7 +236,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
                         adapterHasCount(equalTo(EXPECTED_NUM_STATIONS))));
 
         onView(withId(R.id.search)).perform(click());
-        AWeatherStation searchStation = Mocks.Fakes.Stations().get(2).Station;
+        AWeatherStation searchStation = Mocks.FakeData.Stations().get(2).Station;
 
         String searchTerm = searchStation.GetName();
         onView(withId(R.id.weather_station_search_box))
@@ -259,7 +261,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
     public void test_SelectFavourites_ShowsOnlyFavourites() throws MalformedURLException
     {
         final int EXPECTED_NUM_STATIONS = 11;
-        Mocks.Fakes.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(EXPECTED_NUM_STATIONS);
+        Mocks.FakeData.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(EXPECTED_NUM_STATIONS);
 
         doNothing().when(Mocks.FavouritesCache)
                 .AddFavouriteStation(any(WeatherStation.class));

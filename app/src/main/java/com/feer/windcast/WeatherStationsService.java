@@ -7,6 +7,7 @@ import android.content.Intent;
 import com.feer.windcast.dataAccess.LoadedWeatherStationCache;
 import com.feer.windcast.dataAccess.StationListCacheLoader;
 import com.feer.windcast.dataAccess.WeatherDataCache;
+import com.feer.windcast.dataAccess.dependencyProviders.StationListCacheProvider;
 
 import java.util.UUID;
 
@@ -48,19 +49,19 @@ public class WeatherStationsService extends IntentService {
         
         if(mCache == null)
         {
-            mCache = WeatherDataCache.GetInstance();
+            mCache = StationListCacheProvider.GetWeatherDataCacheInstance();
         }
 
         // get the cache load started as soon as possible. We dont need the result here, but it will
         // be stored in the cache for later components.
         UUID userId = StationListCacheLoader.GetUserID(this.getApplicationContext());
-        StationListCacheLoader.StartStationListCacheLoad(
+        StationListCacheLoader loader = StationListCacheProvider.CreateStationListCacheLoader();
+        loader.StartStationListCacheLoad(
                 userId,
                 mCache,
                 new WeatherDataCache.NotifyWhenStationCacheFilled() {
             @Override
             public void OnCacheFilled(LoadedWeatherStationCache fullCache) {
-                return;
             }
 
             @Override

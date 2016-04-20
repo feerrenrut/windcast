@@ -17,7 +17,6 @@ import static android.support.test.espresso.contrib.DrawerActions.openDrawer;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.mockito.Mockito.when;
 
 /**
  * http://youtu.be/uHoB0KzQGRg?t=54s
@@ -45,9 +44,6 @@ public class testSearchIcon extends ActivityInstrumentationTestCase2<MainActivit
         Mocks = new WindCastMocks(
                 PreferenceManager.getDefaultSharedPreferences(
                         this.getInstrumentation().getTargetContext()));
-
-        when(Mocks.DataCache.CreateNewFavouriteStationAccessor())
-                .thenReturn(Mocks.FavouritesCache);
     }
 
     public void test_NoStations_searchIconNotShown()
@@ -55,7 +51,7 @@ public class testSearchIcon extends ActivityInstrumentationTestCase2<MainActivit
         // depends on
         // testTitleBar.test_initialTitleBar_NoStations_isWindcast();
 
-        Mocks.Fakes.HasStations(0).HasFavourites(0);
+        Mocks.FakeData.HasStations(0).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
         
         launchActivity();
@@ -67,7 +63,7 @@ public class testSearchIcon extends ActivityInstrumentationTestCase2<MainActivit
     {
         // depends on 
         // testTitleBar.test_initialTitleBar_NoFavourites_isWindcast();
-        Mocks.Fakes.HasStations(10).HasFavourites(0);
+        Mocks.FakeData.HasStations(10).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
         
         launchActivity();
@@ -79,7 +75,7 @@ public class testSearchIcon extends ActivityInstrumentationTestCase2<MainActivit
     {
         // depends on
         // testTitleBar.test_initialTitleBar_NoFavourites_isWindcast();
-        Mocks.Fakes.HasStations(10).HasFavourites(0);
+        Mocks.FakeData.HasStations(10).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
         
         launchActivity();
@@ -99,7 +95,7 @@ public class testSearchIcon extends ActivityInstrumentationTestCase2<MainActivit
     {
         // depends on
         // testTitleBar.test_initialTitleBar_withFavourites_isFavourites();
-        Mocks.Fakes.HasStations(10).HasFavourites(3);
+        Mocks.FakeData.HasStations(10).HasFavourites(3);
         Mocks.JustUseMocksWithFakeData();
         
         launchActivity();

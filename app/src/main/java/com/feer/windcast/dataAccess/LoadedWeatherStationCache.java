@@ -9,4 +9,5 @@ public interface LoadedWeatherStationCache
     ArrayList<WeatherData> GetWeatherStationsFrom(String state);
     ArrayList<WeatherData> GetWeatherStationsFromAllStates();
     boolean AreAllStatesFilled();
+    boolean IsStale();
 }

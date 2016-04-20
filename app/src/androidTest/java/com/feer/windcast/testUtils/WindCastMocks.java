@@ -3,12 +3,11 @@ package com.feer.windcast.testUtils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.feer.windcast.WeatherStation;
 import com.feer.windcast.WindCastNavigationDrawer;
 import com.feer.windcast.dataAccess.BackgroundTaskManager;
 import com.feer.windcast.dataAccess.FavouriteStationCache;
 import com.feer.windcast.dataAccess.LoadedWeatherStationCache;
-import com.feer.windcast.dataAccess.WeatherDataCache;
+import com.feer.windcast.dataAccess.StationListCacheLoader;
 
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -16,7 +15,6 @@ import org.mockito.stubbing.Answer;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.when;
 
 /**
@@ -24,33 +22,39 @@ import static org.mockito.Mockito.when;
  */
 public class WindCastMocks {
 
-
-    public final FakeWeatherStationData Fakes;
+    public final FakeWeatherStationData FakeData;
     public final LoadedWeatherStationCache LoadedCache;
-    public final WeatherDataCache DataCache;
+    public final StationListCacheLoader.InternalCacheLoader internalCacheLoader;
     public final SharedPreferences Settings;
     public final FavouriteStationCache FavouritesCache;
+
+    // Providers to override the default dependencies
+    private final MockStationListCacheProvider mockStationListCacheProvider;
+    private final MockSpecificStationWeatherDataProvider mockSpecificStationWeatherDataProvider;
+    private final MockFavouriteStationCacheProvider mockFavouriteStationCacheProvider;
     
     public WindCastMocks(SharedPreferences settings) throws Exception {
-        Fakes = new FakeWeatherStationData("test Station", "fav Station");
+        FakeData = new FakeWeatherStationData("test Station", "fav Station");
 
         // set up weather data cache before starting the activity.
         LoadedCache = StrictMock.create(LoadedWeatherStationCache.class);
-        DataCache = StrictMock.create(WeatherDataCache.class);
         FavouritesCache = StrictMock.create(FavouriteStationCache.class);
+        internalCacheLoader = StrictMock.create(StationListCacheLoader.InternalCacheLoader.class);
 
-        WeatherDataCache.SetInstance(DataCache); //set weather data cache singleton
-        
-        Mockito.doAnswer(createCallCacheFilledAnswer(LoadedCache)) // set call back for waiting for
-                .when(DataCache).OnStationCacheFilled(                    // loaded data
-                isA(WeatherDataCache.NotifyWhenStationCacheFilled.class));
+        // set up dependency injection
+        mockStationListCacheProvider = new MockStationListCacheProvider(internalCacheLoader);
+        mockSpecificStationWeatherDataProvider = new MockSpecificStationWeatherDataProvider();
+        mockFavouriteStationCacheProvider = new MockFavouriteStationCacheProvider(FavouritesCache);
+
+        // set call back for waiting for loaded data
+        Mockito.doAnswer(createCallCacheFilledAnswer(LoadedCache))
+                .when(internalCacheLoader).TriggerFillStationCache(
+                any( StationListCacheLoader.CacheLoaderInterface.class ) );
         
         Mockito.doNothing().when(FavouritesCache).Initialise(
                 any(Context.class), any(BackgroundTaskManager.class));
 
-        Mockito.doReturn(null)
-                .when(DataCache).GetWeatherDataFor(
-                isA(WeatherStation.class));
+        mockSpecificStationWeatherDataProvider.SetWeatherData(null);
                 
         Settings = settings;
         ClearPreferences();
@@ -62,24 +66,8 @@ public class WindCastMocks {
     public void VerifyNoUnstubbedCallsOnMocks()
     {
         StrictMock.verifyNoUnstubbedInteractions(LoadedCache);
-        StrictMock.verifyNoUnstubbedInteractions(DataCache);
         StrictMock.verifyNoUnstubbedInteractions(FavouritesCache);
     }
-
-    public class RememberNotifyOnStationCacheFilled extends WindCastMocks.OnStationCacheFilledAnswer {
-        public RememberNotifyOnStationCacheFilled(LoadedWeatherStationCache cache) {
-            super(cache);
-        }
-
-        public WeatherDataCache.NotifyWhenStationCacheFilled mNotify;
-
-        @Override
-        protected void handleOnCacheFilledRequest(WeatherDataCache.NotifyWhenStationCacheFilled notifyMe)
-        {
-            mNotify = notifyMe;
-            super.handleOnCacheFilledRequest(mNotify);
-        }
-    };
 
     public class OnStationCacheFilledAnswer implements  Answer<Void>{
         final LoadedWeatherStationCache mCache;
@@ -91,13 +79,15 @@ public class WindCastMocks {
         @Override
         public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
             handleOnCacheFilledRequest(
-                    (WeatherDataCache.NotifyWhenStationCacheFilled)invocationOnMock.getArguments()[0]);
+                    (StationListCacheLoader.CacheLoaderInterface)
+                            invocationOnMock.getArguments()[0]);
             return null;
         }
         
-        protected void handleOnCacheFilledRequest(WeatherDataCache.NotifyWhenStationCacheFilled notifyMe)
+        protected void handleOnCacheFilledRequest(
+                StationListCacheLoader.CacheLoaderInterface callback)
         {
-            notifyMe.OnCacheFilled(mCache);
+            callback.onComplete( mCache );
         }
     }
    
@@ -128,14 +118,16 @@ public class WindCastMocks {
     
     public void JustUseMocksWithFakeData()
     {
-        when(DataCache.CreateNewFavouriteStationAccessor())
-                .thenReturn(FavouritesCache);
         when(FavouritesCache.GetFavouriteURLs())
-                .thenReturn(Fakes.FavURLs());
-        when(LoadedCache.GetWeatherStationsFrom( anyString()))
-                .thenReturn(Fakes.Stations());
+                .thenReturn(FakeData.FavURLs());
+        when(LoadedCache.GetWeatherStationsFrom(anyString()))
+                .thenReturn(FakeData.Stations());
         when(LoadedCache.GetWeatherStationsFromAllStates())
-                .thenReturn(Fakes.Stations());
+                .thenReturn(FakeData.Stations());
+        when(LoadedCache.AreAllStatesFilled())
+                .thenReturn(true);
+        when(LoadedCache.IsStale())
+                .thenReturn(true);
         VerifyNoUnstubbedCallsOnMocks();
     }
     
