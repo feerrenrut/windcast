@@ -2,33 +2,29 @@ package com.feer.windcast.tests;
 
 import android.preference.PreferenceManager;
 import android.test.ActivityInstrumentationTestCase2;
-import android.widget.TextView;
 
+import com.feer.windcast.AWeatherStation;
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.WeatherData;
-import com.feer.windcast.WeatherStation;
 import com.feer.windcast.testUtils.WindCastMocks;
 
 import org.hamcrest.CoreMatchers;
 
 import static com.feer.windcast.testUtils.AdapterMatchers.adapterHasCount;
 import static com.feer.windcast.testUtils.ItemHintMatchers.withItemHint;
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
-import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isAssignableFrom;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
+import static android.support.test.espresso.Espresso.onData;
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.typeText;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
 
 /**
  * http://youtu.be/uHoB0KzQGRg?t=54s
@@ -63,7 +59,7 @@ public class testSearchBox extends ActivityInstrumentationTestCase2<MainActivity
     {
         // depends on:
         // testSearchIcon.test_withStationsButNoFavourites_onAllStationsView_searchIconShown();
-        Mocks.Fakes.HasStations(10).HasFavourites(0);
+        Mocks.FakeData.HasStations(10).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
 
         launchActivity();
@@ -94,9 +90,9 @@ public class testSearchBox extends ActivityInstrumentationTestCase2<MainActivity
     // * failed on nexus 4 API 19 on 12/04/15 failure due to ui change
     public void test_enteringTextIntoSearchBox_FiltersStations()
     {
-        Mocks.Fakes.HasStations(11).HasFavourites(0);
+        Mocks.FakeData.HasStations(11).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
-        int EXPECTED_NUM_STATIONS = Mocks.Fakes.Stations().size();
+        int EXPECTED_NUM_STATIONS = Mocks.FakeData.Stations().size();
         
         launchActivity();
 
@@ -105,7 +101,7 @@ public class testSearchBox extends ActivityInstrumentationTestCase2<MainActivity
                         adapterHasCount(CoreMatchers.equalTo(EXPECTED_NUM_STATIONS))));
 
         onView(withId(R.id.search)).perform(click());
-        WeatherStation expected = Mocks.Fakes.Stations().get(2).Station;
+        AWeatherStation expected = Mocks.FakeData.Stations().get(2).Station;
         
         // just use the last few characters of the name;
         String searchTerm = expected.GetName();

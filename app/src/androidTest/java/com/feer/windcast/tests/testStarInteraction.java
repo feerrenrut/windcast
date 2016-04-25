@@ -3,21 +3,21 @@ package com.feer.windcast.tests;
 import android.preference.PreferenceManager;
 import android.test.ActivityInstrumentationTestCase2;
 
+import com.feer.windcast.AWeatherStation;
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.WeatherData;
-import com.feer.windcast.WeatherStation;
 import com.feer.windcast.testUtils.WindCastMocks;
 
 import java.net.MalformedURLException;
 
-import static com.google.android.apps.common.testing.testrunner.util.Checks.checkNotNull;
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withChild;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withParent;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.core.deps.guava.base.Preconditions.checkNotNull;
+import static android.support.test.espresso.matcher.ViewMatchers.withChild;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withParent;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -54,28 +54,28 @@ public class testStarInteraction extends ActivityInstrumentationTestCase2<MainAc
                 PreferenceManager.getDefaultSharedPreferences(
                         this.getInstrumentation().getTargetContext()));
         
-        Mocks.Fakes.HasStations(0).HasFavourites(0);
+        Mocks.FakeData.HasStations(0).HasFavourites(0);
         when(Mocks.LoadedCache.GetWeatherStationsFromAllStates())
-                .thenReturn(Mocks.Fakes.Stations());
+                .thenReturn(Mocks.FakeData.Stations());
         when(Mocks.LoadedCache.GetWeatherStationsFrom(anyString()))
-                .thenReturn(Mocks.Fakes.Stations());
+                .thenReturn(Mocks.FakeData.Stations());
     }
 
     public void test_ClickGrayStar_CallsAddFav() throws MalformedURLException
     {
         final int EXPECTED_NUM_STATIONS = 11;
-        Mocks.Fakes.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(0);
+        Mocks.FakeData.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(0);
         
         doNothing().when(Mocks.FavouritesCache)
-                .AddFavouriteStation(any(WeatherStation.class));
+                .AddFavouriteStation(any(AWeatherStation.class));
         doNothing().when(Mocks.FavouritesCache)
-                .RemoveFavouriteStation(any(WeatherStation.class));
+                .RemoveFavouriteStation(any(AWeatherStation.class));
         
         Mocks.JustUseMocksWithFakeData();
         
         launchActivity();
 
-        WeatherStation newFav = Mocks.Fakes.Stations().get(4).Station;
+        AWeatherStation newFav = Mocks.FakeData.Stations().get(4).Station;
         assertTrue(
                 "Station not yet clicked, it should not be a favourite!",
                 newFav.IsFavourite == false);
@@ -94,22 +94,24 @@ public class testStarInteraction extends ActivityInstrumentationTestCase2<MainAc
     public void test_ClickBlueStar_CallsRemoveFav() throws MalformedURLException
     {
         final int EXPECTED_NUM_STATIONS = 11;
-        Mocks.Fakes.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(EXPECTED_NUM_STATIONS);
+        Mocks.FakeData.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(EXPECTED_NUM_STATIONS);
         when(Mocks.LoadedCache.GetWeatherStationsFromAllStates())
-                .thenReturn(Mocks.Fakes.Stations());
+                .thenReturn(Mocks.FakeData.Stations());
         when(Mocks.LoadedCache.GetWeatherStationsFrom(anyString()))
-                .thenReturn(Mocks.Fakes.Stations());
-        when(Mocks.DataCache.CreateNewFavouriteStationAccessor())
-                .thenReturn(Mocks.FavouritesCache);
+                .thenReturn(Mocks.FakeData.Stations());
+        when(Mocks.LoadedCache.AreAllStatesFilled())
+                .thenReturn(true);
+        when(Mocks.LoadedCache.IsStale())
+                .thenReturn(true);
         when(Mocks.FavouritesCache.GetFavouriteURLs())
-                .thenReturn(Mocks.Fakes.FavURLs());
+                .thenReturn(Mocks.FakeData.FavURLs());
         doNothing().when(Mocks.FavouritesCache)
-                .AddFavouriteStation(any(WeatherStation.class));
+                .AddFavouriteStation(any(AWeatherStation.class));
         doNothing().when(Mocks.FavouritesCache)
-                .RemoveFavouriteStation(any(WeatherStation.class));
+                .RemoveFavouriteStation(any(AWeatherStation.class));
         
-        WeatherStation oldFav = null;
-        for(WeatherData data : Mocks.Fakes.Stations())
+        AWeatherStation oldFav = null;
+        for(WeatherData data : Mocks.FakeData.Stations())
         {
             if(data.Station.IsFavourite)
             {

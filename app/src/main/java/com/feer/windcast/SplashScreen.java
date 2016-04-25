@@ -6,18 +6,18 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
-
 public class SplashScreen extends Activity {
-
     private final String TAG = "SplashScreen";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
-        
-        WeatherStationsService.startAction_UpdateWeatherStations(this);
+        startWeatherStationUpdateAndSleep();
+    }
 
+    private void startWeatherStationUpdateAndSleep() {
+        WeatherStationsService.startAction_UpdateWeatherStations(this);
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
@@ -32,9 +32,14 @@ public class SplashScreen extends Activity {
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
-                SplashScreen.this.startActivity(new Intent(SplashScreen.this, MainActivity.class));
-                SplashScreen.this.finish();
+                startApp();
             }
         }.execute();
+    }
+
+    void startApp() {
+        Log.i(TAG, "Starting app.");
+        SplashScreen.this.startActivity(new Intent(SplashScreen.this, MainActivity.class));
+        SplashScreen.this.finish();
     }
 }

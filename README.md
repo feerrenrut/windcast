@@ -6,7 +6,7 @@ Australia. Information is collected by BOM (Bureau of Meteorology, http://www.bo
 
 ##Requirements
 
-* Android Studio 1.0.2
+* Android Studio 1.3.1
 * See docs/SDK-installedPackages.PNG for sdk versions required.
 * Other dependencies are retrieved via gradle
 
@@ -20,3 +20,4 @@ see: http://stackoverflow.com/a/21020469/346188
   - RELEASE_STORE_PASSWORD=***** (do not use quotes to surround)
   - RELEASE_KEY_ALIAS=***** (do not use quotes to surround)
   - RELEASE_KEY_PASSWORD=***** (do not use quotes to surround)
+  - API_SECRET_WINDCAST=***** (secret override of scrts.java) see source.

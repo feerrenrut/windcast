@@ -2,8 +2,10 @@ package com.feer.windcast.tests;
 
 import android.app.Activity;
 import android.preference.PreferenceManager;
+import android.support.test.espresso.contrib.DrawerActions;
 import android.test.ActivityInstrumentationTestCase2;
 
+import com.feer.windcast.AWeatherStation;
 import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.WeatherData;
@@ -15,21 +17,19 @@ import org.hamcrest.Matchers;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
+import static android.support.test.espresso.Espresso.onData;
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.swipeRight;
+import static android.support.test.espresso.action.ViewActions.typeText;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.contrib.DrawerMatchers.isClosed;
+import static android.support.test.espresso.contrib.DrawerMatchers.isOpen;
+import static android.support.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.feer.windcast.testUtils.AdapterMatchers.adapterHasCount;
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onData;
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.swipeRight;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.typeText;
-import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.closeDrawer;
-import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.openDrawer;
-import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerMatchers.isClosed;
-import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerMatchers.isOpen;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.core.AllOf.allOf;
@@ -124,15 +124,15 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
 
         onView(withId(R.id.drawer_allStations))
                 .check(matches(allOf(
-                    withText(R.string.all),
-                    isCompletelyDisplayed() )));
+                        withText(R.string.all),
+                        isCompletelyDisplayed())));
         onView(withId(R.id.drawer_all_image))
                 .check(matches(isCompletelyDisplayed()));
 
         onView(withId(R.id.drawer_states))
                 .check(matches(allOf(
-                    withText(R.string.states),
-                    isCompletelyDisplayed() )));
+                        withText(R.string.states),
+                        isCompletelyDisplayed())));
         onView(withId(R.id.drawer_states_image))
                 .check(matches(isCompletelyDisplayed()));
 
@@ -154,6 +154,14 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         onView(withId(drawerID)).check(matches(isClosed()));
     }
 
+    private void openDrawer(int drawerID) {
+        onView(withId(drawerID)).perform(DrawerActions.open());
+    }
+
+    private void closeDrawer(int drawerID) {
+        onView(withId(drawerID)).perform(DrawerActions.close());
+    }
+
     public void test_selectWA_titleShowsSelection()
     {
         Mocks.JustUseMocksWithFakeData();
@@ -164,13 +172,13 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         onView(withId(R.id.drawer_states)).perform(click());
         onView(withText("WA")).perform(click());
 
-        assertEquals("Wind Stations in WA", act.getActionBar().getTitle().toString());
+        onView( withText("Wind Stations in WA")).check(matches(isDisplayed()));
 
         openDrawer(drawerID);
         onView(withText("All")).perform(click());
 
-        final String appName = act.getResources().getString(R.string.app_name);
-        assertEquals(appName, act.getActionBar().getTitle().toString());
+        final String expectedTitle = act.getResources().getString(R.string.app_name);
+        onView( withText(expectedTitle)).check(matches(isDisplayed()));
     }
 
     public void test_selectWA_showsWAStations()
@@ -178,19 +186,21 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
         final int EXPECTED_NUM_STATIONS = 11;
         final String STATE_TO_CLICK = "WA";
         
-        Mocks.Fakes.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(0);
+        Mocks.FakeData.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(0);
 
         ArrayList<WeatherData> oneState = new ArrayList<WeatherData>(
-                Mocks.Fakes.Stations().subList(0, 1));
+                Mocks.FakeData.Stations().subList(0, 1));
 
-        when(Mocks.DataCache.CreateNewFavouriteStationAccessor())
-                .thenReturn(Mocks.FavouritesCache);
         when(Mocks.FavouritesCache.GetFavouriteURLs())
-                .thenReturn(Mocks.Fakes.FavURLs());
+                .thenReturn(Mocks.FakeData.FavURLs());
         when(Mocks.LoadedCache.GetWeatherStationsFromAllStates())
-                .thenReturn(Mocks.Fakes.Stations());
+                .thenReturn(Mocks.FakeData.Stations());
         when(Mocks.LoadedCache.GetWeatherStationsFrom(STATE_TO_CLICK))
                 .thenReturn(oneState);
+        when(Mocks.LoadedCache.AreAllStatesFilled())
+                .thenReturn(true);
+        when(Mocks.LoadedCache.IsStale())
+                .thenReturn(true);
         
         Mocks.VerifyNoUnstubbedCallsOnMocks();
         launchActivity();
@@ -213,10 +223,10 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
     // Legitimate bugs found: 1
     public void test_withFilter_selectState_FilterCleared()
     {
-        Mocks.Fakes.HasStations(11).HasFavourites(0);
+        Mocks.FakeData.HasStations(11).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
 
-        final Integer EXPECTED_NUM_STATIONS = Mocks.Fakes.Stations().size();
+        final Integer EXPECTED_NUM_STATIONS = Mocks.FakeData.Stations().size();
         final String STATE_TO_CLICK = "WA";
 
         launchActivity();
@@ -226,7 +236,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
                         adapterHasCount(equalTo(EXPECTED_NUM_STATIONS))));
 
         onView(withId(R.id.search)).perform(click());
-        WeatherStation searchStation = Mocks.Fakes.Stations().get(2).Station;
+        AWeatherStation searchStation = Mocks.FakeData.Stations().get(2).Station;
 
         String searchTerm = searchStation.GetName();
         onView(withId(R.id.weather_station_search_box))
@@ -251,7 +261,7 @@ public class testDrawerStationFragmentInteraction extends ActivityInstrumentatio
     public void test_SelectFavourites_ShowsOnlyFavourites() throws MalformedURLException
     {
         final int EXPECTED_NUM_STATIONS = 11;
-        Mocks.Fakes.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(EXPECTED_NUM_STATIONS);
+        Mocks.FakeData.HasStations(EXPECTED_NUM_STATIONS).HasFavourites(EXPECTED_NUM_STATIONS);
 
         doNothing().when(Mocks.FavouritesCache)
                 .AddFavouriteStation(any(WeatherStation.class));

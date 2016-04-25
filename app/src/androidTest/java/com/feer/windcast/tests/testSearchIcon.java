@@ -9,16 +9,14 @@ import com.feer.windcast.MainActivity;
 import com.feer.windcast.R;
 import com.feer.windcast.testUtils.WindCastMocks;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
-import static com.google.android.apps.common.testing.ui.espresso.action.ViewActions.click;
-import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.doesNotExist;
-import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.contrib.DrawerActions.openDrawer;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withText;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.assertion.ViewAssertions.doesNotExist;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.contrib.DrawerActions.openDrawer;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 /**
  * http://youtu.be/uHoB0KzQGRg?t=54s
@@ -46,9 +44,6 @@ public class testSearchIcon extends ActivityInstrumentationTestCase2<MainActivit
         Mocks = new WindCastMocks(
                 PreferenceManager.getDefaultSharedPreferences(
                         this.getInstrumentation().getTargetContext()));
-
-        when(Mocks.DataCache.CreateNewFavouriteStationAccessor())
-                .thenReturn(Mocks.FavouritesCache);
     }
 
     public void test_NoStations_searchIconNotShown()
@@ -56,7 +51,7 @@ public class testSearchIcon extends ActivityInstrumentationTestCase2<MainActivit
         // depends on
         // testTitleBar.test_initialTitleBar_NoStations_isWindcast();
 
-        Mocks.Fakes.HasStations(0).HasFavourites(0);
+        Mocks.FakeData.HasStations(0).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
         
         launchActivity();
@@ -68,7 +63,7 @@ public class testSearchIcon extends ActivityInstrumentationTestCase2<MainActivit
     {
         // depends on 
         // testTitleBar.test_initialTitleBar_NoFavourites_isWindcast();
-        Mocks.Fakes.HasStations(10).HasFavourites(0);
+        Mocks.FakeData.HasStations(10).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
         
         launchActivity();
@@ -80,7 +75,7 @@ public class testSearchIcon extends ActivityInstrumentationTestCase2<MainActivit
     {
         // depends on
         // testTitleBar.test_initialTitleBar_NoFavourites_isWindcast();
-        Mocks.Fakes.HasStations(10).HasFavourites(0);
+        Mocks.FakeData.HasStations(10).HasFavourites(0);
         Mocks.JustUseMocksWithFakeData();
         
         launchActivity();
@@ -90,7 +85,8 @@ public class testSearchIcon extends ActivityInstrumentationTestCase2<MainActivit
 
         Activity act = getActivity();
         final String expectedTitle = act.getResources().getString(R.string.favourite_stations);
-        assertEquals(expectedTitle, act.getActionBar().getTitle().toString());
+
+        onView( withText(expectedTitle)).check(matches(isDisplayed()));
 
         onView(withId(R.id.search)).check(doesNotExist());
     }
@@ -99,7 +95,7 @@ public class testSearchIcon extends ActivityInstrumentationTestCase2<MainActivit
     {
         // depends on
         // testTitleBar.test_initialTitleBar_withFavourites_isFavourites();
-        Mocks.Fakes.HasStations(10).HasFavourites(3);
+        Mocks.FakeData.HasStations(10).HasFavourites(3);
         Mocks.JustUseMocksWithFakeData();
         
         launchActivity();

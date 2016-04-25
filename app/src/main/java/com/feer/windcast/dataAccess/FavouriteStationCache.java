@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.feer.windcast.WeatherStation;
+import com.feer.windcast.AWeatherStation;
 import com.feer.windcast.dataAccess.DBContract.DBContract2;
 
 import java.util.ArrayList;
@@ -35,13 +35,13 @@ public class FavouriteStationCache
     }
 
     synchronized
-    public void AddFavouriteStation(final WeatherStation station)
+    public void AddFavouriteStation(final AWeatherStation station)
     {
         CheckInitialisation();
 
-        if(!mFavUrls.contains(station.GetURL().toString())) // do add the same station twice!
+        if(!mFavUrls.contains(station.GetURL())) // do add the same station twice!
         {
-            mFavUrls.add(station.GetURL().toString());
+            mFavUrls.add(station.GetURL());
 
             mTaskManager.RunInBackground(
                     new BackgroundTask<Void>() {
@@ -56,13 +56,13 @@ public class FavouriteStationCache
     }
 
     synchronized
-    public void RemoveFavouriteStation(final WeatherStation station)
+    public void RemoveFavouriteStation(final AWeatherStation station)
     {
         CheckInitialisation();
 
-        if(mFavUrls.contains(station.GetURL().toString())) // only remove if it is there
+        if(mFavUrls.contains(station.GetURL())) // only remove if it is there
         {
-            mFavUrls.remove(station.GetURL().toString());
+            mFavUrls.remove(station.GetURL());
 
             mTaskManager.RunInBackground(
                     new BackgroundTask<Void>() {
@@ -90,14 +90,14 @@ public class FavouriteStationCache
         }
     }
 
-    private synchronized void AddFavouriteStationToDB(WeatherStation station)
+    private synchronized void AddFavouriteStationToDB(AWeatherStation station)
     {
         station.IsFavourite = true;
 
         SQLiteDatabase db = DBOpenHelper.Instance(mContext).getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(DBContract2.FavouriteStation.COLUMN_NAME_STATION_NAME, station.GetName());
-        values.put(DBContract2.FavouriteStation.COLUMN_NAME_URL, station.GetURL().toString());
+        values.put(DBContract2.FavouriteStation.COLUMN_NAME_URL, station.GetURL());
         db.insert(
                 DBContract2.FavouriteStation.TABLE_NAME,
                 "null",
@@ -105,13 +105,13 @@ public class FavouriteStationCache
                  );
     }
 
-    private synchronized void RemoveFavouriteStationFromDB(WeatherStation station)
+    private synchronized void RemoveFavouriteStationFromDB(AWeatherStation station)
     {
         station.IsFavourite = false;
 
         SQLiteDatabase db = DBOpenHelper.Instance(mContext).getWritableDatabase();
         String selection = DBContract2.FavouriteStation.COLUMN_NAME_URL + " = ?";
-        String[] selectionArgs = { station.GetURL().toString() };
+        String[] selectionArgs = {station.GetURL()};
         db.delete(DBContract2.FavouriteStation.TABLE_NAME, selection, selectionArgs);
     }
 

@@ -4,7 +4,7 @@ import android.content.res.Resources;
 import android.view.View;
 import android.widget.EditText;
 
-import com.google.android.apps.common.testing.ui.espresso.matcher.BoundedMatcher;
+import android.support.test.espresso.matcher.BoundedMatcher;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;

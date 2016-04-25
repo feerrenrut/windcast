@@ -6,10 +6,11 @@ import android.test.ActivityInstrumentationTestCase2;
 import com.feer.windcast.About;
 import com.feer.windcast.R;
 
-import static com.google.android.apps.common.testing.ui.espresso.Espresso.onView;
-import static com.google.android.apps.common.testing.ui.espresso.assertion.ViewAssertions.matches;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.isDisplayed;
-import static com.google.android.apps.common.testing.ui.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 /**
  * Created by Reef on 12/10/2014.
@@ -37,7 +38,7 @@ public class testAboutScreen extends ActivityInstrumentationTestCase2<About>
     {
         launchActivity();
 
-        assertEquals("About", getActivity().getActionBar().getTitle().toString());
+        onView( withText("About")).check(matches(isDisplayed()));
         onView(withId(R.id.bom_attrib_imageView))
                 .check(matches(isDisplayed()));
     }
@@ -46,7 +47,7 @@ public class testAboutScreen extends ActivityInstrumentationTestCase2<About>
     {
         launchActivity();
 
-        assertEquals("About", getActivity().getActionBar().getTitle().toString());
+        onView( withText("About")).check(matches(isDisplayed()));
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         onView(withId(R.id.bom_attrib_imageView))
                 .check(matches(isDisplayed()));

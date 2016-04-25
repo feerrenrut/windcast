@@ -9,8 +9,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-import static com.feer.windcast.WeatherStation.States.*;
-import static com.google.android.apps.common.testing.testrunner.util.Checks.checkNotNull;
+import static android.support.test.espresso.core.deps.guava.base.Preconditions.checkNotNull;
+import static com.feer.windcast.AWeatherStation.States.*;
+
 import static java.lang.String.format;
 
 /**

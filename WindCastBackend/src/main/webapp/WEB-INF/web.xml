@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" version="2.5">
+    <servlet>
+        <servlet-name>SystemServiceServlet</servlet-name>
+        <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
+        <init-param>
+            <param-name>services</param-name>
+            <param-value>com.feer.windcast.backend.WindCastDataEndpoint</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SystemServiceServlet</servlet-name>
+        <url-pattern>/_ah/spi/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>GAEJCronServlet-UpdateStations</servlet-name>
+        <servlet-class>com.feer.windcast.backend.cron.GAEJCronServletUpdateStations</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GAEJCronServlet-UpdateStations</servlet-name>
+        <url-pattern>/cron/updatestations</url-pattern>
+    </servlet-mapping>
+
+    <listener>
+        <listener-class>com.feer.windcast.backend.ServletListener</listener-class>
+    </listener>
+
+    <filter>
+        <filter-name>ObjectifyFilter</filter-name>
+        <filter-class>com.googlecode.objectify.ObjectifyFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>ObjectifyFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+</web-app>

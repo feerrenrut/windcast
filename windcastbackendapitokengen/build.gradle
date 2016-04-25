@@ -1,0 +1,35 @@
+apply plugin: 'java'
+
+
+task scrts(){
+    description 'Generates scrts java file from template.'
+    println ' Generating scrts '
+    File dest = file('.\\src\\main\\java\\com\\feer\\helperLib\\scrts\\impl\\scrtsImpl.java')
+    File src = file('.\\src\\main\\java\\com\\feer\\helperLib\\scrts\\scrts.java');
+
+    String header =
+            'package com.feer.helperLib.scrts.impl; \n' +
+                    'import com.feer.helperLib.scrts.scrts; \n' +
+                    '/* THIS FILE IS GENERATED DURING BUILD - DO NOT EDIT */';
+    String notascrt = "notasecret";
+    if (project.hasProperty("API_SECRET_WINDCAST")) {
+        notascrt = API_SECRET_WINDCAST;
+    } else {
+        println '\n\n**WARNING**\n\tGradle properties not set correctly for api secrets. Please see readme & com/feer/helperLib/scrts/scrts.java\n\n'
+    }
+
+    String contents = src.getText( 'UTF-8' );
+    contents = contents
+            .replaceAll( 'NOT_THE_SECRET_YOU_WERE_LOOKING_FOR', notascrt )
+            .replaceAll('class scrts', 'class scrtsImpl extends scrts')
+            .replaceAll('package com.feer.helperLib.scrts;', header)
+    dest.delete();
+    dest.write(contents, 'UTF-8');
+}
+
+assemble.dependsOn(scrts)
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'junit:junit:4.12'
+}

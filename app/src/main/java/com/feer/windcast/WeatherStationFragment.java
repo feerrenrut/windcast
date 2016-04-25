@@ -28,18 +28,23 @@ import android.widget.TextView;
 import com.feer.windcast.dataAccess.BackgroundTaskManager;
 import com.feer.windcast.dataAccess.FavouriteStationCache;
 import com.feer.windcast.dataAccess.LoadedWeatherStationCache;
+import com.feer.windcast.dataAccess.StationListCacheLoader;
 import com.feer.windcast.dataAccess.WeatherDataCache;
+import com.feer.windcast.dataAccess.dependencyProviders.FavouriteStationCacheProvider;
+import com.feer.windcast.dataAccess.dependencyProviders.StationListCacheProvider;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 import static android.support.v4.app.ActivityCompat.invalidateOptionsMenu;
-import static com.feer.windcast.EmptyDataError.*;
+import static com.feer.windcast.EmptyDataError.EmptyTextState;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoFavourites;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoInternetAccess;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoResultsAfterFilter;
 import static com.feer.windcast.EmptyDataError.EmptyTextState.NoStationsAvailable;
+import static com.feer.windcast.EmptyDataError.OnEmptyListReasonChanged;
 
 /**
  * A fragment representing a list of Items.
@@ -141,7 +146,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         WeatherStationArrayAdapter.OnFavouriteChangedListener handleFavChange = new WeatherStationArrayAdapter.OnFavouriteChangedListener()
         {
             @Override
-            public void OnFavouriteChanged(final WeatherStation station)
+            public void OnFavouriteChanged(final AWeatherStation station)
             {
                 if(station.IsFavourite) {
                     mFavs.AddFavouriteStation(station);
@@ -236,7 +241,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 + " must implement OnWeatherStationFragmentInteractionListener");
         }
 
-        mFavs = WeatherDataCache.GetInstance().CreateNewFavouriteStationAccessor();
+        mFavs = FavouriteStationCacheProvider.CreateNewFavouriteStationAccessor();
     }
 
     @Override
@@ -320,12 +325,20 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onResume() {
         super.onResume();
 
-        abstract class FillStation implements WeatherDataCache.NotifyWhenStationCacheFilled {}
-
-        WeatherDataCache.GetInstance().OnStationCacheFilled(new FillStation() {
+        UUID userId = StationListCacheLoader.GetUserID(this.getContext());
+        StationListCacheLoader loader = StationListCacheProvider.CreateStationListCacheLoader();
+        loader.StartStationListCacheLoad(
+                userId,
+                StationListCacheProvider.GetWeatherDataCacheInstance(),
+                new WeatherDataCache.NotifyWhenStationCacheFilled(){
             @Override
             public void OnCacheFilled(LoadedWeatherStationCache fullCache) {
                 new FillStationArrayAsync(fullCache).execute();
+            }
+
+            @Override
+            public boolean ShouldContinueGettingNotifications() {
+                return false;
             }
         });
     }
@@ -365,7 +378,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     {
         WeatherStationArrayAdapter adapter;
         if ( (adapter = mAdapter) != null || (adapter = (WeatherStationArrayAdapter) parent.getAdapter()) != null) {
-            WeatherStation station = adapter.getItem(position).Station;
+            AWeatherStation station = adapter.getItem(position).Station;
             Log.i(TAG, String.format("Selected station: %s", station.GetName()));
             try {
                 WeatherStationSelected(station);
@@ -385,10 +398,10 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             StringBuilder message = new StringBuilder()
                 .append("Source: ").append(data.Source);
             
-            if(data.ObservationData != null && !data.ObservationData.isEmpty() && data.ObservationData.get(0).LocalTime != null) {
+            if(data.getLatestReading() != null && data.getLatestReading().getLocalTime() != null) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("M LLL kk:mm z");
                 message.append('\n')
-                       .append("Latest reading: ").append(dateFormat.format(data.ObservationData.get(0).LocalTime));
+                       .append("Latest reading: ").append(dateFormat.format(data.getLatestReading().getLocalTime()));
             }
 
             AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
@@ -401,7 +414,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         return false;
     }
 
-    private void WeatherStationSelected(WeatherStation station) throws Exception
+    private void WeatherStationSelected(AWeatherStation station) throws Exception
     {
         if (null != mListener) {
             mSearchInput.clearFocus();
@@ -419,7 +432,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     {
         for(WeatherData station : fullListOfStations)
         {
-            station.Station.IsFavourite = (favStations.contains(station.Station.GetURL().toString()));
+            station.Station.IsFavourite = (favStations.contains(station.Station.GetURL()));
         }
     }
 
@@ -510,7 +523,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     */
     public interface OnWeatherStationFragmentInteractionListener
     {
-        public void onWeatherStationSelected(WeatherStation station);
+        void onWeatherStationSelected(AWeatherStation station);
     }
 
 }
