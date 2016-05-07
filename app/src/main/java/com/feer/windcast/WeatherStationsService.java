@@ -52,11 +52,13 @@ public class WeatherStationsService extends IntentService {
             mCache = StationListCacheProvider.GetWeatherDataCacheInstance();
         }
 
+        Context c = this.getApplicationContext();
         // get the cache load started as soon as possible. We dont need the result here, but it will
         // be stored in the cache for later components.
-        UUID userId = StationListCacheLoader.GetUserID(this.getApplicationContext());
+        UUID userId = StationListCacheLoader.GetUserID(c);
         StationListCacheLoader loader = StationListCacheProvider.CreateStationListCacheLoader();
         loader.StartStationListCacheLoad(
+                c,
                 userId,
                 mCache,
                 new WeatherDataCache.NotifyWhenStationCacheFilled() {

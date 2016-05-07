@@ -29,11 +29,12 @@ public class StationListCacheLoader {
         return userId;
     }
 
-    public void StartStationListCacheLoad(UUID userId,
+    public void StartStationListCacheLoad(Context context,
+                                          UUID userId,
                                           WeatherDataCache cache,
                                           WeatherDataCache.NotifyWhenStationCacheFilled notify) {
         cache.OnStationCacheFilled(notify);
-        cache.SetCacheLoader(StationListCacheProvider.CreateInternalCacheLoader(userId));
+        cache.SetCacheLoader(StationListCacheProvider.CreateInternalCacheLoader(userId, context));
     }
 
     public interface CacheLoaderInterface {

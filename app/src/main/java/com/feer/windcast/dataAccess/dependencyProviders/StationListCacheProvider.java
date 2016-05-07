@@ -1,4 +1,6 @@
 package com.feer.windcast.dataAccess.dependencyProviders;
+import android.content.Context;
+
 import com.feer.windcast.dataAccess.StationListCacheLoader;
 import com.feer.windcast.dataAccess.StationListCacheLoader.InternalCacheLoader;
 import com.feer.windcast.dataAccess.WeatherDataCache;
@@ -34,11 +36,11 @@ public class StationListCacheProvider {
         return new StationListCacheLoader();
     }
 
-    public static InternalCacheLoader CreateInternalCacheLoader(UUID userId) {
-        return getInstance().InternalCreateInternalCacheLoader(userId);
+    public static InternalCacheLoader CreateInternalCacheLoader(UUID userId, Context context) {
+        return getInstance().InternalCreateInternalCacheLoader(userId, context);
     }
 
-    protected InternalCacheLoader InternalCreateInternalCacheLoader(UUID userId) {
-        return new WindCastApiWeatherStationLoader(userId);
+    protected InternalCacheLoader InternalCreateInternalCacheLoader(UUID userId, Context context) {
+        return new WindCastApiWeatherStationLoader(userId, context);
     }
 }

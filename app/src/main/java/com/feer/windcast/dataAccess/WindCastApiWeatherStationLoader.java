@@ -1,5 +1,6 @@
 package com.feer.windcast.dataAccess;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -18,6 +19,7 @@ import com.feer.windcast.dataAccess.StationListCacheLoader.CacheLoaderInterface;
 import com.feer.windcast.dataAccess.StationListCacheLoader.InternalCacheLoader;
 import com.feer.windcast.dataAccess.backend.CreateWindcastBackendApi;
 import com.feer.windcast.dataAccess.backend.GAE_StationCache;
+import com.feer.windcast.dataAccess.dependencyProviders.StationListFileLoader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,9 +33,10 @@ import java.util.UUID;
 public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
     final UUID mUserId;
     final private String mUserIdBase64String;
-
-    public WindCastApiWeatherStationLoader(UUID userId) {
+    final private Context mContext;
+    public WindCastApiWeatherStationLoader(UUID userId, Context context) {
         this.mUserId = userId;
+        this.mContext = context;
         this.mUserIdBase64String = Base64.encodeToString(
                 this.mUserId.toString().getBytes(),
                 Base64.NO_WRAP);
@@ -45,39 +48,60 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
         LoadCacheUsingWindcastAPI();
     }
 
-    private void LoadCacheUsingWindcastAPI() {
-        final Windcastdata windcastdata = CreateWindcastBackendApi.create();
+    private ArrayList<WeatherData> LoadFromFile() {
+        final StationListFileLoader fileLoader = new StationListFileLoader(mContext);
+        return CreateWeatherDataFromStationCollection(
+                                fileLoader.readFile(), "GAE_fileCache");
+    }
+
+    private void SaveStationsToFile(final StationsInUpdateCollection stationsInUpdateCol) {
+        final StationListFileLoader fileLoader = new StationListFileLoader(mContext);
         new AsyncTask<Void, Void, Void>() {
-            long StartTime;
-            GAE_StationCache cache;
-
             @Override
-            protected void onPreExecute() {
-                StartTime = System.nanoTime();
-                cache = new GAE_StationCache();
-            }
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                ArrayList<WeatherData> weatherStations = getWeatherDataFromBackend(windcastdata);
-                if (weatherStations == null) {
-                    weatherStations = new ArrayList<WeatherData>();
-                }
-                cache.SetCachedStations(weatherStations, new Date());
+            protected Void doInBackground(Void... unused) {
+                fileLoader.writeToFile(stationsInUpdateCol);
                 return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void unused) {
-                double difference = (System.nanoTime() - StartTime) / 1E9;
-                Log.i("StationList", "Filled station list from GAE in (seoonds): " + difference);
-                mCallback.onComplete(cache);
-                mCallback = null;
             }
         }.execute();
     }
 
-    @Nullable
+    private void LoadCacheUsingWindcastAPI() {
+        final Windcastdata windcastdata = CreateWindcastBackendApi.create();
+        new AsyncTask<Void, Void, GAE_StationCache>() {
+            long StartTime;
+
+            @Override
+            protected void onPreExecute() {
+                StartTime = System.nanoTime();
+            }
+
+            @Override
+            protected GAE_StationCache doInBackground(Void... params) {
+                ArrayList<WeatherData> weatherStations = getWeatherDataFromBackend(windcastdata);
+                if (weatherStations.isEmpty()) {
+                    Log.i("WeatherDataCache", "Got no stations, loading from file-cache instead");
+                    weatherStations = LoadFromFile();
+                }
+                GAE_StationCache cache = new GAE_StationCache();
+                cache.SetCachedStations(weatherStations, new Date());
+                return cache;
+            }
+
+            @Override
+            protected void onPostExecute(GAE_StationCache cache) {
+                double difference = (System.nanoTime() - StartTime) / 1E9;
+                Log.i("StationList", "Filled station list from GAE in (seconds): " + difference);
+
+                if(cache != null) {
+                    mCallback.onComplete(cache);
+                    mCallback = null;
+                } else {
+
+                }
+            }
+        }.execute();
+    }
+
     private ArrayList<WeatherData> getWeatherDataFromBackend(Windcastdata windcastdata) {
 
         Log.i("WeatherDataCache", "Creating API sending request");
@@ -94,20 +118,33 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
         } catch (IOException e) {
             Log.e("WeatherDataCache", "Couldnt load stations and latest readings: " + e.toString());
         }
+        ArrayList<WeatherData> weatherData = CreateWeatherDataFromStationCollection(
+                stationsInUpdateCol, "GAE-backend");
+        if (weatherData != null) {
+            SaveStationsToFile(stationsInUpdateCol);
+        }
+        else {
+            weatherData = new ArrayList<>();
+        }
+        return weatherData;
+    }
+
+    @Nullable
+    private ArrayList<WeatherData> CreateWeatherDataFromStationCollection(StationsInUpdateCollection stationsInUpdateCol, final String source) {
         if (stationsInUpdateCol == null || stationsInUpdateCol.isEmpty()) return null;
 
         Log.i("WeatherDataCache", "Got result");
-        ArrayList<WeatherData> weatherData = new ArrayList<>(2000);
+        ArrayList<WeatherData> weatherData = new ArrayList<>(stationsInUpdateCol.size());
         for (StationsInUpdate stateStations : stationsInUpdateCol.getItems()) {
 
             List<StationData> stations = stateStations.getStations();
-            Log.i("WeatherDataCache", "Number of stations from backend: " + stations.size());
+            Log.i("WeatherDataCache", "Number of stations from backend (" + stateStations.getState() + "): " + stations.size());
 
             for (StationData stationData : stations) {
                 LatestReading readingForStation = stationData.getLatestReading();
 
                 WeatherData d = new WeatherData();
-                d.Source = "GAE-backend";
+                d.Source = source;
                 if (readingForStation != null) {
                     GAE_ObservationReading latest = new GAE_ObservationReading(readingForStation);
                     d.setLatestReading(latest);

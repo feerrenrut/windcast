@@ -1,5 +1,7 @@
 package com.feer.windcast.testUtils;
 
+import android.content.Context;
+
 import com.feer.windcast.dataAccess.StationListCacheLoader;
 import com.feer.windcast.dataAccess.WeatherDataCache;
 import com.feer.windcast.dataAccess.dependencyProviders.StationListCacheProvider;
@@ -32,7 +34,7 @@ public class MockStationListCacheProvider extends StationListCacheProvider {
     }
 
     @Override
-    protected StationListCacheLoader.InternalCacheLoader InternalCreateInternalCacheLoader(UUID uuid){
+    protected StationListCacheLoader.InternalCacheLoader InternalCreateInternalCacheLoader( UUID uuid, Context c){
         return sMockStationListCacheLoader;
     }
 

@@ -325,9 +325,11 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onResume() {
         super.onResume();
 
-        UUID userId = StationListCacheLoader.GetUserID(this.getContext());
+        Context c = this.getContext();
+        UUID userId = StationListCacheLoader.GetUserID(c);
         StationListCacheLoader loader = StationListCacheProvider.CreateStationListCacheLoader();
         loader.StartStationListCacheLoad(
+                c,
                 userId,
                 StationListCacheProvider.GetWeatherDataCacheInstance(),
                 new WeatherDataCache.NotifyWhenStationCacheFilled(){
