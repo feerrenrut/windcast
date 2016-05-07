@@ -87,8 +87,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         mTaskManager = BackgroundTaskManager.GetTaskManager();
     }
 
-    public static enum StationsToShow
-    {
+    public static enum StationsToShow {
         All,
         Favourites,
         ACT,
@@ -101,8 +100,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         WA
     }
 
-    public static WeatherStationFragment newInstance(StationsToShow showstations)
-    {
+    public static WeatherStationFragment newInstance(StationsToShow showstations) {
         Bundle bundle = new Bundle();
         WeatherStationFragment.writeBundle(bundle, showstations);
 
@@ -111,17 +109,14 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         return frag;
     }
 
-    private void readBundle(Bundle savedInstanceState)
-    {
+    private void readBundle(Bundle savedInstanceState) {
         int enumAsInt = savedInstanceState.getInt(
                 PARAM_STATIONS_TO_SHOW, StationsToShow.All.ordinal());
 
         mShowOnlyStations = StationsToShow.values()[enumAsInt];
     }
-    private static void writeBundle(Bundle saveInstanceState, StationsToShow showStations)
-    {
-        if(showStations != null)
-        {
+    private static void writeBundle(Bundle saveInstanceState, StationsToShow showStations) {
+        if(showStations != null) {
             saveInstanceState.putInt(PARAM_STATIONS_TO_SHOW, showStations.ordinal());
         }
     }
@@ -133,7 +128,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         setHasOptionsMenu(true);
         if(savedInstanceState != null) readBundle(savedInstanceState);
         else if (getArguments() != null) readBundle(getArguments());
-
     }
 
     @Override
@@ -178,16 +172,14 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.stations_list_menu, menu);
-        if( !mStationsExist)
-        {
+        if( !mStationsExist) {
             menu.removeItem(R.id.search);
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId())
-        {
+        switch (item.getItemId()) {
             case R.id.search:
                 ToggleStationFilter();
                 break;
@@ -195,12 +187,9 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         return super.onOptionsItemSelected(item);
     }
 
-
     private void ToggleStationFilter() {
-        if(mSearchInput != null)
-        {
-            switch (mSearchInput.getVisibility())
-            {
+        if(mSearchInput != null) {
+            switch (mSearchInput.getVisibility()) {
                 case View.GONE:
                     mSearchInput.setVisibility(View.VISIBLE);
                     break;
@@ -209,24 +198,20 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                     mSearchInput.setVisibility(View.GONE);
                     mSearchInput.clearFocus();
                     break;
-
             }
         }
     }
 
     @Override
-    public void onDestroyView()
-    {
+    public void onDestroyView()  {
         super.onDestroyView();
         mAdapter = null;
         mSearchInput = null;
         mEmptyView = null;
     }
 
-
     @Override
-    public void onSaveInstanceState(Bundle outState)
-    {
+    public void onSaveInstanceState(Bundle outState)  {
         super.onSaveInstanceState(outState);
         writeBundle(outState, mShowOnlyStations);
     }
@@ -240,7 +225,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             throw new ClassCastException(activity.toString()
                 + " must implement OnWeatherStationFragmentInteractionListener");
         }
-
         mFavs = FavouriteStationCacheProvider.CreateNewFavouriteStationAccessor();
     }
 
@@ -250,12 +234,10 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         if(savedInstanceState != null) readBundle(savedInstanceState);
     }
     
-    class FillStationArrayAsync  extends AsyncTask<Void, Void, ArrayList<WeatherData>>
-    {
+    class FillStationArrayAsync  extends AsyncTask<Void, Void, ArrayList<WeatherData>> {
         private final LoadedWeatherStationCache mWeatherCache;
         
-        FillStationArrayAsync(LoadedWeatherStationCache weatherCache)
-        {
+        FillStationArrayAsync(LoadedWeatherStationCache weatherCache) {
             mWeatherCache = weatherCache;
         }
         
@@ -274,7 +256,8 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         }
 
         @Override
-        protected void onPostExecute(final ArrayList<WeatherData> cacheStations) {
+        protected void onPostExecute( ArrayList<WeatherData> useStations) {
+            Log.i(TAG, "Started adding stations.");
             Activity act = getActivity();
             if (act == null) return;
 
@@ -282,9 +265,8 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 mShowOnlyStations = (mFavs == null || mFavs.GetFavouriteURLs().isEmpty()) ? StationsToShow.All : StationsToShow.Favourites;
             }
 
-            if (mFavs != null && cacheStations != null) {
+            if (mFavs != null && useStations != null) {
                 ArrayList<String> favs = mFavs.GetFavouriteURLs();
-                ArrayList<WeatherData> useStations = cacheStations;
                 SetFavStations(useStations, favs);
 
                 if (mShowOnlyStations == StationsToShow.Favourites) {
@@ -301,7 +283,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 Log.i(TAG, "Finished adding new stations.");
             } else {
                 Boolean favsNull = mFavs == null;
-                Boolean cacheStationsNull = cacheStations == null;
+                Boolean cacheStationsNull = useStations == null;
                 mEmptyTextEnum.AddEmptyListReason(NoInternetAccess);
 
                 Log.i(TAG,
@@ -318,7 +300,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
 
             invalidateOptionsMenu(act);
         }
-        
     }
 
     @Override
@@ -374,10 +355,8 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         mFavs = null;
     }
 
-
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-    {
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         WeatherStationArrayAdapter adapter;
         if ( (adapter = mAdapter) != null || (adapter = (WeatherStationArrayAdapter) parent.getAdapter()) != null) {
             AWeatherStation station = adapter.getItem(position).Station;
@@ -389,7 +368,6 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             }
         }
     }
-
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -416,49 +394,39 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         return false;
     }
 
-    private void WeatherStationSelected(AWeatherStation station) throws Exception
-    {
+    private void WeatherStationSelected(AWeatherStation station) throws Exception {
         if (null != mListener) {
             mSearchInput.clearFocus();
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
             mListener.onWeatherStationSelected(station);
         }
-        else
-        {
+        else {
             throw new Exception("Weather station selected, but there is no listener set.");
         }
     }
 
-    private void SetFavStations(final Collection<WeatherData> fullListOfStations, final Collection<String> favStations)
-    {
-        for(WeatherData station : fullListOfStations)
-        {
+    private void SetFavStations(final Collection<WeatherData> fullListOfStations, final Collection<String> favStations) {
+        for(WeatherData station : fullListOfStations) {
             station.Station.IsFavourite = (favStations.contains(station.Station.GetURL()));
         }
     }
 
-    private ArrayList<WeatherData> FilterToOnlyFavs(final ArrayList<WeatherData> fullListOfStations)
-    {
+    private ArrayList<WeatherData> FilterToOnlyFavs(final ArrayList<WeatherData> fullListOfStations){
         ArrayList<WeatherData> onlyFavs = new ArrayList<WeatherData>();
 
-        for(WeatherData station : fullListOfStations)
-        {
-            if(station.Station.IsFavourite)
-            {
+        for(WeatherData station : fullListOfStations) {
+            if(station.Station.IsFavourite) {
                 onlyFavs.add(station);
             }
         }
         return onlyFavs;
     }
 
-    private void SetStationList(ArrayList<WeatherData> listStations)
-    {
-        if (mAdapter != null)
-        {
+    private void SetStationList(ArrayList<WeatherData> listStations) {
+        if (mAdapter != null) {
             mAdapter.clear();
             mAdapter.addAll(listStations);
-
 
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
             final String unitTypePrefValue = preferences.getString(SettingsActivity.PREF_KEY_WIND_SPEED_UNIT, "0");
@@ -475,12 +443,10 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         }
     }
 
-
     /**
      * Initializes the search box for filtering the list of weather stations
      */
-    private void InitializeSearchBox(View view)
-    {
+    private void InitializeSearchBox(View view) {
         mSearchInput = (EditText)view.findViewById(R.id.weather_station_search_box);
         mSearchInput.setFocusable(true);
         mSearchInput.addTextChangedListener(
@@ -488,12 +454,10 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                     @Override
                     public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
                         mAdapter.getFilter().filter(charSequence);
-                        if(charSequence.length() > 0)
-                        {
+                        if(charSequence.length() > 0) {
                             mEmptyTextEnum.AddEmptyListReason(NoResultsAfterFilter);
                         }
-                        else
-                        {
+                        else {
                             mEmptyTextEnum.RemoveEmptyListReason(NoResultsAfterFilter);
                         }
                     }
@@ -505,17 +469,17 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
                 }
         );
         mSearchInput.setOnFocusChangeListener(
-                new View.OnFocusChangeListener() {
-                    @Override
-                    public void onFocusChange(View v, boolean hasFocus) {
-                        if (v == mSearchInput && !hasFocus) {
-                            //close keyboard
-                            Context context = getActivity().getApplicationContext();
-                            ((InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(
-                                    InputMethodManager.SHOW_IMPLICIT, 0);
-                        }
+            new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if (v == mSearchInput && !hasFocus) {
+                        //close keyboard
+                        Context context = getActivity().getApplicationContext();
+                        ((InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(
+                                InputMethodManager.SHOW_IMPLICIT, 0);
                     }
                 }
+            }
         );
     }
 
@@ -523,9 +487,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     * Interface to allow actions to occur outside of this
     * fragment, when the user interacts with this fragment
     */
-    public interface OnWeatherStationFragmentInteractionListener
-    {
+    public interface OnWeatherStationFragmentInteractionListener {
         void onWeatherStationSelected(AWeatherStation station);
     }
-
 }

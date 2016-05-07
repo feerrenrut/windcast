@@ -42,10 +42,11 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
                 Base64.NO_WRAP);
     }
 
-    CacheLoaderInterface mCallback;
+    CacheLoaderInterface mFileCacheCallback;
+    CacheLoaderInterface mFullCacheCallback;
     public void TriggerFillStationCache(CacheLoaderInterface callback) {
-        mCallback = callback;
-        LoadCacheUsingWindcastAPI();
+        mFileCacheCallback = mFullCacheCallback = callback;
+        LoadFileCache();
     }
 
     private ArrayList<WeatherData> LoadFromFile() {
@@ -65,6 +66,40 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
         }.execute();
     }
 
+    private void LoadFileCache() {
+        new AsyncTask<Void, Void, GAE_StationCache>() {
+            long StartTime;
+
+            @Override
+            protected void onPreExecute() {
+                StartTime = System.nanoTime();
+            }
+
+            @Override
+            protected GAE_StationCache doInBackground(Void... params) {
+                ArrayList<WeatherData> weatherStations = LoadFromFile();
+                GAE_StationCache cache = new GAE_StationCache();
+                cache.SetCachedStations(weatherStations, new Date());
+                return cache;
+            }
+
+            @Override
+            protected void onPostExecute(GAE_StationCache cache) {
+                double difference = (System.nanoTime() - StartTime) / 1E9;
+                Log.i("StationList", "Filled station list from file cache in (seconds): " + difference);
+
+                if(mFileCacheCallback != null && cache != null) {
+                    mFileCacheCallback.onComplete(cache);
+                    mFileCacheCallback = null;
+                }
+                // Trigger the full cache import. This has to be triggered from here so that
+                // the handling of the results of the file cache happen first (triggered in the
+                // onComplete callback above)
+                LoadCacheUsingWindcastAPI();
+            }
+        }.execute();
+    }
+
     private void LoadCacheUsingWindcastAPI() {
         final Windcastdata windcastdata = CreateWindcastBackendApi.create();
         new AsyncTask<Void, Void, GAE_StationCache>() {
@@ -80,7 +115,8 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
                 ArrayList<WeatherData> weatherStations = getWeatherDataFromBackend(windcastdata);
                 if (weatherStations.isEmpty()) {
                     Log.i("WeatherDataCache", "Got no stations, loading from file-cache instead");
-                    weatherStations = LoadFromFile();
+                    // weatherStations = LoadFromFile();
+                    return null;
                 }
                 GAE_StationCache cache = new GAE_StationCache();
                 cache.SetCachedStations(weatherStations, new Date());
@@ -92,11 +128,9 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
                 double difference = (System.nanoTime() - StartTime) / 1E9;
                 Log.i("StationList", "Filled station list from GAE in (seconds): " + difference);
 
-                if(cache != null) {
-                    mCallback.onComplete(cache);
-                    mCallback = null;
-                } else {
-
+                if(cache != null && mFullCacheCallback != null) {
+                    mFullCacheCallback.onComplete(cache);
+                    mFullCacheCallback = null;
                 }
             }
         }.execute();
