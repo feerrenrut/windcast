@@ -30,6 +30,30 @@ public class WeatherData implements Comparable
      */
     public String Source;
 
+    private boolean mUpdateFailed;
+    public boolean isUpdateFailed() {
+        return mUpdateFailed;
+    }
+    public void setUpdateFailed(boolean updateFailed) {
+        this.mUpdateFailed = updateFailed;
+    }
+
+    private boolean mIsStaleData;
+    public boolean isStaleData() {
+        return mIsStaleData;
+    }
+    public void setStaleData(boolean isStaleData) {
+        this.mIsStaleData = isStaleData;
+    }
+
+    private boolean mUsingFileCacheData;
+    public boolean isUsingFileCacheData() {
+        return mUsingFileCacheData;
+    }
+    public void setUsingFileCacheData(boolean usingFileCacheData) {
+        this.mUsingFileCacheData = usingFileCacheData;
+    }
+
     @Override
     public String toString()
     {

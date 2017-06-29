@@ -20,18 +20,15 @@ public class ShowGraphActivity extends ActionBarActivity {
     private static final String KEY_STATION_URL = "StationURL";
     private static final String KEY_STATION_STATE = "StationState";
 
-    static Intent getShowGraphForStationIntent(Context context, AWeatherStation station)
-    {
+    static Intent getShowGraphForStationIntent(Context context, AWeatherStation station) {
         Intent graphIntent = new Intent(context, ShowGraphActivity.class);
         graphIntent.putExtra(KEY_STATION_NAME, station.GetName());
         graphIntent.putExtra(KEY_STATION_URL, station.GetURL());
         graphIntent.putExtra(KEY_STATION_STATE, station.GetStateAbbreviated());
-
         return graphIntent;
     }
 
     private static AWeatherStation getStationFromIntent(Intent intent) throws MalformedURLException {
-
         return new WeatherStation.WeatherStationBuilder()
                 .WithName(intent.getStringExtra(KEY_STATION_NAME))
                 .WithURL(new URL(intent.getStringExtra(KEY_STATION_URL)))
@@ -48,11 +45,9 @@ public class ShowGraphActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         try {
             WindGraphFragment graphFragment = WindGraphFragment.newInstance(
                     getStationFromIntent(getIntent()));
-
             FragmentManager fm = getSupportFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
             ft.replace(R.id.content_frame, graphFragment).commit();

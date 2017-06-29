@@ -7,8 +7,10 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -70,7 +72,8 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     private FavouriteStationCache mFavs = null;
     private boolean mStationsExist = false;
     private TextView mEmptyView = null;
-
+    private SwipeRefreshLayout mSwipeRefresh = null;
+    private Runnable mRefreshRunner = null;
 
     private EmptyDataError mEmptyTextEnum = new EmptyDataError(new OnEmptyListReasonChanged() {
         @Override
@@ -161,6 +164,16 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         listView.setEmptyView(mEmptyView);
         listView.setAdapter(mAdapter);
 
+        mSwipeRefresh = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_stationList);
+
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mHandler.removeCallbacks(mRefreshRunner);
+                mRefreshRunner.run();
+            }
+        });
+
         // Set OnItemClickListener so we can be notified on item clicks
         listView.setOnItemClickListener(this);
         listView.setOnItemLongClickListener(this);
@@ -208,6 +221,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
         mAdapter = null;
         mSearchInput = null;
         mEmptyView = null;
+        mSwipeRefresh = null;
     }
 
     @Override
@@ -297,33 +311,47 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
             ProgressBar progressBar = (ProgressBar) act.findViewById(R.id.loading);
             listView.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.GONE);
+            mSwipeRefresh.setRefreshing(false);
 
             invalidateOptionsMenu(act);
         }
     }
 
+
+    Handler mHandler = new Handler();
     @Override
     public void onResume() {
         super.onResume();
 
-        Context c = this.getContext();
-        UUID userId = StationListCacheLoader.GetUserID(c);
-        StationListCacheLoader loader = StationListCacheProvider.CreateStationListCacheLoader();
-        loader.StartStationListCacheLoad(
-                c,
-                userId,
-                StationListCacheProvider.GetWeatherDataCacheInstance(),
-                new WeatherDataCache.NotifyWhenStationCacheFilled(){
-            @Override
-            public void OnCacheFilled(LoadedWeatherStationCache fullCache) {
-                new FillStationArrayAsync(fullCache).execute();
-            }
+        mRefreshRunner = new Runnable(){
+            public void run() {
+                final Context c = getContext();
+                if(c != null) {
+                    final int interval = 1000 * 60 * 15; // 15 minutes
+                    final UUID userId = StationListCacheLoader.GetUserID(c);
+                    Log.i(TAG, "Triggering update of station list.");
+                    final StationListCacheLoader loader = StationListCacheProvider.CreateStationListCacheLoader();
+                    loader.StartStationListCacheLoad(
+                            c,
+                            userId,
+                            StationListCacheProvider.GetWeatherDataCacheInstance(),
+                            new WeatherDataCache.NotifyWhenStationCacheFilled() {
+                                @Override
+                                public void OnCacheFilled(LoadedWeatherStationCache fullCache) {
+                                    new FillStationArrayAsync(fullCache).execute();
+                                }
 
-            @Override
-            public boolean ShouldContinueGettingNotifications() {
-                return false;
+                                @Override
+                                public boolean ShouldContinueGettingNotifications() {
+                                    return false;
+                                }
+                            });
+
+                    mHandler.postDelayed(this, interval);
+                }
             }
-        });
+        };
+        mRefreshRunner.run();
     }
 
     private void SetEmptyTextViewContents(EmptyTextState reason) {
@@ -359,6 +387,7 @@ public class WeatherStationFragment extends Fragment implements AbsListView.OnIt
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         WeatherStationArrayAdapter adapter;
         if ( (adapter = mAdapter) != null || (adapter = (WeatherStationArrayAdapter) parent.getAdapter()) != null) {
+
             AWeatherStation station = adapter.getItem(position).Station;
             Log.i(TAG, String.format("Selected station: %s", station.GetName()));
             try {

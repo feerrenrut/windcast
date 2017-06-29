@@ -1,5 +1,7 @@
 package com.feer.windcast.dataAccess.backend;
 
+import android.util.Log;
+
 import com.feer.windcast.WeatherData;
 import com.feer.windcast.dataAccess.LoadedWeatherStationCache;
 
@@ -34,18 +36,18 @@ public class GAE_StationCache implements LoadedWeatherStationCache {
         return mWeatherStations != null;
     }
 
-    Date mInternalStationCacheTime = null;
+    Long mCacheExpiryTime = null;
     @Override
     public boolean IsStale() {
-        final long cacheTimeout = 15L * 60 * 1000; // 15 min
         final long currentTime = new Date().getTime();
-        return mInternalStationCacheTime != null &&
-                cacheTimeout <= // elapsed time
-                        ( currentTime - mInternalStationCacheTime.getTime() );
+        return mCacheExpiryTime != null &&
+                mCacheExpiryTime < currentTime ;
     }
 
-    public void SetCachedStations(ArrayList<WeatherData> weatherStations, Date loadedAt) {
+    final long cacheTimeout = 15L * 60 * 1000; // 15 min;
+    public void SetCachedStations(ArrayList<WeatherData> weatherStations, Date latestReadingTime) {
         mWeatherStations = weatherStations;
-        mInternalStationCacheTime = loadedAt;
+        mCacheExpiryTime = latestReadingTime.getTime() + cacheTimeout;
+        Log.i("GAEstationcache", "Cache updated, latest reading: " + latestReadingTime.toLocaleString() );
     }
 }

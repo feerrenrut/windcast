@@ -51,8 +51,9 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
 
     private ArrayList<WeatherData> LoadFromFile() {
         final StationListFileLoader fileLoader = new StationListFileLoader(mContext);
+        StationsInUpdateCollection stationCollection =  fileLoader.readFile();
         return CreateWeatherDataFromStationCollection(
-                                fileLoader.readFile(), "GAE_fileCache");
+               stationCollection, "GAE_fileCache");
     }
 
     private void SaveStationsToFile(final StationsInUpdateCollection stationsInUpdateCol) {
@@ -79,14 +80,14 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
             protected GAE_StationCache doInBackground(Void... params) {
                 ArrayList<WeatherData> weatherStations = LoadFromFile();
                 GAE_StationCache cache = new GAE_StationCache();
-                cache.SetCachedStations(weatherStations, new Date());
+                cache.SetCachedStations(weatherStations, getLatestReadingDate(weatherStations));
                 return cache;
             }
 
             @Override
             protected void onPostExecute(GAE_StationCache cache) {
                 double difference = (System.nanoTime() - StartTime) / 1E9;
-                Log.i("StationList", "Filled station list from file cache in (seconds): " + difference);
+                Log.i("StationList", "Fill station list from file cache took (seconds): " + difference);
 
                 if(mFileCacheCallback != null && cache != null) {
                     mFileCacheCallback.onComplete(cache);
@@ -118,15 +119,16 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
                     // weatherStations = LoadFromFile();
                     return null;
                 }
+                Date latestReadingTime = getLatestReadingDate(weatherStations);
                 GAE_StationCache cache = new GAE_StationCache();
-                cache.SetCachedStations(weatherStations, new Date());
+                cache.SetCachedStations(weatherStations, latestReadingTime);
                 return cache;
             }
 
             @Override
             protected void onPostExecute(GAE_StationCache cache) {
                 double difference = (System.nanoTime() - StartTime) / 1E9;
-                Log.i("StationList", "Filled station list from GAE in (seconds): " + difference);
+                Log.i("StationList", "Fill station list from GAE took (seconds): " + difference);
 
                 if(cache != null && mFullCacheCallback != null) {
                     mFullCacheCallback.onComplete(cache);
@@ -134,6 +136,17 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
                 }
             }
         }.execute();
+    }
+
+    private Date getLatestReadingDate(ArrayList<WeatherData> weatherStations) {
+        Date latestReadingTime = new Date(0); // epoch
+        for(WeatherData wd : weatherStations){
+            if(wd.getLatestReading().getLocalTime().after(latestReadingTime)){
+                latestReadingTime = wd.getLatestReading().getLocalTime();
+                wd.getLatestReading().getLocalTime();
+            }
+        }
+        return latestReadingTime;
     }
 
     private ArrayList<WeatherData> getWeatherDataFromBackend(Windcastdata windcastdata) {
@@ -152,8 +165,10 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
         } catch (IOException e) {
             Log.e("WeatherDataCache", "Couldnt load stations and latest readings: " + e.toString());
         }
+        final boolean isStale = false;
+        final boolean isFileCache = false;
         ArrayList<WeatherData> weatherData = CreateWeatherDataFromStationCollection(
-                stationsInUpdateCol, "GAE-backend");
+                stationsInUpdateCol, "GAE-backend", isStale, isFileCache, stationsInUpdateCol == null);
         if (weatherData != null) {
             SaveStationsToFile(stationsInUpdateCol);
         }
@@ -164,7 +179,11 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
     }
 
     @Nullable
-    private ArrayList<WeatherData> CreateWeatherDataFromStationCollection(StationsInUpdateCollection stationsInUpdateCol, final String source) {
+    private ArrayList<WeatherData> CreateWeatherDataFromStationCollection(  StationsInUpdateCollection stationsInUpdateCol,
+                                                                            final String source,
+                                                                            final boolean isStale,
+                                                                            final boolean isFromFileCache,
+                                                                            final boolean updateFailed) {
         if (stationsInUpdateCol == null || stationsInUpdateCol.isEmpty()) return null;
 
         Log.i("WeatherDataCache", "Got result");
@@ -179,6 +198,9 @@ public class WindCastApiWeatherStationLoader implements InternalCacheLoader{
 
                 WeatherData d = new WeatherData();
                 d.Source = source;
+                d.setStaleData(isStale);
+                d.setUsingFileCacheData(isFromFileCache);
+                d.setUpdateFailed(updateFailed);
                 if (readingForStation != null) {
                     GAE_ObservationReading latest = new GAE_ObservationReading(readingForStation);
                     d.setLatestReading(latest);
